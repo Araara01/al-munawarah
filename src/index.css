@@ -1,0 +1,169 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 120 13% 97%;
+    --foreground: 162 45% 7%;
+    --card: 0 0% 100%;
+    --card-foreground: 162 45% 7%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 162 45% 7%;
+    --primary: 163 75% 21%;
+    --primary-foreground: 120 20% 98%;
+    --secondary: 135 15% 94%;
+    --secondary-foreground: 163 75% 21%;
+    --muted: 135 15% 94%;
+    --muted-foreground: 160 9% 42%;
+    --accent: 44 67% 46%;
+    --accent-foreground: 162 45% 7%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 155 12% 86%;
+    --input: 155 12% 86%;
+    --ring: 163 75% 21%;
+    --radius: 1rem;
+    --surface: 0 0% 100%;
+    --surface-hover: 140 22% 95%;
+    --elevated: 145 18% 91%;
+    --gold: 44 67% 46%;
+    --gold-bright: 46 65% 52%;
+    --emerald: 163 75% 21%;
+    --arabic: 44 89% 32%;
+    --gold-glow: rgba(197, 155, 39, 0.18);
+    --grain-opacity: 0.02;
+  }
+
+  .dark {
+    --background: 158 44% 5%;
+    --foreground: 120 20% 98%;
+    --card: 161 44% 10%;
+    --card-foreground: 120 20% 98%;
+    --popover: 161 44% 10%;
+    --popover-foreground: 120 20% 98%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 158 44% 5%;
+    --secondary: 162 43% 13%;
+    --secondary-foreground: 120 20% 98%;
+    --muted: 162 43% 13%;
+    --muted-foreground: 151 13% 62%;
+    --accent: 39 67% 69%;
+    --accent-foreground: 158 44% 5%;
+    --destructive: 0 62% 42%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 163 30% 17%;
+    --input: 163 30% 17%;
+    --ring: 39 67% 69%;
+    --surface: 161 44% 10%;
+    --surface-hover: 162 43% 14%;
+    --elevated: 163 43% 16%;
+    --gold: 39 67% 69%;
+    --gold-bright: 40 78% 75%;
+    --emerald: 160 84% 39%;
+    --arabic: 44 78% 79%;
+    --gold-glow: rgba(229, 192, 123, 0.22);
+    --grain-opacity: 0.035;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors duration-300 antialiased;
+  }
+}
+
+/* Luxury Al Munawwarah Card */
+.noor-card {
+  background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface)) 60%, hsl(var(--elevated) / 0.55) 100%);
+  border: 1px solid hsl(var(--gold) / 0.22);
+  box-shadow: 0 1px 0 hsl(var(--gold) / 0.08) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.55);
+  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
+}
+
+.noor-card:hover {
+  border-color: hsl(var(--gold) / 0.4);
+}
+
+/* Gold Gradient Text */
+.gold-text {
+  background: linear-gradient(100deg, hsl(var(--gold)) 0%, hsl(var(--gold-bright)) 45%, hsl(var(--gold)) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Gold Hairline Divider */
+.hairline {
+  background: linear-gradient(90deg, transparent 0%, hsl(var(--gold) / 0.35) 50%, transparent 100%);
+  height: 1px;
+}
+
+/* Quranic Arabic Typography */
+.arabic {
+  color: hsl(var(--arabic));
+  direction: rtl;
+  font-family: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-weight: 400;
+  line-height: 2.2;
+  text-align: right;
+}
+
+/* Halo Glow Animation */
+@keyframes halo {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.animate-halo {
+  animation: halo 3.6s ease-in-out infinite;
+}
+
+/* Noor Bloom Background Accent */
+.noor-bloom {
+  position: absolute;
+  background: radial-gradient(60% 55% at 50% 40%, var(--gold-glow), transparent 70%);
+  filter: blur(22px);
+  inset: -22% -8%;
+  pointer-events: none;
+}
+
+/* Glassmorphism Navigation */
+.glass {
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  background: hsl(var(--background) / 0.78);
+}
+
+/* Subtle Texture Grain */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Cpath filter='url(%23a)' d='M0 0h120v120H0z'/%3E%3C/svg%3E");
+  opacity: var(--grain-opacity);
+  pointer-events: none;
+}
+
+/* Smooth Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--gold) / 0.5);
+}
