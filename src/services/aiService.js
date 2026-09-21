@@ -2,23 +2,38 @@
 // Integrates 4 Strict Distinct Layers: Al-Qur'an, Terjemahan Kemenag RI, Tafsir Kemenag RI, Penjelasan Al Munawwarah
 import { POPULAR_AYAHS, SURAH_LIST } from '../data/quranData';
 
+// Detect provider from model id
+function getProvider(model = '') {
+  if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4')) return 'openai';
+  if (model.startsWith('claude')) return 'anthropic';
+  return 'google'; // gemini-*
+}
+
 export async function askGuidanceAI({
   messages,
   mode = 'muslim', // 'muslim' or 'wawasan'
   apiKey = '',
-  model = 'gemini-1.5-flash',
+  model = 'gemini-2.0-flash',
   temperature = 0.7
 }) {
   const latestMessage = messages[messages.length - 1];
   const userQuery = latestMessage?.content || '';
 
-  // 1. If Gemini API key is configured, call Gemini API
   if (apiKey && apiKey.trim().length > 10) {
+    const provider = getProvider(model);
     try {
-      const response = await callGeminiMunawwarah(messages, mode, apiKey.trim(), model, temperature);
+      let response;
+      if (provider === 'openai') {
+        response = await callOpenAIMunawwarah(messages, mode, apiKey.trim(), model, temperature);
+      } else if (provider === 'anthropic') {
+        response = await callClaudeMunawwarah(messages, mode, apiKey.trim(), model, temperature);
+      } else {
+        response = await callGeminiMunawwarah(messages, mode, apiKey.trim(), model, temperature);
+      }
       return response;
     } catch (err) {
-      console.warn("Gemini API call failed, falling back to built-in Al Munawwarah engine:", err);
+      const providerName = provider === 'openai' ? 'OpenAI' : provider === 'anthropic' ? 'Anthropic Claude' : 'Gemini';
+      console.warn(`${providerName} API call failed, falling back to built-in Al Munawwarah engine:`, err);
       const fallback = generateOfflineMunawwarah(userQuery, mode);
       return {
         ...fallback,
@@ -27,7 +42,7 @@ export async function askGuidanceAI({
     }
   }
 
-  // 2. Otherwise, use Built-in Al Munawwarah Kemenag Cognitive Engine
+  // Otherwise, use Built-in Al Munawwarah Kemenag Cognitive Engine
   return generateOfflineMunawwarah(userQuery, mode);
 }
 
@@ -98,7 +113,120 @@ export function generateOfflineMunawwarah(query, mode = 'muslim') {
 // Call Google Gemini API with strict instruction to return 4 layers
 async function callGeminiMunawwarah(messages, mode, apiKey, model, temperature) {
   const isMuslim = mode === 'muslim';
-  const systemPrompt = `Anda adalah "Al Munawwarah", AI penuntun dan penerang pertanyaan kehidupan manusia berbasis Al-Qur'an dan kearifan universal.
+  const systemPrompt = buildSystemPrompt(isMuslim);
+
+  const contents = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content)) }]
+  }));
+
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents,
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      generationConfig: {
+        temperature: parseFloat(temperature) || 0.7,
+        responseMimeType: "application/json"
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error("Respon kosong dari Gemini AI");
+
+  return parseAndBuildRawText(text, messages, mode);
+}
+
+// ─── OpenAI (GPT-5 / o-series) ───────────────────────────────────────────────
+async function callOpenAIMunawwarah(messages, mode, apiKey, model, temperature) {
+  const isMuslim = mode === 'muslim';
+  const systemPrompt = buildSystemPrompt(isMuslim);
+
+  const openaiMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map(msg => ({
+      role: msg.role === 'assistant' ? 'assistant' : 'user',
+      content: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content))
+    }))
+  ];
+
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model,
+      messages: openaiMessages,
+      temperature: parseFloat(temperature) || 0.7,
+      response_format: { type: 'json_object' }
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Respon kosong dari OpenAI");
+
+  return parseAndBuildRawText(text, messages, mode);
+}
+
+// ─── Anthropic Claude ─────────────────────────────────────────────────────────
+async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) {
+  const isMuslim = mode === 'muslim';
+  const systemPrompt = buildSystemPrompt(isMuslim);
+
+  const claudeMessages = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'assistant' : 'user',
+    content: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content))
+  }));
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model,
+      system: systemPrompt,
+      messages: claudeMessages,
+      max_tokens: 2048,
+      temperature: parseFloat(temperature) || 0.7
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.content?.[0]?.text;
+  if (!text) throw new Error("Respon kosong dari Anthropic Claude");
+
+  return parseAndBuildRawText(text, messages, mode);
+}
+
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+function buildSystemPrompt(isMuslim) {
+  return `Anda adalah "Al Munawwarah", AI penuntun dan penerang pertanyaan kehidupan manusia berbasis Al-Qur'an dan kearifan universal.
 Anda berbicara dalam Bahasa Indonesia yang santun, sejuk, ramah, dan empatik.
 
 PRINSIP WAJIB:
@@ -130,42 +258,17 @@ FORMAT OUTPUT: Berikan respon dalam format JSON yang valid agar dapat dirender o
   "practical_steps": ["Langkah praktis 1", "Langkah praktis 2", "Langkah praktis 3"],
   "closing": "Kata-kata penutup yang menenangkan hati"
 }`;
+}
 
-  const contents = messages.map(msg => ({
-    role: msg.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content)) }]
-  }));
-
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents,
-      systemInstruction: { parts: [{ text: systemPrompt }] },
-      generationConfig: {
-        temperature: parseFloat(temperature) || 0.7,
-        responseMimeType: "application/json"
-      }
-    })
-  });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.error?.message || `HTTP ${response.status}`);
-  }
-
-  const data = await response.json();
-  const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Respon kosong dari Gemini AI");
-
+function parseAndBuildRawText(text, messages, mode) {
+  // Strip markdown code fences if present
+  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   try {
-    const parsed = JSON.parse(text);
+    const parsed = JSON.parse(cleaned);
     parsed.rawText = `${parsed.opening || ''}\n\n### QS. ${parsed.ayahs?.[0]?.surah_name}: ${parsed.ayahs?.[0]?.ayah_number}\n\n${parsed.ayahs?.[0]?.arabic_text}\n\n*${parsed.ayahs?.[0]?.latin_text}*\n\n> "${parsed.ayahs?.[0]?.translation_id}"\n\n**Penjelasan:**\n${parsed.explanation}\n\n${parsed.closing || ''}`;
     return parsed;
   } catch {
-    // If not JSON, generate structured wrapper
     return generateOfflineMunawwarah(messages[messages.length - 1]?.content || '', mode);
   }
 }
+

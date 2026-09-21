@@ -2,157 +2,445 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+
+/* ─── Design System: Golden Ratio φ = 1.618 ────────────────────────────────
+   Fibonacci spacing: 5 · 8 · 13 · 21 · 34 · 55 · 89 · 144px
+   Typography scale: 10 → 12 → 14 → 17 → 21 → 34px
+   ────────────────────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
-    --background: 120 13% 97%;
-    --foreground: 162 45% 7%;
+    /* ── Surfaces ── */
+    --background: 220 18% 97%;
+    --foreground: 220 25% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 162 45% 7%;
+    --card-foreground: 220 25% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 162 45% 7%;
-    --primary: 163 75% 21%;
+    --popover-foreground: 220 25% 10%;
+
+    /* ── Brand ── */
+    --primary: 163 72% 22%;
     --primary-foreground: 120 20% 98%;
-    --secondary: 135 15% 94%;
-    --secondary-foreground: 163 75% 21%;
-    --muted: 135 15% 94%;
-    --muted-foreground: 160 9% 42%;
-    --accent: 44 67% 46%;
-    --accent-foreground: 162 45% 7%;
-    --destructive: 0 72% 45%;
+    --secondary: 220 14% 94%;
+    --secondary-foreground: 163 72% 22%;
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 48%;
+
+    /* ── Accents ── */
+    --accent: 44 78% 48%;
+    --accent-foreground: 220 25% 10%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 98%;
-    --border: 155 12% 86%;
-    --input: 155 12% 86%;
-    --ring: 163 75% 21%;
+
+    /* ── Borders ── */
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 163 72% 22%;
     --radius: 1rem;
+
+    /* ── Extended Tokens ── */
     --surface: 0 0% 100%;
-    --surface-hover: 140 22% 95%;
-    --elevated: 145 18% 91%;
-    --gold: 44 67% 46%;
-    --gold-bright: 46 65% 52%;
-    --emerald: 163 75% 21%;
-    --arabic: 44 89% 32%;
-    --gold-glow: rgba(197, 155, 39, 0.18);
-    --grain-opacity: 0.02;
+    --surface-hover: 220 18% 96%;
+    --elevated: 220 16% 92%;
+
+    /* ── Da Vinci Gold Palette ── */
+    --gold: 40 72% 50%;
+    --gold-bright: 44 85% 60%;
+    --gold-deep: 36 65% 38%;
+    --gold-glow: rgba(210, 165, 60, 0.18);
+    --gold-shimmer: rgba(230, 188, 90, 0.35);
+
+    /* ── Sacred Green (Emerald / Islamic) ── */
+    --emerald: 163 72% 22%;
+    --arabic: 40 75% 35%;
+
+    /* ── Sfumato Glows ── */
+    --sfumato-1: rgba(163, 220, 190, 0.12);
+    --sfumato-2: rgba(210, 165, 60, 0.10);
+
+    --grain-opacity: 0.018;
   }
 
   .dark {
-    --background: 158 44% 5%;
-    --foreground: 120 20% 98%;
-    --card: 161 44% 10%;
-    --card-foreground: 120 20% 98%;
-    --popover: 161 44% 10%;
-    --popover-foreground: 120 20% 98%;
-    --primary: 160 84% 39%;
-    --primary-foreground: 158 44% 5%;
-    --secondary: 162 43% 13%;
-    --secondary-foreground: 120 20% 98%;
-    --muted: 162 43% 13%;
-    --muted-foreground: 151 13% 62%;
-    --accent: 39 67% 69%;
-    --accent-foreground: 158 44% 5%;
-    --destructive: 0 62% 42%;
+    /* ── Surfaces ── */
+    --background: 222 28% 6%;
+    --foreground: 210 22% 96%;
+    --card: 222 26% 10%;
+    --card-foreground: 210 22% 96%;
+    --popover: 222 26% 10%;
+    --popover-foreground: 210 22% 96%;
+
+    /* ── Brand ── */
+    --primary: 158 80% 42%;
+    --primary-foreground: 222 28% 6%;
+    --secondary: 222 22% 14%;
+    --secondary-foreground: 210 22% 96%;
+    --muted: 222 22% 14%;
+    --muted-foreground: 218 14% 60%;
+
+    /* ── Accents ── */
+    --accent: 40 75% 68%;
+    --accent-foreground: 222 28% 6%;
+    --destructive: 0 62% 44%;
     --destructive-foreground: 0 0% 98%;
-    --border: 163 30% 17%;
-    --input: 163 30% 17%;
-    --ring: 39 67% 69%;
-    --surface: 161 44% 10%;
-    --surface-hover: 162 43% 14%;
-    --elevated: 163 43% 16%;
-    --gold: 39 67% 69%;
-    --gold-bright: 40 78% 75%;
-    --emerald: 160 84% 39%;
-    --arabic: 44 78% 79%;
-    --gold-glow: rgba(229, 192, 123, 0.22);
-    --grain-opacity: 0.035;
+
+    /* ── Borders ── */
+    --border: 222 18% 18%;
+    --input: 222 18% 18%;
+    --ring: 40 75% 68%;
+
+    /* ── Extended Tokens ── */
+    --surface: 222 26% 10%;
+    --surface-hover: 222 22% 14%;
+    --elevated: 222 22% 17%;
+
+    /* ── Da Vinci Gold Palette (Dark) ── */
+    --gold: 40 75% 68%;
+    --gold-bright: 44 88% 76%;
+    --gold-deep: 38 60% 52%;
+    --gold-glow: rgba(230, 188, 90, 0.20);
+    --gold-shimmer: rgba(240, 205, 115, 0.28);
+
+    /* ── Sacred Green ── */
+    --emerald: 158 80% 42%;
+    --arabic: 42 82% 74%;
+
+    /* ── Sfumato Glows (Dark) ── */
+    --sfumato-1: rgba(60, 180, 120, 0.10);
+    --sfumato-2: rgba(230, 188, 90, 0.12);
+
+    --grain-opacity: 0.028;
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300 antialiased;
+    @apply bg-background text-foreground antialiased;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+  }
+
+  /* Cormorant Garamond for display headings */
+  .font-cormorant {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
   }
 }
 
-/* Luxury Al Munawwarah Card */
+/* ═══════════════════════════════════════════════════════════════════════════
+   DA VINCI COMPONENT SYSTEM
+   Every class named after a da Vinci technique
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Da Vinci Card: lit from within (Chiaroscuro) ─────────────────────── */
+.da-card {
+  background: linear-gradient(
+    160deg,
+    hsl(var(--surface)) 0%,
+    hsl(var(--surface)) 55%,
+    hsl(var(--elevated) / 0.6) 100%
+  );
+  border: 1px solid hsl(var(--gold) / 0.18);
+  box-shadow:
+    0 0 0 1px hsl(var(--gold) / 0.06) inset,
+    0 1px 0 hsl(255 100% 100% / 0.06) inset,
+    0 24px 48px -32px rgba(0, 0, 0, 0.45),
+    0 4px 12px -4px rgba(0, 0, 0, 0.12);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.3s ease;
+}
+
+.da-card:hover {
+  border-color: hsl(var(--gold) / 0.32);
+  box-shadow:
+    0 0 0 1px hsl(var(--gold) / 0.10) inset,
+    0 1px 0 hsl(255 100% 100% / 0.08) inset,
+    0 32px 64px -32px rgba(0, 0, 0, 0.5),
+    0 0 0 4px var(--gold-glow);
+}
+
+/* ── Legacy noor-card alias ──────────────────────────────────────────────── */
 .noor-card {
-  background: linear-gradient(180deg, hsl(var(--surface)) 0%, hsl(var(--surface)) 60%, hsl(var(--elevated) / 0.55) 100%);
-  border: 1px solid hsl(var(--gold) / 0.22);
-  box-shadow: 0 1px 0 hsl(var(--gold) / 0.08) inset, 0 18px 40px -28px rgba(0, 0, 0, 0.55);
-  transition: box-shadow 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
+  @apply da-card;
 }
 
-.noor-card:hover {
-  border-color: hsl(var(--gold) / 0.4);
+/* ── Sfumato Glow Bloom ─────────────────────────────────────────────────── */
+.da-glow {
+  position: absolute;
+  background: radial-gradient(
+    ellipse 70% 60% at 50% 40%,
+    var(--gold-glow),
+    var(--sfumato-1) 50%,
+    transparent 80%
+  );
+  filter: blur(28px);
+  inset: -30% -10%;
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* Gold Gradient Text */
-.gold-text {
-  background: linear-gradient(100deg, hsl(var(--gold)) 0%, hsl(var(--gold-bright)) 45%, hsl(var(--gold)) 100%);
+.noor-bloom {
+  @apply da-glow;
+  inset: -22% -8%;
+}
+
+/* ── Gold Gradient Text (Da Vinci's gilded manuscripts) ─────────────────── */
+.da-text-gradient {
+  background: linear-gradient(
+    105deg,
+    hsl(var(--gold-deep)) 0%,
+    hsl(var(--gold)) 35%,
+    hsl(var(--gold-bright)) 60%,
+    hsl(var(--gold)) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Gold Hairline Divider */
-.hairline {
-  background: linear-gradient(90deg, transparent 0%, hsl(var(--gold) / 0.35) 50%, transparent 100%);
-  height: 1px;
+.gold-text {
+  @apply da-text-gradient;
 }
 
-/* Quranic Arabic Typography */
+/* ── Da Vinci Input ─────────────────────────────────────────────────────── */
+.da-input {
+  background: linear-gradient(
+    160deg,
+    hsl(var(--surface)) 0%,
+    hsl(var(--elevated) / 0.4) 100%
+  );
+  border: 1px solid hsl(var(--gold) / 0.20);
+  box-shadow:
+    0 0 0 1px hsl(var(--gold) / 0.06) inset,
+    0 2px 8px -2px rgba(0, 0, 0, 0.10);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.da-input:focus-within {
+  border-color: hsl(var(--gold) / 0.50);
+  box-shadow:
+    0 0 0 1px hsl(var(--gold) / 0.12) inset,
+    0 0 0 3px var(--gold-glow),
+    0 4px 16px -4px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Da Vinci Chip (Suggestion) ─────────────────────────────────────────── */
+.da-chip {
+  background: hsl(var(--surface));
+  border: 1px solid hsl(var(--border));
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.da-chip:hover {
+  transform: translateY(-3px) scale(1.01);
+  border-color: hsl(var(--gold) / 0.40);
+  box-shadow: 0 8px 24px -8px var(--gold-glow), 0 2px 8px -2px rgba(0,0,0,0.10);
+}
+
+.da-chip:active {
+  transform: scale(0.98);
+}
+
+/* ── Primary Button with Shimmer ────────────────────────────────────────── */
+.da-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--emerald)) 100%
+  );
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.da-btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(255,255,255,0.18) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.da-btn-primary:hover::after {
+  transform: translateX(100%);
+}
+
+.da-btn-primary:hover {
+  box-shadow: 0 4px 20px -4px hsl(var(--primary) / 0.5);
+  transform: scale(1.04);
+}
+
+.da-btn-primary:active {
+  transform: scale(0.96);
+}
+
+/* ── Islamic Geometric Background Pattern ───────────────────────────────── */
+.geometric-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cg fill='none' stroke='%23c9a84c' stroke-width='0.4' opacity='0.06'%3E%3Cpolygon points='40,4 47,20 64,20 51,31 55,48 40,38 25,48 29,31 16,20 33,20'/%3E%3Ccircle cx='40' cy='40' r='28'/%3E%3Crect x='18' y='18' width='44' height='44' rx='4' transform='rotate(45 40 40)'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 80px 80px;
+}
+
+/* ── Vitruvian Loader (Da Vinci) ────────────────────────────────────────── */
+.vitruvian-loader {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.vitruvian-loader::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid transparent;
+  border-top-color: hsl(var(--gold));
+  border-right-color: hsl(var(--gold) / 0.4);
+  border-radius: 50%;
+  animation: vitruvian-spin 1.2s linear infinite;
+}
+
+.vitruvian-loader::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px solid transparent;
+  border-bottom-color: hsl(var(--gold) / 0.6);
+  border-left-color: hsl(var(--gold) / 0.3);
+  border-radius: 50%;
+  animation: vitruvian-spin 0.8s linear infinite reverse;
+}
+
+@keyframes vitruvian-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Breathing Animation (Organic Life) ─────────────────────────────────── */
+@keyframes breathing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.022); }
+}
+
+.breathing {
+  animation: breathing 4.2s ease-in-out infinite;
+}
+
+/* ── Float Up Entry ─────────────────────────────────────────────────────── */
+@keyframes floatUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+.float-up {
+  animation: floatUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.animate-fade-up {
+  animation: floatUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── Shimmer Sweep ──────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position: 200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    var(--gold-shimmer) 50%,
+    transparent 70%
+  );
+  background-size: 200% auto;
+  animation: shimmer 2.4s linear infinite;
+}
+
+/* ── Bloom Entry ────────────────────────────────────────────────────────── */
+@keyframes bloom {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-bloom {
+  animation: bloom 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── Halo Pulse (for audio playing) ─────────────────────────────────────── */
+@keyframes halo {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50%       { transform: scale(1.10); opacity: 1; }
+}
+
+.animate-halo {
+  animation: halo 3.8s ease-in-out infinite;
+}
+
+/* ── Quranic Arabic Typography ──────────────────────────────────────────── */
 .arabic {
   color: hsl(var(--arabic));
   direction: rtl;
   font-family: 'Amiri', 'Scheherazade New', 'Noto Naskh Arabic', serif;
   font-weight: 400;
-  line-height: 2.2;
+  line-height: 2.4;
   text-align: right;
+  letter-spacing: 0.02em;
 }
 
-/* Halo Glow Animation */
-@keyframes halo {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.08);
-    opacity: 1;
-  }
+/* ── Gold Hairline Divider ──────────────────────────────────────────────── */
+.hairline {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--gold) / 0.30) 30%,
+    hsl(var(--gold-bright) / 0.50) 50%,
+    hsl(var(--gold) / 0.30) 70%,
+    transparent 100%
+  );
 }
 
-.animate-halo {
-  animation: halo 3.6s ease-in-out infinite;
-}
-
-/* Noor Bloom Background Accent */
-.noor-bloom {
-  position: absolute;
-  background: radial-gradient(60% 55% at 50% 40%, var(--gold-glow), transparent 70%);
-  filter: blur(22px);
-  inset: -22% -8%;
-  pointer-events: none;
-}
-
-/* Glassmorphism Navigation */
+/* ── Glass Navigation ───────────────────────────────────────────────────── */
 .glass {
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  background: hsl(var(--background) / 0.78);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  background: hsl(var(--background) / 0.72);
 }
 
-/* Subtle Texture Grain */
+/* ── Subtle Film Grain ──────────────────────────────────────────────────── */
 .grain::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Cpath filter='url(%23a)' d='M0 0h120v120H0z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Cpath filter='url(%23a)' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
   opacity: var(--grain-opacity);
   pointer-events: none;
+  z-index: 10;
 }
 
-/* Smooth Scrollbars */
+/* ── Golden Left Accent Bar ─────────────────────────────────────────────── */
+.gold-bar {
+  border-left: 2px solid;
+  border-image: linear-gradient(
+    to bottom,
+    hsl(var(--gold-bright)),
+    hsl(var(--gold)),
+    hsl(var(--gold-deep))
+  ) 1;
+}
+
+/* ── Smooth Scrollbars ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -160,10 +448,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.25);
+  background: hsl(var(--gold) / 0.22);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--gold) / 0.5);
+  background: hsl(var(--gold) / 0.50);
 }

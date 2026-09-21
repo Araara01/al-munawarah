@@ -1,17 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { 
-  Volume2, 
-  VolumeX, 
-  BookOpen, 
-  FileText, 
-  Bookmark, 
-  BookmarkCheck, 
-  Share2, 
-  Copy, 
-  Check, 
-  Sparkles,
-  ChevronDown,
-  ChevronUp
+import {
+  Volume2,
+  VolumeX,
+  BookOpen,
+  FileText,
+  Bookmark,
+  BookmarkCheck,
+  Share2,
+  Copy,
+  Check,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -30,12 +28,15 @@ export default function MessageItem({
 
   const isUser = message.role === 'user';
 
-  // If user message, render bubble
   if (isUser) {
     return (
       <div className="flex justify-end animate-fade-up">
-        <div 
-          className="max-w-[85%] rounded-3xl rounded-br-md border border-gold/20 bg-secondary px-4 py-3 text-sm leading-relaxed text-foreground shadow-xs"
+        <div
+          className="max-w-[82%] rounded-3xl rounded-br-lg px-5 py-3.5 text-sm leading-relaxed text-foreground shadow-sm"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--secondary)), hsl(var(--elevated)))',
+            border: '1px solid hsl(var(--gold) / 0.15)'
+          }}
           data-testid="user-message"
         >
           {message.content}
@@ -44,7 +45,6 @@ export default function MessageItem({
     );
   }
 
-  // Parse assistant response data
   const data = typeof message.content === 'object' ? message.content : null;
   const ayahs = data?.ayahs || [];
   const opening = data?.opening || (typeof message.content === 'string' ? message.content : '');
@@ -52,64 +52,47 @@ export default function MessageItem({
   const practicalSteps = data?.practical_steps || [];
   const closing = data?.closing || '';
 
-  // Audio Playback
   const handleToggleAudio = (audioUrl) => {
-    if (!audioUrl) {
-      showToast("Audio untuk ayat ini belum tersedia", "info");
-      return;
-    }
-
+    if (!audioUrl) { showToast('Audio untuk ayat ini belum tersedia', 'info'); return; }
     if (isPlaying) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
+      audioRef.current?.pause();
       setIsPlaying(false);
     } else {
       if (!audioRef.current) {
         audioRef.current = new Audio(audioUrl);
         audioRef.current.onended = () => setIsPlaying(false);
-        audioRef.current.onerror = () => {
-          setIsPlaying(false);
-          showToast("Gagal memuat lantunan audio", "error");
-        };
+        audioRef.current.onerror = () => { setIsPlaying(false); showToast('Gagal memuat lantunan audio', 'error'); };
       }
       audioRef.current.play()
         .then(() => setIsPlaying(true))
-        .catch(() => {
-          setIsPlaying(false);
-          showToast("Gagal memutar lantunan audio", "error");
-        });
+        .catch(() => { setIsPlaying(false); showToast('Gagal memutar lantunan audio', 'error'); });
     }
   };
 
-  // Copy Ayah
   const handleCopyAyah = (ayah) => {
-    const textToCopy = `${ayah.arabic_text}\n\n"${ayah.translation_id}"\n\n— QS. ${ayah.surah_name}: ${ayah.ayah_number}`;
-    navigator.clipboard.writeText(textToCopy);
+    const text = `${ayah.arabic_text}\n\n"${ayah.translation_id}"\n\n— QS. ${ayah.surah_name}: ${ayah.ayah_number}`;
+    navigator.clipboard.writeText(text);
     setCopied(true);
-    showToast("Ayat berhasil disalin ke papan klip", "success");
+    showToast('Ayat berhasil disalin ke papan klip', 'success');
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Share quote card
   const handleShareQuote = (ayah) => {
-    if (onExportQuote) {
-      onExportQuote({
-        quote: ayah.translation_id,
-        author: `QS. ${ayah.surah_name}: ${ayah.ayah_number}`,
-        arabic: ayah.arabic_text
-      });
-    }
+    onExportQuote?.({
+      quote: ayah.translation_id,
+      author: `QS. ${ayah.surah_name}: ${ayah.ayah_number}`,
+      arabic: ayah.arabic_text
+    });
   };
 
   return (
-    <div className="space-y-6 animate-fade-up text-foreground">
-      
-      {/* Opening Reflection */}
+    <div className="space-y-5 animate-fade-up text-foreground">
+
+      {/* Opening — italic serif, spacious */}
       {opening && (
-        <div className="text-sm sm:text-base leading-relaxed text-foreground/90 font-sans">
+        <p className="font-cormorant text-[17px] leading-[1.85] text-foreground/90 italic">
           {opening}
-        </div>
+        </p>
       )}
 
       {/* Ayah Cards */}
@@ -117,12 +100,12 @@ export default function MessageItem({
         <div key={idx} className="relative animate-bloom" data-testid={`ayah-card-${ayah.surah_number}-${ayah.ayah_number}`}>
           <span className="noor-bloom animate-halo" />
 
-          <article className="noor-card grain relative overflow-hidden rounded-3xl p-5 sm:p-7">
-            
-            {/* Header: Surah badge, revelation, and audio */}
+          <article className="da-card grain relative overflow-hidden rounded-3xl p-6 sm:p-8">
+
+            {/* Header */}
             <header className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold tracking-wide text-gold">
+              <div className="flex items-center gap-2.5">
+                <span className="rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold tracking-wide" style={{ color: 'hsl(var(--gold))' }}>
                   QS. {ayah.surah_name}: {ayah.ayah_number}
                 </span>
                 {ayah.revelation && (
@@ -132,49 +115,53 @@ export default function MessageItem({
                 )}
               </div>
 
-              {/* Audio player button */}
+              {/* Audio button */}
               <button
                 onClick={() => handleToggleAudio(ayah.audio_url)}
                 aria-label="Putar bacaan"
-                className="group flex items-center gap-2 rounded-full border border-border/80 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-gold/50 hover:text-gold active:scale-95"
+                className="flex items-center gap-2 rounded-full border border-border/70 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-gold transition-all active:scale-95"
               >
-                {isPlaying ? (
-                  <VolumeX className="h-3.5 w-3.5 text-gold animate-pulse" />
-                ) : (
-                  <Volume2 className="h-3.5 w-3.5" />
-                )}
-                <span>{isPlaying ? "Berhenti" : "Dengarkan"}</span>
+                {isPlaying
+                  ? <VolumeX className="h-3.5 w-3.5 animate-pulse" style={{ color: 'hsl(var(--gold))' }} />
+                  : <Volume2 className="h-3.5 w-3.5" />}
+                <span>{isPlaying ? 'Berhenti' : 'Dengarkan'}</span>
               </button>
             </header>
 
-            {/* Arabic Uthmani Calligraphy */}
-            <p className="arabic mt-6 text-2xl sm:text-3xl" data-testid="ayah-arabic">
+            {/* Arabic Calligraphy */}
+            <p className="arabic mt-8" style={{ fontSize: '2rem', lineHeight: 2.4 }} data-testid="ayah-arabic">
               {ayah.arabic_text}
             </p>
 
-            {/* Latin Transliteration */}
+            {/* Latin transliteration */}
             {ayah.latin_text && (
-              <p className="mt-3 text-xs italic text-muted-foreground">
+              <p className="mt-2 text-xs italic text-muted-foreground/70 text-right">
                 {ayah.latin_text}
               </p>
             )}
 
-            <div className="hairline my-5" />
+            <div className="hairline my-6" />
 
-            {/* Indonesian Translation */}
+            {/* Translation */}
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
                 Terjemahan · Kemenag RI
               </span>
-              <p className="mt-2 text-base leading-relaxed text-foreground" data-testid="ayah-translation">
-                "{ayah.translation_id}"
+              <p className="mt-2.5 text-base leading-relaxed text-foreground" data-testid="ayah-translation">
+                &ldquo;{ayah.translation_id}&rdquo;
               </p>
             </div>
 
-            {/* Expandable Tafsir Kemenag RI */}
+            {/* Tafsir (expandable) */}
             {showTafsir && ayah.tafsir && (
-              <div className="mt-5 rounded-2xl border border-gold/20 bg-secondary/50 p-4 animate-fade-up">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+              <div
+                className="mt-5 rounded-2xl p-4 animate-fade-up"
+                style={{
+                  background: 'hsl(var(--secondary) / 0.6)',
+                  border: '1px solid hsl(var(--gold) / 0.18)'
+                }}
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'hsl(var(--gold))' }}>
                   Tafsir · Kemenag RI
                 </span>
                 <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
@@ -183,109 +170,108 @@ export default function MessageItem({
               </div>
             )}
 
-            {/* Action Toolbar */}
+            {/* Action toolbar */}
             <footer className="mt-6 flex flex-wrap gap-2">
-              
-              {/* Baca Surah */}
-              <button
-                onClick={() => onOpenSurah && onOpenSurah(ayah.surah_number)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/80 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-foreground transition-colors active:scale-95"
-              >
-                <BookOpen className="h-3.5 w-3.5 text-emerald" />
-                <span>Baca Surah</span>
-              </button>
-
-              {/* Tafsir Toggle */}
-              <button
-                onClick={() => setShowTafsir(!showTafsir)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/80 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-foreground transition-colors active:scale-95"
-              >
-                <FileText className="h-3.5 w-3.5 text-gold" />
-                <span>{showTafsir ? "Tutup Tafsir" : "Tafsir"}</span>
-              </button>
-
-              {/* Simpan Ayat */}
-              <button
-                onClick={() => {
-                  if (onToggleSave) onToggleSave(ayah);
-                }}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors active:scale-95 ${
-                  isSaved 
-                    ? 'border-gold/60 text-gold bg-gold/5' 
-                    : 'border-border/80 text-muted-foreground hover:border-gold/50 hover:text-foreground'
-                }`}
-              >
-                {isSaved ? (
-                  <BookmarkCheck className="h-3.5 w-3.5 text-gold fill-current" />
-                ) : (
-                  <Bookmark className="h-3.5 w-3.5" />
-                )}
-                <span>{isSaved ? "Tersimpan" : "Simpan"}</span>
-              </button>
-
-              {/* Bagikan Kartu Mutiara */}
-              <button
-                onClick={() => handleShareQuote(ayah)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/80 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-foreground transition-colors active:scale-95"
-              >
-                <Share2 className="h-3.5 w-3.5 text-gold" />
-                <span>Bagikan</span>
-              </button>
-
-              {/* Salin Teks */}
-              <button
-                onClick={() => handleCopyAyah(ayah)}
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors active:scale-95"
-              >
-                {copied ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Copy className="h-3.5 w-3.5" />}
-                <span>{copied ? "Tersalin" : "Salin"}</span>
-              </button>
-
+              {[
+                {
+                  icon: BookOpen,
+                  label: 'Baca Surah',
+                  color: 'text-emerald',
+                  onClick: () => onOpenSurah?.(ayah.surah_number)
+                },
+                {
+                  icon: FileText,
+                  label: showTafsir ? 'Tutup Tafsir' : 'Tafsir',
+                  color: 'text-gold',
+                  onClick: () => setShowTafsir(!showTafsir)
+                },
+                {
+                  icon: isSaved ? BookmarkCheck : Bookmark,
+                  label: isSaved ? 'Tersimpan' : 'Simpan',
+                  color: isSaved ? 'text-gold' : '',
+                  active: isSaved,
+                  onClick: () => onToggleSave?.(ayah)
+                },
+                {
+                  icon: Share2,
+                  label: 'Bagikan',
+                  color: 'text-gold',
+                  onClick: () => handleShareQuote(ayah)
+                },
+                {
+                  icon: copied ? Check : Copy,
+                  label: copied ? 'Tersalin' : 'Salin',
+                  color: copied ? 'text-emerald' : '',
+                  onClick: () => handleCopyAyah(ayah)
+                }
+              ].map((btn, i) => (
+                <button
+                  key={i}
+                  onClick={btn.onClick}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-all active:scale-95 ${
+                    btn.active
+                      ? 'border-gold/50 bg-gold/8 text-gold'
+                      : 'border-border/70 text-muted-foreground hover:border-gold/45 hover:text-foreground'
+                  }`}
+                  style={btn.active ? { background: 'hsl(var(--gold) / 0.08)' } : {}}
+                >
+                  <btn.icon className={`h-3.5 w-3.5 ${btn.active ? 'fill-current' : btn.color}`} />
+                  <span>{btn.label}</span>
+                </button>
+              ))}
             </footer>
 
           </article>
         </div>
       ))}
 
-      {/* Penjelasan Sederhana Al Munawwarah */}
+      {/* Explanation — with gold left bar */}
       {explanation && (
-        <div className="noor-card rounded-3xl p-5 sm:p-6">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+        <div
+          className="da-card rounded-3xl pl-6 pr-5 py-5 sm:pl-7 sm:py-6"
+          style={{ borderLeft: '2px solid hsl(var(--gold))' }}
+        >
+          <span className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'hsl(var(--gold))' }}>
             Penjelasan Sederhana Al Munawwarah
           </span>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
             {explanation}
           </p>
 
-          {/* Practical Steps */}
+          {/* Practical steps with golden numbers */}
           {practicalSteps.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-border/40">
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
+            <div className="mt-5 pt-4 border-t border-border/40">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'hsl(var(--gold))' }}>
                 Langkah Nyata Hari Ini
               </span>
-              <ul className="mt-2.5 space-y-2">
+              <ol className="mt-3 space-y-3">
                 {practicalSteps.map((step, sIdx) => (
-                  <li key={sIdx} className="flex items-start gap-2 text-xs sm:text-sm text-foreground/90">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-                    <span>{step}</span>
+                  <li key={sIdx} className="flex items-start gap-3">
+                    <span
+                      className="flex-shrink-0 font-cormorant font-semibold text-sm leading-5 w-6 text-right"
+                      style={{ color: 'hsl(var(--gold))' }}
+                    >
+                      {String(sIdx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="text-xs sm:text-sm text-foreground/90 leading-relaxed">{step}</span>
                   </li>
                 ))}
-              </ul>
+              </ol>
             </div>
           )}
         </div>
       )}
 
-      {/* Closing Soothing Words */}
+      {/* Closing */}
       {closing && (
-        <p className="text-xs sm:text-sm text-muted-foreground italic leading-relaxed">
+        <p className="font-cormorant text-[15px] italic text-muted-foreground text-center leading-relaxed px-2">
           {closing}
         </p>
       )}
 
-      {/* Disclaimer footnote */}
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground/80 pt-2 border-t border-border/40">
-        <Sparkles className="h-3 w-3 text-gold shrink-0" />
+      {/* Disclaimer */}
+      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground/70 pt-1 border-t border-border/30">
+        <Sparkles className="h-3 w-3 flex-shrink-0" style={{ color: 'hsl(var(--gold))' }} />
         <span>Al Munawwarah bukan pengganti ulama, fatwa resmi, atau konsultasi fiqih.</span>
       </p>
 

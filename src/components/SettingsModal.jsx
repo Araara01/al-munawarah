@@ -115,54 +115,87 @@ export default function SettingsModal({
             <Cpu className="h-3.5 w-3.5 text-gold" />
             Mesin AI & Penelusuran
           </label>
-          
-          <div className="space-y-3">
-            <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground font-medium"
-            >
-              <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Sangat Cepat & Cerdas)</option>
-              <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Ringan & Cepat)</option>
-              <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Analisis Sangat Mendalam)</option>
-            </select>
 
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground flex items-center gap-1">
-                  <Key className="h-3 w-3 text-gold" />
-                  Gemini API Key (Opsional)
-                </span>
-                <a
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-gold hover:underline inline-flex items-center gap-1 font-medium"
+          {(() => {
+            const model = selectedModel || '';
+            const isOpenAI = model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4');
+            const isAnthropic = model.startsWith('claude');
+            const providerLabel = isOpenAI ? 'OpenAI API Key' : isAnthropic ? 'Anthropic API Key' : 'Gemini API Key (Opsional)';
+            const providerLink = isOpenAI
+              ? 'https://platform.openai.com/api-keys'
+              : isAnthropic
+              ? 'https://console.anthropic.com/settings/keys'
+              : 'https://aistudio.google.com/app/apikey';
+            const providerLinkLabel = isOpenAI ? 'Dapatkan Key OpenAI' : isAnthropic ? 'Dapatkan Key Anthropic' : 'Dapatkan Kunci Gratis';
+            const placeholder = isOpenAI
+              ? 'sk-... (OpenAI API Key)'
+              : isAnthropic
+              ? 'sk-ant-... (Anthropic API Key)'
+              : 'AIzaSy... (kosongkan jika memakai offline engine)';
+
+            return (
+              <div className="space-y-3">
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground font-medium"
                 >
-                  Dapatkan Kunci Gratis <ExternalLink className="h-2.5 w-2.5" />
-                </a>
+                  <optgroup label="🔵 Google Gemini">
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Sangat Cepat &amp; Cerdas)</option>
+                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Ringan &amp; Cepat)</option>
+                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analisis Mendalam)</option>
+                  </optgroup>
+                  <optgroup label="🟢 OpenAI">
+                    <option value="gpt-4.1">GPT-4.1 (Terbaru &amp; Paling Mampu)</option>
+                    <option value="gpt-4.1-mini">GPT-4.1 Mini (Cepat &amp; Efisien)</option>
+                    <option value="gpt-4o">GPT-4o (Multimodal)</option>
+                    <option value="o3">o3 (Penalaran Tinggi)</option>
+                  </optgroup>
+                  <optgroup label="🟠 Anthropic Claude">
+                    <option value="claude-opus-4-5">Claude Opus 4.5 (Paling Canggih)</option>
+                    <option value="claude-sonnet-4-5">Claude Sonnet 4.5 (Seimbang &amp; Cerdas)</option>
+                    <option value="claude-haiku-3-5">Claude Haiku 3.5 (Sangat Cepat)</option>
+                  </optgroup>
+                </select>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <Key className="h-3 w-3 text-gold" />
+                      {providerLabel}
+                    </span>
+                    <a
+                      href={providerLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-gold hover:underline inline-flex items-center gap-1 font-medium"
+                    >
+                      {providerLinkLabel} <ExternalLink className="h-2.5 w-2.5" />
+                    </a>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showKey ? 'text' : 'password'}
+                      value={tempKey}
+                      onChange={(e) => setTempKey(e.target.value)}
+                      placeholder={placeholder}
+                      className="w-full px-3.5 py-2 pr-20 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowKey(!showKey)}
+                      className="absolute right-3 top-2 text-[11px] text-gold hover:text-gold/80 font-medium"
+                    >
+                      {showKey ? "Sembunyikan" : "Tampilkan"}
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed pt-0.5">
+                    ✦ <strong>Zero-Setup:</strong> Tanpa API key, Al Munawwarah tetap dapat menjawab ribuan persoalan hidup secara instan dengan basis data Kemenag RI bawaan.
+                  </p>
+                </div>
               </div>
-              <div className="relative">
-                <input
-                  type={showKey ? 'text' : 'password'}
-                  value={tempKey}
-                  onChange={(e) => setTempKey(e.target.value)}
-                  placeholder="AIzaSy... (kosongkan jika memakai offline engine)"
-                  className="w-full px-3.5 py-2 pr-20 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowKey(!showKey)}
-                  className="absolute right-3 top-2 text-[11px] text-gold hover:text-gold/80 font-medium"
-                >
-                  {showKey ? "Sembunyikan" : "Tampilkan"}
-                </button>
-              </div>
-              <p className="text-[11px] text-muted-foreground leading-relaxed pt-0.5">
-                ✦ <strong>Zero-Setup:</strong> Tanpa API key, Al Munawwarah tetap dapat menjawab ribuan persoalan hidup secara instan dengan basis data Kemenag RI bawaan.
-              </p>
-            </div>
-          </div>
+            );
+          })()}
         </section>
 
         {/* Section 4: Tampilan & Teks Latin */}

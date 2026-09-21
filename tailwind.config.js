@@ -43,7 +43,8 @@ export default {
         arabic: 'hsl(var(--arabic))',
       },
       fontFamily: {
-        display: ['Outfit', 'sans-serif'],
+        display: ['Cormorant Garamond', 'Outfit', 'Georgia', 'serif'],
+        cormorant: ['Cormorant Garamond', 'Georgia', 'serif'],
         sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
         arabic: ['Amiri', '"Scheherazade New"', 'Noto Naskh Arabic', 'serif']
       },

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { SURAH_LIST, THEMES, POPULAR_AYAHS } from '../data/quranData';
+import { getSurahDetail } from '../services/quranService';
 import { Search, BookOpen, Volume2, VolumeX, Sparkles, X, ChevronRight } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -10,6 +11,8 @@ export default function QuranBrowser({ initialSurahNumber = null, onOpenSurahDet
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [activeAudioSurah, setActiveAudioSurah] = useState(null);
   const [selectedSurahModal, setSelectedSurahModal] = useState(null);
+  const [isLoadingSurah, setIsLoadingSurah] = useState(false);
+  const [translationLang, setTranslationLang] = useState('id'); // 'id' or 'en'
   const audioRef = useRef(null);
 
   // Filter surahs
@@ -48,25 +51,20 @@ export default function QuranBrowser({ initialSurahNumber = null, onOpenSurahDet
     }
   };
 
-  const openSurahDetail = (surah) => {
-    // Find ayahs in popular list or synthesize surah view
-    const relatedAyahs = POPULAR_AYAHS.filter(a => a.surah_number === surah.number);
-    setSelectedSurahModal({
-      ...surah,
-      ayahs: relatedAyahs.length > 0 ? relatedAyahs : [
-        {
-          surah_number: surah.number,
-          surah_name: surah.name,
-          ayah_number: "1",
-          revelation: surah.revelation.toUpperCase(),
-          arabic_text: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-          latin_text: "Bismillāhir-raḥmānir-raḥīm",
-          translation_id: "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.",
-          tafsir: "Kalimat pembuka yang penuh berkah, mengingatkan bahwa setiap perbuatan mulia hendaknya dimulai dengan kesadaran akan kasih sayang Tuhan.",
-          audio_url: `https://cdn.islamic.network/quran/audio/128/ar.alafasy/1.mp3`
-        }
-      ]
-    });
+  const openSurahDetail = async (surah) => {
+    // Show modal immediately with loading state
+    setSelectedSurahModal({ ...surah, ayahs: [] });
+    setIsLoadingSurah(true);
+    
+    try {
+      const fullSurah = await getSurahDetail(surah.number);
+      setSelectedSurahModal(fullSurah);
+    } catch (err) {
+      showToast("Gagal memuat detail surat", "error");
+      setSelectedSurahModal(null);
+    } finally {
+      setIsLoadingSurah(false);
+    }
   };
 
   return (
@@ -262,34 +260,59 @@ export default function QuranBrowser({ initialSurahNumber = null, onOpenSurahDet
                   </p>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedSurahModal(null)}
-                className="p-2 rounded-xl text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center rounded-lg border border-border/60 bg-secondary/30 p-1">
+                  <button 
+                    onClick={() => setTranslationLang('id')}
+                    className={`px-3 py-1 text-[10px] font-semibold rounded-md transition-colors ${translationLang === 'id' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    ID
+                  </button>
+                  <button 
+                    onClick={() => setTranslationLang('en')}
+                    className={`px-3 py-1 text-[10px] font-semibold rounded-md transition-colors ${translationLang === 'en' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                  >
+                    EN
+                  </button>
+                </div>
+                <button
+                  onClick={() => setSelectedSurahModal(null)}
+                  className="p-2 rounded-xl text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body with Ayahs */}
             <div className="flex-1 overflow-y-auto py-5 space-y-6">
-              {selectedSurahModal.ayahs.map((ay, idx) => (
-                <div key={idx} className="space-y-3 pb-5 border-b border-border/40 last:border-0">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full border border-gold/30 bg-gold/5 px-2.5 py-0.5 text-xs font-semibold text-gold">
-                      Ayat {ay.ayah_number}
-                    </span>
-                  </div>
-                  <p className="arabic text-2xl text-right leading-loose">{ay.arabic_text}</p>
-                  <p className="text-xs italic text-muted-foreground">{ay.latin_text}</p>
-                  <p className="text-sm text-foreground/90 leading-relaxed">"{ay.translation_id}"</p>
-                  {ay.tafsir && (
-                    <div className="p-3 rounded-xl bg-secondary/50 text-xs text-muted-foreground leading-relaxed">
-                      <span className="font-semibold text-gold block mb-1">Tafsir Kemenag RI:</span>
-                      {ay.tafsir}
-                    </div>
-                  )}
+              {isLoadingSurah ? (
+                <div className="flex flex-col items-center justify-center py-10 space-y-4">
+                  <Sparkles className="h-8 w-8 text-gold animate-pulse" />
+                  <p className="text-sm text-muted-foreground">Memuat data ayat...</p>
                 </div>
-              ))}
+              ) : (
+                selectedSurahModal.ayahs.map((ay, idx) => (
+                  <div key={idx} className="space-y-3 pb-5 border-b border-border/40 last:border-0">
+                    <div className="flex items-center justify-between">
+                      <span className="rounded-full border border-gold/30 bg-gold/5 px-2.5 py-0.5 text-xs font-semibold text-gold">
+                        Ayat {ay.ayah_number}
+                      </span>
+                    </div>
+                    <p className="arabic text-2xl text-right leading-loose">{ay.arabic_text}</p>
+                    <p className="text-xs italic text-muted-foreground">{ay.latin_text}</p>
+                    <p className="text-sm text-foreground/90 leading-relaxed">
+                      "{translationLang === 'en' ? ay.translation_en : ay.translation_id}"
+                    </p>
+                    {ay.tafsir && translationLang === 'id' && (
+                      <div className="p-3 rounded-xl bg-secondary/50 text-xs text-muted-foreground leading-relaxed">
+                        <span className="font-semibold text-gold block mb-1">Tafsir Kemenag RI:</span>
+                        {ay.tafsir}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
             </div>
 
             <div className="pt-3 border-t border-border/60 flex justify-end">
