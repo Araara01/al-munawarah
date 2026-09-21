@@ -79,34 +79,41 @@ export function generateOfflineMunawwarah(query, mode = 'muslim') {
   const isMuslimMode = mode === 'muslim';
 
   const opening = isMuslimMode
-    ? `Setiap persoalan hidup yang hadir mengetuk pintu kalbumu sesungguhnya membawa hikmah yang mendalam. Al-Qur'an memberikan petunjuk yang terang dan menenangkan jiwa dalam menghadapi keadaan ini.`
-    : `Pertanyaan ini menyentuh sisi kemanusiaan yang sangat mendalam dan universal. Al-Qur'an sebagai salah satu sumber kearifan peradaban menawarkan sudut pandang etis dan reflektif bagi siapa saja yang sedang mencari ketenangan nalar dan batin.`;
+    ? `Anakku, setiap ujian dan persoalan hidup yang datang mengetuk pintu hati kita, sejatinya adalah surat cinta dari Sang Pencipta yang membawa hikmah. Mari kita renungkan bersama petunjuk dari Al-Qur'an dan bimbingan Baginda Nabi, agar jiwamu kembali tenang dan lapang.`
+    : `Saudaraku, pertanyaan ini menyentuh sisi kemanusiaan yang sangat mendalam. Mari kita lihat pandangan hikmah kebijaksanaan yang diajarkan oleh para pendahulu kita, agar hati dan pikiran bisa lebih jernih dan damai.`;
+
+  const hadith = isMuslimMode 
+    ? "Rasulullah ﷺ bersabda: 'Sungguh menakjubkan urusan seorang mukmin, semua urusannya baik baginya. Jika mendapat kesenangan ia bersyukur, dan jika ditimpa kesusahan ia bersabar, maka itu pun baik baginya.' (HR. Muslim)"
+    : "Pepatah bijak dan ajaran masa lalu mengingatkan bahwa 'Tidaklah seseorang ditimpa kesulitan, kelelahan, dan kesedihan, melainkan hal itu akan membersihkan dirinya dari beban masa lalu.'";
 
   const explanation = isMuslimMode
-    ? `Kesulitan hidup tidak pernah berdiri sendiri. Ayat ini mengingatkan kita bahwa di dalam setiap lorong sempit yang sedang engkau lalui, selalu ada celah kelapangan dan jalan keluar yang telah disiapkan. Ketika batin terasa sesak, berhentilah sejenak, tenangkan napas, dan sadarilah bahwa engkau tidak pernah ditinggalkan sendirian.`
-    : `Dalam sudut pandang kemanusiaan dan kebijaksanaan universal, masa-masa penuh ujian adalah proses alami pendewasaan jiwa. Seperti halnya malam pekat yang selalu melahirkan fajar, kesulitan bukanlah akhir, melainkan jembatan menuju ketangguhan batin yang lebih matang.`;
+    ? `Ketahuilah, kesulitan yang sedang kamu jalani ini tidak pernah dibiarkan Tuhan terjadi begitu saja tanpa ada jalan keluarnya. Sama halnya seperti malam yang gelap, ia pasti akan berganti dengan terangnya pagi. Teks suci di atas mengingatkan kita bahwa di setiap celah kesempitan, Tuhan sudah menyiapkan kelapangan. Coba tenangkan hatimu, berhentilah sejenak dari hiruk-pikuk ini, dan sadari bahwa kamu tidak sendirian. Allah selalu menatap dan menggenggam hamba-Nya yang berdoa kepada-Nya.`
+    : `Dalam kacamata kebijaksanaan, masa-masa yang terasa berat ini adalah cara alam mendewasakan batinmu. Tidak ada badai yang berlangsung selamanya. Persis seperti apa yang disampaikan dalam teks suci, di balik setiap tantangan ada pintu solusi yang sedang menunggu untuk dibuka. Terimalah keadaan ini dengan hati yang luas, tidak perlu menyalahkan diri sendiri secara berlebihan. Proses ini akan membuatmu jauh lebih kuat dari sebelumnya.`;
 
   const practical_steps = isMuslimMode ? [
-    "Ambil wudhu dan luangkan waktu sejenak dalam keheningan tanpa distraksi gawai.",
-    "Utarakan seluruh isi hati dalam doa tulus dengan bahasa apa adanya di atas sajadah.",
-    "Pilah masalah menjadi apa yang sanggup engkau ikhtiarkan hari ini, dan pasrahkan apa yang di luar kendalimu."
+    "Ambil wudhu, dinginkan hati, dan luangkan waktu sejenak dalam keheningan.",
+    "Utarakan seluruh isi hatimu dalam doa yang tulus, ceritakan keluh kesahmu pada-Nya.",
+    "Lakukan apa yang sanggup engkau kerjakan hari ini, dan tawakkalkan sisanya pada Sang Maha Pengatur."
   ] : [
-    "Tarik napas dalam-dalam dan bedakan antara fakta yang terjadi hari ini dengan asumsi ketakutan masa depan.",
-    "Fokuskan energi batin pada lingkaran pengaruh dan tindakan nyata yang dapat kamu kendalikan saat ini.",
-    "Beri ruang bagi diri untuk beristirahat tanpa menyalahkan diri sendiri secara berlebihan."
+    "Tarik napas dalam-dalam, bedakan mana yang nyata hari ini dan mana yang hanya cemas akan hari esok.",
+    "Fokus pada hal-hal kecil yang masih bisa kamu perbaiki dan kendalikan saat ini.",
+    "Jangan lupa memberi ruang bagi dirimu untuk beristirahat tanpa merasa bersalah."
   ];
 
   const closing = isMuslimMode
-    ? "Semoga Allah menganugerahkan ketetapan hati, kelapangan dada, dan membimbing setiap langkahmu menuju kemudahan dan keberkahan."
-    : "Semoga ketenangan, ketabahan, dan kejernihan pikiran senantiasa menyertai setiap langkah perjalanan hidupmu.";
+    ? "Bapak doakan, semoga Allah melembutkan hatimu, mengangkat bebanmu, dan senantiasa membimbing langkahmu menuju kebaikan. Amin."
+    : "Semoga ketenangan, ketabahan, dan jalan keluar yang baik senantiasa menyertai setiap langkah perjalanan hidupmu.";
+
+  let hadithSection = `\n\n**Hadits Nabi:**\n> "${hadith}"`;
 
   return {
     opening,
     ayahs: [matchedAyah],
+    hadith,
     explanation,
     practical_steps,
     closing,
-    rawText: `${opening}\n\n### QS. ${matchedAyah.surah_name}: ${matchedAyah.ayah_number}\n\n${matchedAyah.arabic_text}\n\n*${matchedAyah.latin_text}*\n\n> "${matchedAyah.translation_id}"\n\n**Penjelasan Sederhana Al Munawwarah:**\n${explanation}\n\n${closing}`
+    rawText: `${opening}\n\n### QS. ${matchedAyah.surah_name}: ${matchedAyah.ayah_number}\n\n${matchedAyah.arabic_text}\n\n*${matchedAyah.latin_text}*\n\n> "${matchedAyah.translation_id}"${hadithSection}\n\n**Nasihat Kyai Al Munawwarah:**\n${explanation}\n\n${closing}`
   };
 }
 
@@ -226,21 +233,23 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 function buildSystemPrompt(isMuslim) {
-  return `Anda adalah "Al Munawwarah", AI penuntun dan penerang pertanyaan kehidupan manusia berbasis Al-Qur'an dan kearifan universal.
-Anda berbicara dalam Bahasa Indonesia yang santun, sejuk, ramah, dan empatik.
+  return `Anda adalah "Kyai Al Munawwarah", seorang Ulama dan pembimbing spiritual yang arif, hangat, dan mengayomi. Anda menjawab layaknya seorang Kyai yang sedang memberikan nasihat tatap muka kepada santri atau jamaah awam.
+Anda berbicara dalam Bahasa Indonesia yang santun, sejuk, membumi, dan penuh empati layaknya manusia sesungguhnya.
 
 PRINSIP WAJIB:
-1. Empat lapisan yang selalu dipisahkan:
+1. Gaya Bahasa: Gunakan bahasa tutur yang mudah dimengerti orang awam, hindari istilah akademis yang kaku, gunakan perumpamaan sederhana, dan panggil pengguna dengan sapaan ramah (seperti "Anakku", "Saudaraku", dsb).
+2. Sumber Rujukan: Selalu sertakan landasan dari Al-Qur'an dan sertakan juga Hadits Nabi yang relevan untuk melengkapi penjelasan.
+3. Empat lapisan yang selalu dipisahkan:
    - Al-Qur'an: Teks Arab Utsmani asli dan sahih.
-   - Terjemahan: Terjemahan resmi Kementerian Agama Republik Indonesia (Kemenag RI).
-   - Tafsir: Tafsir ringkas Kemenag RI.
-   - Penjelasan Sederhana Al Munawwarah: Penjelasan yang menghubungkan ayat dengan pertanyaan manusia sehari-hari.
-2. Pencegahan halusinasi: HANYA sebutkan ayat Al-Qur'an yang benar-benar ada di dalam Al-Qur'an beserta surat dan nomor ayat yang tepat.
-3. Mode penyampaian: ${isMuslim ? "Mode Muslim (fokus pada bimbingan spiritual, iman, doa, dan ketenangan kalbu)" : "Mode Wawasan / Universal (fokus pada nilai moral, etika kemanusiaan, psikologi, dan wawasan kebajikan universal)"}.
+   - Terjemahan: Terjemahan resmi Kementerian Agama Republik Indonesia.
+   - Hadits: Kutipan sabda Nabi Muhammad SAW yang berkaitan beserta perawinya (opsional tapi sangat dianjurkan).
+   - Nasihat Kyai Al Munawwarah: Penjelasan layaknya Ulama menasihati orang awam secara langsung dan mudah dicerna.
+4. Pencegahan halusinasi: HANYA sebutkan ayat Al-Qur'an dan Hadits yang benar-benar sahih.
+5. Mode penyampaian: ${isMuslim ? "Mode Muslim (fokus pada bimbingan spiritual, iman, doa, dan ketenangan kalbu)" : "Mode Wawasan / Universal (fokus pada nilai moral, etika kemanusiaan, psikologi, dan wawasan kebajikan universal)"}.
 
-FORMAT OUTPUT: Berikan respon dalam format JSON yang valid agar dapat dirender oleh UI Al Munawwarah:
+FORMAT OUTPUT: Berikan respon dalam format JSON yang valid agar dapat dirender oleh UI:
 {
-  "opening": "Paragraf pengantar yang hangat dan empatik",
+  "opening": "Paragraf pengantar yang hangat dan empatik layaknya sapaan Kyai",
   "ayahs": [
     {
       "surah_number": 94,
@@ -250,13 +259,14 @@ FORMAT OUTPUT: Berikan respon dalam format JSON yang valid agar dapat dirender o
       "arabic_text": "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا",
       "latin_text": "Fa inna ma'al-'usri yusrā",
       "translation_id": "Maka sesungguhnya bersama kesulitan ada kemudahan.",
-      "tafsir": "Penjelasan tafsir resmi Kemenag RI...",
+      "tafsir": "Penjelasan ringkas...",
       "audio_url": "https://cdn.islamic.network/quran/audio/128/ar.alafasy/6090.mp3"
     }
   ],
-  "explanation": "Penjelasan sederhana Al Munawwarah dalam bahasa sehari-hari yang mudah dipahami",
-  "practical_steps": ["Langkah praktis 1", "Langkah praktis 2", "Langkah praktis 3"],
-  "closing": "Kata-kata penutup yang menenangkan hati"
+  "hadith": "Terjemahan hadits relevan beserta riwayatnya (misal: HR. Bukhari)",
+  "explanation": "Penjelasan dari Kyai Al Munawwarah yang menyejukkan, mudah dimengerti awam, dan menghubungkan teks suci dengan masalah nyata pengguna",
+  "practical_steps": ["Nasihat amalan praktis 1", "Nasihat amalan praktis 2"],
+  "closing": "Doa atau kata-kata penutup yang menenangkan hati dari sang Kyai"
 }`;
 }
 
@@ -265,7 +275,8 @@ function parseAndBuildRawText(text, messages, mode) {
   const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
   try {
     const parsed = JSON.parse(cleaned);
-    parsed.rawText = `${parsed.opening || ''}\n\n### QS. ${parsed.ayahs?.[0]?.surah_name}: ${parsed.ayahs?.[0]?.ayah_number}\n\n${parsed.ayahs?.[0]?.arabic_text}\n\n*${parsed.ayahs?.[0]?.latin_text}*\n\n> "${parsed.ayahs?.[0]?.translation_id}"\n\n**Penjelasan:**\n${parsed.explanation}\n\n${parsed.closing || ''}`;
+    let hadithSection = parsed.hadith ? `\n\n**Hadits Nabi:**\n> "${parsed.hadith}"` : "";
+    parsed.rawText = `${parsed.opening || ''}\n\n### QS. ${parsed.ayahs?.[0]?.surah_name}: ${parsed.ayahs?.[0]?.ayah_number}\n\n${parsed.ayahs?.[0]?.arabic_text}\n\n*${parsed.ayahs?.[0]?.latin_text}*\n\n> "${parsed.ayahs?.[0]?.translation_id}"${hadithSection}\n\n**Nasihat Kyai Al Munawwarah:**\n${parsed.explanation}\n\n${parsed.closing || ''}`;
     return parsed;
   } catch {
     return generateOfflineMunawwarah(messages[messages.length - 1]?.content || '', mode);

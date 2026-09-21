@@ -48,6 +48,7 @@ export default function MessageItem({
   const data = typeof message.content === 'object' ? message.content : null;
   const ayahs = data?.ayahs || [];
   const opening = data?.opening || (typeof message.content === 'string' ? message.content : '');
+  const hadith = data?.hadith || '';
   const explanation = data?.explanation || '';
   const practicalSteps = data?.practical_steps || [];
   const closing = data?.closing || '';
@@ -225,6 +226,18 @@ export default function MessageItem({
         </div>
       ))}
 
+      {/* Hadith section */}
+      {hadith && (
+        <div className="da-card grain rounded-3xl p-5 sm:p-6" style={{ border: '1px solid hsl(var(--gold) / 0.2)' }}>
+          <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Hadits Nabi ﷺ
+          </span>
+          <p className="mt-2.5 text-sm leading-relaxed text-foreground/90 italic">
+            &ldquo;{hadith}&rdquo;
+          </p>
+        </div>
+      )}
+
       {/* Explanation — with gold left bar */}
       {explanation && (
         <div
@@ -232,7 +245,7 @@ export default function MessageItem({
           style={{ borderLeft: '2px solid hsl(var(--gold))' }}
         >
           <span className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'hsl(var(--gold))' }}>
-            Penjelasan Sederhana Al Munawwarah
+            Nasihat Kyai Al Munawwarah
           </span>
           <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
             {explanation}
