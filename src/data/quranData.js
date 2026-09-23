@@ -284,3 +284,46 @@ export const POPULAR_AYAHS = [
     theme_tags: ["kemanusiaan", "toleransi", "sesama", "persaudaraan", "wawasan", "non-muslim", "sosial"]
   }
 ];
+
+export const JUZ_LIST = [
+  { number: 1, name: "آلم", latin: "Alif Lam Mim", start: { surah: 1, ayah: 1, surahName: "Al-Fatihah" }, end: { surah: 2, ayah: 141, surahName: "Al-Baqarah" } },
+  { number: 2, name: "سَيَقُولُ", latin: "Sayaqulu", start: { surah: 2, ayah: 142, surahName: "Al-Baqarah" }, end: { surah: 2, ayah: 252, surahName: "Al-Baqarah" } },
+  { number: 3, name: "تِلْكَ الرُّسُلُ", latin: "Tilkar-Rusul", start: { surah: 2, ayah: 253, surahName: "Al-Baqarah" }, end: { surah: 3, ayah: 92, surahName: "Ali 'Imran" } },
+  { number: 4, name: "لَنْ تَنَالُوا", latin: "Lan Tanalu", start: { surah: 3, ayah: 93, surahName: "Ali 'Imran" }, end: { surah: 4, ayah: 23, surahName: "An-Nisa'" } },
+  { number: 5, name: "وَالْمُحْصَنَاتُ", latin: "Wal-Muhsanat", start: { surah: 4, ayah: 24, surahName: "An-Nisa'" }, end: { surah: 4, ayah: 147, surahName: "An-Nisa'" } },
+  { number: 6, name: "لَا يُحِبُّ اللَّهُ", latin: "La Yuhibbullah", start: { surah: 4, ayah: 148, surahName: "An-Nisa'" }, end: { surah: 5, ayah: 81, surahName: "Al-Ma'idah" } },
+  { number: 7, name: "وَإِذَا سَمِعُوا", latin: "Wa Iza Sami'u", start: { surah: 5, ayah: 82, surahName: "Al-Ma'idah" }, end: { surah: 6, ayah: 110, surahName: "Al-An'am" } },
+  { number: 8, name: "وَلَوْ أَنَّنَا", latin: "Walau Annana", start: { surah: 6, ayah: 111, surahName: "Al-An'am" }, end: { surah: 7, ayah: 87, surahName: "Al-A'raf" } },
+  { number: 9, name: "قَالَ الْمَلَأُ", latin: "Qalal-Mala'u", start: { surah: 7, ayah: 88, surahName: "Al-A'raf" }, end: { surah: 8, ayah: 40, surahName: "Al-Anfal" } },
+  { number: 10, name: "وَاعْلَمُوا", latin: "Wa'lamu", start: { surah: 8, ayah: 41, surahName: "Al-Anfal" }, end: { surah: 9, ayah: 92, surahName: "At-Taubah" } },
+  { number: 11, name: "يَعْتَذِرُونَ", latin: "Ya'tazirun", start: { surah: 9, ayah: 93, surahName: "At-Taubah" }, end: { surah: 11, ayah: 5, surahName: "Hud" } },
+  { number: 12, name: "وَمَا مِنْ دَابَّةٍ", latin: "Wa Mamin Dabbah", start: { surah: 11, ayah: 6, surahName: "Hud" }, end: { surah: 12, ayah: 52, surahName: "Yusuf" } },
+  { number: 13, name: "وَمَا أُبَرِّئُ", latin: "Wa Ma Ubarri'u", start: { surah: 12, ayah: 53, surahName: "Yusuf" }, end: { surah: 14, ayah: 52, surahName: "Ibrahim" } },
+  { number: 14, name: "رُبَمَا", latin: "Rubama", start: { surah: 15, ayah: 1, surahName: "Al-Hijr" }, end: { surah: 16, ayah: 128, surahName: "An-Nahl" } },
+  { number: 15, name: "سُبْحَانَ الَّذِي", latin: "Subhanallazi", start: { surah: 17, ayah: 1, surahName: "Al-Isra'" }, end: { surah: 18, ayah: 74, surahName: "Al-Kahf" } },
+  { number: 16, name: "قَالَ أَلَمْ", latin: "Qala Alam", start: { surah: 18, ayah: 75, surahName: "Al-Kahf" }, end: { surah: 20, ayah: 135, surahName: "Taha" } },
+  { number: 17, name: "اقْتَرَبَ لِلنَّاسِ", latin: "Iqtaraba Lin-Nasi", start: { surah: 21, ayah: 1, surahName: "Al-Anbiya'" }, end: { surah: 22, ayah: 78, surahName: "Al-Hajj" } },
+  { number: 18, name: "قَدْ أَفْلَحَ", latin: "Qad Aflaha", start: { surah: 23, ayah: 1, surahName: "Al-Mu'minun" }, end: { surah: 25, ayah: 20, surahName: "Al-Furqan" } },
+  { number: 19, name: "وَقَالَ الَّذِينَ", latin: "Wa Qalal-Lazina", start: { surah: 25, ayah: 21, surahName: "Al-Furqan" }, end: { surah: 27, ayah: 55, surahName: "An-Naml" } },
+  { number: 20, name: "فَمَا كَانَ جَوَابَ", latin: "Fama Kana Jawaba", start: { surah: 27, ayah: 56, surahName: "An-Naml" }, end: { surah: 29, ayah: 45, surahName: "Al-'Ankabut" } },
+  { number: 21, name: "وَلَا تُجَادِلُوا", latin: "Wa La Tujadilu", start: { surah: 29, ayah: 46, surahName: "Al-'Ankabut" }, end: { surah: 33, ayah: 30, surahName: "Al-Ahzab" } },
+  { number: 22, name: "وَمَنْ يَقْنُتْ", latin: "Wa Man Yaqnut", start: { surah: 33, ayah: 31, surahName: "Al-Ahzab" }, end: { surah: 36, ayah: 27, surahName: "Yasin" } },
+  { number: 23, name: "وَمَا أَنْزَلْنَا", latin: "Wa Ma Anzalna", start: { surah: 36, ayah: 28, surahName: "Yasin" }, end: { surah: 39, ayah: 31, surahName: "Az-Zumar" } },
+  { number: 24, name: "فَمَنْ أَظْلَمُ", latin: "Faman Azlamu", start: { surah: 39, ayah: 32, surahName: "Az-Zumar" }, end: { surah: 41, ayah: 46, surahName: "Fussilat" } },
+  { number: 25, name: "إِلَيْهِ يُرَدُّ", latin: "Ilaihi Yuraddu", start: { surah: 41, ayah: 47, surahName: "Fussilat" }, end: { surah: 45, ayah: 37, surahName: "Al-Jasiyah" } },
+  { number: 26, name: "حم", latin: "Ha Mim", start: { surah: 46, ayah: 1, surahName: "Al-Ahqaf" }, end: { surah: 51, ayah: 30, surahName: "Az-Zariyat" } },
+  { number: 27, name: "قَالَ فَمَا خَطْبُكُمْ", latin: "Qala Fama Khatbukum", start: { surah: 51, ayah: 31, surahName: "Az-Zariyat" }, end: { surah: 57, ayah: 29, surahName: "Al-Hadid" } },
+  { number: 28, name: "قَدْ سَمِعَ اللَّهُ", latin: "Qad Sami'allahu", start: { surah: 58, ayah: 1, surahName: "Al-Mujadilah" }, end: { surah: 66, ayah: 12, surahName: "At-Tahrim" } },
+  { number: 29, name: "تَبَارَكَ الَّذِي", latin: "Tabarakallazi", start: { surah: 67, ayah: 1, surahName: "Al-Mulk" }, end: { surah: 77, ayah: 50, surahName: "Al-Mursalat" } },
+  { number: 30, name: "عَمَّ", latin: "'Amma", start: { surah: 78, ayah: 1, surahName: "An-Naba'" }, end: { surah: 114, ayah: 6, surahName: "An-Nas" } }
+];
+
+export const QARI_LIST = [
+  { id: "05", name: "Misyari Rasyid Al-Afasi", label: "Misyari Rasyid Al-Afasi", country: "Kuwait" },
+  { id: "03", name: "Abdurrahman as-Sudais", label: "Abdurrahman As-Sudais (Imam Ka'bah)", country: "Arab Saudi" },
+  { id: "01", name: "Abdullah Al-Juhany", label: "Abdullah Al-Juhany (Imam Haramain)", country: "Arab Saudi" },
+  { id: "02", name: "Abdul-Muhsin Al-Qasim", label: "Abdul-Muhsin Al-Qasim (Imam Madinah)", country: "Arab Saudi" },
+  { id: "04", name: "Ibrahim Al-Dossari", label: "Ibrahim Al-Dossari", country: "Arab Saudi" },
+  { id: "06", name: "Yasser Al-Dosari", label: "Yasser Al-Dosari", country: "Arab Saudi" }
+];
+

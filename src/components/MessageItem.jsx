@@ -178,7 +178,7 @@ export default function MessageItem({
                   icon: BookOpen,
                   label: 'Baca Surah',
                   color: 'text-emerald',
-                  onClick: () => onOpenSurah?.(ayah.surah_number)
+                  onClick: () => onOpenSurah?.(ayah.surah_number, ayah.ayah_number)
                 },
                 {
                   icon: FileText,

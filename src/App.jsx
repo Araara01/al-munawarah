@@ -127,6 +127,13 @@ function AppContent() {
   }, [conversations]);
 
   // Sync route with browser URL history
+  const [quranTarget, setQuranTarget] = useState({ surahNumber: null, ayahNumber: null });
+
+  const handleOpenSurah = (surahNum, ayahNum = 1) => {
+    setQuranTarget({ surahNumber: surahNum, ayahNumber: ayahNum });
+    navigateTo('quran');
+  };
+
   const navigateTo = (tab) => {
     setCurrentTab(tab);
     const targetPath = tab === 'landing' ? '/' : `/${tab}`;
@@ -396,7 +403,7 @@ function AppContent() {
                 onSendMessage={handleSendMessage}
                 isLoading={isLoading}
                 currentMode={currentMode}
-                onOpenSurah={(surahNum) => navigateTo('quran')}
+                onOpenSurah={handleOpenSurah}
                 onExportQuote={(q) => setExportQuoteData(q)}
                 savedAyahs={savedAyahs}
                 onToggleSaveAyah={handleToggleSaveAyah}
@@ -406,7 +413,14 @@ function AppContent() {
 
           {currentTab === 'quran' && (
             <QuranBrowser
-              onOpenSurahDetail={() => {}}
+              targetSurahNumber={quranTarget.surahNumber}
+              targetAyahNumber={quranTarget.ayahNumber}
+              onClearTarget={() => setQuranTarget({ surahNumber: null, ayahNumber: null })}
+              savedAyahs={savedAyahs}
+              onToggleSaveAyah={handleToggleSaveAyah}
+              onExportQuote={(q) => setExportQuoteData(q)}
+              defaultShowLatin={showLatin}
+              currentMode={currentMode}
             />
           )}
 
@@ -414,7 +428,7 @@ function AppContent() {
             <SavedAyat
               savedAyahs={savedAyahs}
               onRemoveAyah={handleRemoveAyah}
-              onOpenSurah={(num) => navigateTo('quran')}
+              onOpenSurah={handleOpenSurah}
               onExportQuote={(q) => setExportQuoteData(q)}
             />
           )}
