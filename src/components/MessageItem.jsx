@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Volume2,
   VolumeX,
@@ -12,6 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { useToast } from './Toast';
+import { getTafsirIbnuKatsir } from '../services/quranService.js';
 
 export default function MessageItem({
   message,
@@ -23,6 +24,9 @@ export default function MessageItem({
   const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
   const [showTafsir, setShowTafsir] = useState(false);
+  const [tafsirSource, setTafsirSource] = useState('ibnu_katsir'); // 'ibnu_katsir' | 'kemenag'
+  const [ibnuKatsirMap, setIbnuKatsirMap] = useState({});
+  const [loadingIbnuKatsir, setLoadingIbnuKatsir] = useState(false);
   const [copied, setCopied] = useState(false);
   const audioRef = useRef(null);
 
@@ -52,6 +56,27 @@ export default function MessageItem({
   const explanation = data?.explanation || '';
   const practicalSteps = data?.practical_steps || [];
   const closing = data?.closing || '';
+
+  // Load Tafsir Ibnu Katsir on demand when Tafsir is opened
+  useEffect(() => {
+    if (!showTafsir || ayahs.length === 0) return;
+    ayahs.forEach(a => {
+      const sNum = a.surah_number;
+      if (sNum && !ibnuKatsirMap[sNum]) {
+        setLoadingIbnuKatsir(true);
+        getTafsirIbnuKatsir(sNum)
+          .then(map => {
+            setIbnuKatsirMap(prev => ({ ...prev, [sNum]: map }));
+          })
+          .catch(err => {
+            console.error("Gagal memuat Tafsir Ibnu Katsir:", err);
+          })
+          .finally(() => {
+            setLoadingIbnuKatsir(false);
+          });
+      }
+    });
+  }, [showTafsir, ayahs]);
 
   const handleToggleAudio = (audioUrl) => {
     if (!audioUrl) { showToast('Audio untuk ayat ini belum tersedia', 'info'); return; }
@@ -154,22 +179,78 @@ export default function MessageItem({
             </div>
 
             {/* Tafsir (expandable) */}
-            {showTafsir && ayah.tafsir && (
-              <div
-                className="mt-5 rounded-2xl p-4 animate-fade-up"
-                style={{
-                  background: 'hsl(var(--secondary) / 0.6)',
-                  border: '1px solid hsl(var(--gold) / 0.18)'
-                }}
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.22em]" style={{ color: 'hsl(var(--gold))' }}>
-                  Tafsir · Kemenag RI
-                </span>
-                <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-                  {ayah.tafsir}
-                </p>
-              </div>
-            )}
+            {showTafsir && (() => {
+              const isIbnuKatsir = tafsirSource === 'ibnu_katsir';
+              const sNum = ayah.surah_number;
+              const aNum = ayah.ayah_number;
+              const loadedIbnuMap = ibnuKatsirMap[sNum] || {};
+              const ibnuText = ayah.tafsir_ibnu_katsir || loadedIbnuMap[aNum] || loadedIbnuMap[String(aNum)] || "";
+              const kemenagText = ayah.tafsir_kemenag || ayah.tafsir || "";
+              const currentText = isIbnuKatsir ? ibnuText : kemenagText;
+
+              return (
+                <div
+                  className="mt-5 rounded-2xl p-4 animate-fade-up space-y-3"
+                  style={{
+                    background: 'hsl(var(--secondary) / 0.6)',
+                    border: '1px solid hsl(var(--gold) / 0.18)'
+                  }}
+                >
+                  {/* Source Switcher */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/30 pb-2">
+                    <div className="flex items-center gap-1 bg-background/80 p-0.5 rounded-xl border border-border/50 text-[11px]">
+                      <button
+                        type="button"
+                        onClick={() => setTafsirSource('ibnu_katsir')}
+                        className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                          isIbnuKatsir
+                            ? 'bg-gold text-white shadow-xs font-semibold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Ibnu Katsir
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTafsirSource('kemenag')}
+                        className={`px-2.5 py-0.5 rounded-lg font-medium transition-all ${
+                          !isIbnuKatsir
+                            ? 'bg-gold text-white shadow-xs font-semibold'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Kemenag RI
+                      </button>
+                    </div>
+
+                    <span className="text-[10px] text-gold/80 font-medium tracking-wider uppercase">
+                      {isIbnuKatsir ? "Tafsir Al-Qur'an Al-'Azhim" : "Kemenag RI Ringkas"}
+                    </span>
+                  </div>
+
+                  {/* Tafsir Body */}
+                  <div className="max-h-72 overflow-y-auto pr-1 text-xs sm:text-sm leading-relaxed text-foreground/85 font-sans space-y-2">
+                    {isIbnuKatsir && loadingIbnuKatsir && !ibnuText ? (
+                      <p className="italic text-muted-foreground text-xs animate-pulse">
+                        Memuat Tafsir Ibnu Katsir...
+                      </p>
+                    ) : currentText ? (
+                      currentText.split('\n\n').map((para, pIdx) => {
+                        const trimmed = para.trim();
+                        if (!trimmed) return null;
+                        return <p key={pIdx}>{trimmed}</p>;
+                      })
+                    ) : (
+                      <p className="text-muted-foreground text-xs italic">
+                        {isIbnuKatsir 
+                          ? (kemenagText ? `Tafsir Ibnu Katsir tidak tersedia. Tafsir Kemenag: ${kemenagText}` : "Tafsir untuk ayat ini sedang dipersiapkan.") 
+                          : "Tafsir Kemenag untuk ayat ini belum tersedia."}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Action toolbar */}
             <footer className="mt-6 flex flex-wrap gap-2">

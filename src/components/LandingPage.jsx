@@ -324,7 +324,7 @@ export default function LandingPage({
             Al Munawwarah adalah AI untuk membantu memahami dan menemukan referensi ayat Al-Qur'an. Jawaban AI bukan pengganti ulama, ustaz, ahli tafsir, atau fatwa resmi. Untuk keputusan hukum/fatwa, sebaiknya konsultasikan kepada ulama atau ahli yang terpercaya.
           </p>
           <p className="text-xs text-muted-foreground">
-            Sumber data: Teks Arab Utsmani, Terjemahan & Tafsir Kementerian Agama RI melalui EQuran.id.
+            Sumber data: Teks Arab Utsmani, Terjemahan & Tafsir Ringkas Kemenag RI, serta Database Lengkap Kitab Tafsir Ibnu Katsir (114 Surat, 30 Juz).
           </p>
           <div className="flex flex-wrap gap-4 text-xs font-medium pt-2">
             <button

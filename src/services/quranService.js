@@ -1,9 +1,13 @@
 // Quran Database Service
-// Connects to equran.id API v2 (official Kemenag standard) & alquran.cloud
-import { SURAH_LIST } from '../data/quranData';
+// Connects to local static Tafsir Ibnu Katsir database, equran.id API v2 & alquran.cloud
+import { SURAH_LIST } from '../data/quranData.js';
+
+// Cache version — bump this to invalidate stale sessionStorage caches
+const CACHE_VERSION = 'v3_ibk';
 
 const surahCache = new Map();
 const tafsirCache = new Map();
+const ibnuKatsirCache = new Map();
 
 // Helper to fetch with timeout
 async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
@@ -23,8 +27,99 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
 }
 
 /**
+ * Validate that a tafsir map is non-empty and has real content
+ */
+function isValidTafsirMap(map) {
+  if (!map || typeof map !== 'object') return false;
+  const keys = Object.keys(map);
+  if (keys.length === 0) return false;
+  // At least some entries must have meaningful content (> 10 chars)
+  return keys.some(k => (map[k] || '').length > 10);
+}
+
+/**
+ * Fetch Tafsir Ibnu Katsir directly for a specific Surah.
+ * Serves from local static database /data/tafsir/ibnu-katsir/${surahNumber}.json
+ * with fallback to open CDN.
+ */
+export async function getTafsirIbnuKatsir(surahNumber) {
+  const sNum = parseInt(surahNumber, 10);
+  if (!sNum || sNum < 1 || sNum > 114) {
+    return {};
+  }
+
+  // 1. Check in-memory cache (fastest, always valid)
+  if (ibnuKatsirCache.has(sNum)) {
+    return ibnuKatsirCache.get(sNum);
+  }
+
+  // 2. Check sessionStorage with version guard
+  const sessionKey = `tafsir_ibnu_katsir_${CACHE_VERSION}_${sNum}`;
+  try {
+    const cached = sessionStorage.getItem(sessionKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (isValidTafsirMap(parsed)) {
+        ibnuKatsirCache.set(sNum, parsed);
+        return parsed;
+      }
+      // Invalid/stale cache — remove it
+      sessionStorage.removeItem(sessionKey);
+    }
+  } catch (e) {}
+
+  // 3. Load from local static database (Fastest, offline-capable, primary source)
+  try {
+    const res = await fetchWithTimeout(`/data/tafsir/ibnu-katsir/${sNum}.json`, {}, 6000);
+    if (res.ok) {
+      const data = await res.json();
+      const map = data.ayahs || {};
+      if (isValidTafsirMap(map)) {
+        ibnuKatsirCache.set(sNum, map);
+        try {
+          sessionStorage.setItem(sessionKey, JSON.stringify(map));
+        } catch (e) {}
+        console.log(`[Tafsir IK] Surah ${sNum} loaded from local DB (${Object.keys(map).length} ayahs)`);
+        return map;
+      }
+    }
+  } catch (err) {
+    console.warn(`[Tafsir IK] Local fetch failed for surah ${sNum}:`, err.message);
+  }
+
+  // 4. Fallback to GitHub Raw CDN
+  try {
+    const res = await fetchWithTimeout(
+      `https://raw.githubusercontent.com/renpwn/alquran.js/master/alquran/Alquran_${sNum}.json`,
+      {},
+      10000
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      (data.ayahs || []).forEach((a, idx) => {
+        const text = (a.ibnu_katsir || '').trim();
+        if (text) map[idx + 1] = text;
+      });
+      if (isValidTafsirMap(map)) {
+        ibnuKatsirCache.set(sNum, map);
+        try {
+          sessionStorage.setItem(sessionKey, JSON.stringify(map));
+        } catch (e) {}
+        console.log(`[Tafsir IK] Surah ${sNum} loaded from GitHub CDN fallback`);
+        return map;
+      }
+    }
+  } catch (err) {
+    console.error(`[Tafsir IK] All sources failed for surah ${sNum}:`, err.message);
+  }
+
+  return {};
+}
+
+/**
  * Fetch complete Surah detail including all ayahs, Latin transliteration,
- * Indonesian translation, English translation, Tafsir Kemenag, and Qari audio URLs.
+ * Indonesian translation, English translation, Tafsir Ibnu Katsir, Tafsir Kemenag, and Qari audio URLs.
  */
 export async function getSurahDetail(surahNumber) {
   const sNum = parseInt(surahNumber, 10);
@@ -37,24 +132,31 @@ export async function getSurahDetail(surahNumber) {
     return surahCache.get(sNum);
   }
 
-  // 2. Check sessionStorage
+  // 2. Check sessionStorage with version guard
+  const sessionSurahKey = `surah_detail_${CACHE_VERSION}_${sNum}`;
   try {
-    const cachedSession = sessionStorage.getItem(`surah_detail_${sNum}`);
+    const cachedSession = sessionStorage.getItem(sessionSurahKey);
     if (cachedSession) {
       const parsed = JSON.parse(cachedSession);
-      surahCache.set(sNum, parsed);
-      return parsed;
+      // Validate the cached data has tafsir
+      if (parsed && parsed.ayahs && parsed.ayahs.length > 0) {
+        surahCache.set(sNum, parsed);
+        return parsed;
+      }
+      sessionStorage.removeItem(sessionSurahKey);
     }
   } catch (e) {
     // ignore sessionStorage errors
   }
 
   try {
-    // Concurrent fetch: Indonesian Surah + Kemenag Tafsir + English Translation
-    const [resId, resTafsir, resEn] = await Promise.allSettled([
+    // Concurrent fetch: Indonesian Surah + Kemenag Tafsir + English Translation + Tafsir Ibnu Katsir
+    // Tafsir Ibnu Katsir from local DB is always attempted first
+    const [resId, resTafsirKemenag, resEn, resIbnuKatsir] = await Promise.allSettled([
       fetchWithTimeout(`https://equran.id/api/v2/surat/${sNum}`),
       fetchWithTimeout(`https://equran.id/api/v2/tafsir/${sNum}`),
-      fetchWithTimeout(`https://api.alquran.cloud/v1/surah/${sNum}/en.sahih`, {}, 5000)
+      fetchWithTimeout(`https://api.alquran.cloud/v1/surah/${sNum}/en.sahih`, {}, 5000),
+      getTafsirIbnuKatsir(sNum) // Always resolves, even if empty
     ]);
 
     if (resId.status !== 'fulfilled' || !resId.value.ok) {
@@ -64,18 +166,31 @@ export async function getSurahDetail(surahNumber) {
     const dataId = await resId.value.json();
     const surahData = dataId.data;
 
-    // Process Tafsir
-    let tafsirMap = {};
-    if (resTafsir.status === 'fulfilled' && resTafsir.value.ok) {
+    // Process Tafsir Kemenag
+    let tafsirKemenagMap = {};
+    if (resTafsirKemenag.status === 'fulfilled' && resTafsirKemenag.value.ok) {
       try {
-        const dataTafsir = await resTafsir.value.json();
+        const dataTafsir = await resTafsirKemenag.value.json();
         const tafsirList = dataTafsir?.data?.tafsir || [];
         tafsirList.forEach(t => {
-          tafsirMap[t.ayat] = t.teks;
+          tafsirKemenagMap[t.ayat] = t.teks;
         });
       } catch (e) {
-        console.warn("Tafsir parsing failed:", e);
+        console.warn('[Tafsir Kemenag] Parsing failed:', e);
       }
+    }
+
+    // Process Tafsir Ibnu Katsir from local DB
+    let tafsirIbnuKatsirMap = {};
+    if (resIbnuKatsir.status === 'fulfilled' && resIbnuKatsir.value) {
+      tafsirIbnuKatsirMap = resIbnuKatsir.value;
+    }
+    // Validate and log
+    const ibnuKatsirCount = Object.keys(tafsirIbnuKatsirMap).length;
+    if (ibnuKatsirCount > 0) {
+      console.log(`[Surah ${sNum}] Tafsir Ibnu Katsir loaded: ${ibnuKatsirCount} ayahs`);
+    } else {
+      console.warn(`[Surah ${sNum}] Tafsir Ibnu Katsir not available, using Kemenag fallback`);
     }
 
     // Process English
@@ -85,23 +200,37 @@ export async function getSurahDetail(surahNumber) {
         const dataEn = await resEn.value.json();
         ayahsEn = dataEn?.data?.ayahs || [];
       } catch (e) {
-        console.warn("English parsing failed:", e);
+        console.warn('[Translation EN] Parsing failed:', e);
       }
     }
 
     const ayahsId = surahData.ayat || [];
     const combinedAyahs = ayahsId.map((ayah, index) => {
+      const ayahNum = ayah.nomorAyat;
+      // Support both numeric and string keys (JSON keys are always strings)
+      const kemenagText = tafsirKemenagMap[ayahNum] || tafsirKemenagMap[String(ayahNum)] || '';
+      const ibnuKatsirText = tafsirIbnuKatsirMap[ayahNum] || tafsirIbnuKatsirMap[String(ayahNum)] || '';
+
       return {
         surah_number: surahData.nomor,
         surah_name: surahData.namaLatin,
-        ayah_number: ayah.nomorAyat,
+        ayah_number: ayahNum,
         arabic_text: ayah.teksArab,
         latin_text: ayah.teksLatin,
         translation_id: ayah.teksIndonesia,
-        translation_en: ayahsEn[index]?.text || "",
-        tafsir: tafsirMap[ayah.nomorAyat] || "",
+        translation_en: ayahsEn[index]?.text || '',
+        // Default tafsir: Ibnu Katsir first, then Kemenag as fallback
+        tafsir: ibnuKatsirText || kemenagText || '',
+        tafsir_ibnu_katsir: ibnuKatsirText,
+        tafsir_kemenag: kemenagText,
+        // Mark tafsir source for UI
+        tafsir_source: ibnuKatsirText
+          ? 'ibnu_katsir_local'
+          : kemenagText
+            ? 'kemenag_api'
+            : 'none',
         audio: ayah.audio || {}, // Map containing "01" through "06"
-        audio_url: ayah.audio?.["05"] || Object.values(ayah.audio || {})[0] || ""
+        audio_url: ayah.audio?.['05'] || Object.values(ayah.audio || {})[0] || ''
       };
     });
 
@@ -115,43 +244,55 @@ export async function getSurahDetail(surahNumber) {
       name: surahData.namaLatin,
       arabic: surahData.nama,
       numberOfAyahs: surahData.jumlahAyat,
-      revelation: surahData.tempatTurun === "Mekah" ? "MAKKIYYAH" : "MADANIYYAH",
+      revelation: surahData.tempatTurun === 'Mekah' ? 'MAKKIYYAH' : 'MADANIYYAH',
       translation: surahData.arti,
       description: cleanDescription,
       rawDescription: surahData.deskripsi,
       audioFull: surahData.audioFull || {},
       suratSebelumnya: surahData.suratSebelumnya || null,
       suratSelanjutnya: surahData.suratSelanjutnya || null,
+      // Summary stats
+      tafsirStats: {
+        ibnuKatsirCount: combinedAyahs.filter(a => a.tafsir_ibnu_katsir).length,
+        kemenagCount: combinedAyahs.filter(a => a.tafsir_kemenag).length,
+        totalAyahs: combinedAyahs.length
+      },
       ayahs: combinedAyahs
     };
 
     // Save to cache
     surahCache.set(sNum, result);
     try {
-      sessionStorage.setItem(`surah_detail_${sNum}`, JSON.stringify(result));
+      sessionStorage.setItem(sessionSurahKey, JSON.stringify(result));
     } catch (e) {
       // ignore quota exceed
     }
 
     return result;
   } catch (error) {
-    console.error(`Error loading Surah ${surahNumber}:`, error);
+    console.error(`[Surah ${surahNumber}] Error loading:`, error);
     throw error;
   }
 }
 
 /**
- * Fetch Surah Tafsir directly
+ * Fetch Surah Tafsir (Ibnu Katsir or Kemenag) directly
  */
-export async function getSurahTafsir(surahNumber) {
+export async function getSurahTafsir(surahNumber, type = 'ibnu_katsir') {
   const sNum = parseInt(surahNumber, 10);
+  if (!sNum) return {};
+
+  if (type === 'ibnu_katsir') {
+    return getTafsirIbnuKatsir(sNum);
+  }
+
   if (tafsirCache.has(sNum)) {
     return tafsirCache.get(sNum);
   }
 
   try {
     const res = await fetchWithTimeout(`https://equran.id/api/v2/tafsir/${sNum}`);
-    if (!res.ok) throw new Error("Gagal mengambil tafsir");
+    if (!res.ok) throw new Error('Gagal mengambil tafsir Kemenag');
     const json = await res.json();
     const tafsirMap = {};
     (json?.data?.tafsir || []).forEach(t => {
@@ -160,7 +301,7 @@ export async function getSurahTafsir(surahNumber) {
     tafsirCache.set(sNum, tafsirMap);
     return tafsirMap;
   } catch (err) {
-    console.error("Error fetching tafsir:", err);
+    console.error('[Tafsir Kemenag] Error fetching:', err);
     return {};
   }
 }
@@ -200,27 +341,27 @@ export function getLastRead() {
 /**
  * Get Audio URL for specific Qari
  */
-export function getAyahAudioUrl(ayah, qariId = "05") {
-  if (!ayah) return "";
+export function getAyahAudioUrl(ayah, qariId = '05') {
+  if (!ayah) return '';
   if (ayah.audio && ayah.audio[qariId]) {
     return ayah.audio[qariId];
   }
-  if (ayah.audio && ayah.audio["05"]) {
-    return ayah.audio["05"];
+  if (ayah.audio && ayah.audio['05']) {
+    return ayah.audio['05'];
   }
-  return ayah.audio_url || "";
+  return ayah.audio_url || '';
 }
 
 /**
  * Get Full Surah Audio URL for specific Qari
  */
-export function getSurahFullAudioUrl(surah, qariId = "05") {
-  if (!surah) return "";
+export function getSurahFullAudioUrl(surah, qariId = '05') {
+  if (!surah) return '';
   if (surah.audioFull && surah.audioFull[qariId]) {
     return surah.audioFull[qariId];
   }
-  if (surah.audioFull && surah.audioFull["05"]) {
-    return surah.audioFull["05"];
+  if (surah.audioFull && surah.audioFull['05']) {
+    return surah.audioFull['05'];
   }
   return `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surah.number || surah}.mp3`;
 }

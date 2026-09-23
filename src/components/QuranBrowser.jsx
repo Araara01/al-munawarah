@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { SURAH_LIST, JUZ_LIST, THEMES, POPULAR_AYAHS, QARI_LIST } from '../data/quranData';
 import { 
   getSurahDetail, 
@@ -71,7 +71,12 @@ export default function QuranBrowser({
   const [autoPlayNext, setAutoPlayNext] = useState(true);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
   const [openTafsirMap, setOpenTafsirMap] = useState({});
+  const [preferredTafsir, setPreferredTafsir] = useState(() => {
+    return localStorage.getItem('munawwarah_preferred_tafsir') || 'ibnu_katsir';
+  });
+  const [activeTafsirTabMap, setActiveTafsirTabMap] = useState({});
   const [copiedAyah, setCopiedAyah] = useState(null);
+  const [copiedTafsirAyah, setCopiedTafsirAyah] = useState(null);
 
   // Last Read State
   const [lastRead, setLastRead] = useState(() => getLastRead());
@@ -91,6 +96,11 @@ export default function QuranBrowser({
   useEffect(() => {
     localStorage.setItem('munawwarah_quran_font_size', String(fontSize));
   }, [fontSize]);
+
+  // Save preferred tafsir source
+  useEffect(() => {
+    localStorage.setItem('munawwarah_preferred_tafsir', preferredTafsir);
+  }, [preferredTafsir]);
 
   // Handle external target navigation (e.g. from Chat or Saved Ayat)
   useEffect(() => {
@@ -343,6 +353,16 @@ export default function QuranBrowser({
     setTimeout(() => setCopiedAyah(null), 2500);
   };
 
+  // Copy Tafsir Text
+  const handleCopyTafsir = (ayah, tafsirSource, tafsirText) => {
+    if (!tafsirText) return;
+    const textToCopy = `[Tafsir ${tafsirSource}]\nSurat ${surahDetail?.name || ayah.surah_name} Ayat ${ayah.ayah_number}\n\n${tafsirText}\n\nSumber: Al Munawwarah`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedTafsirAyah(ayah.ayah_number);
+    showToast(`Tafsir ${tafsirSource} Ayat ${ayah.ayah_number} disalin`, "success");
+    setTimeout(() => setCopiedTafsirAyah(null), 2500);
+  };
+
   // Bookmark check
   const isAyahBookmarked = (surahNum, ayahNum) => {
     return savedAyahs.some(a => 
@@ -484,6 +504,19 @@ export default function QuranBrowser({
                   </select>
                 </div>
 
+                {/* Preferred Tafsir Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-muted-foreground block">Pilihan Tafsir Utama</label>
+                  <select
+                    value={preferredTafsir}
+                    onChange={(e) => setPreferredTafsir(e.target.value)}
+                    className="w-full rounded-xl border border-border/80 bg-secondary/60 px-3 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-gold"
+                  >
+                    <option value="ibnu_katsir">📖 Tafsir Ibnu Katsir (Lengkap)</option>
+                    <option value="kemenag">🏛️ Tafsir Kemenag RI (Ringkas)</option>
+                  </select>
+                </div>
+
                 {/* Toggles: Latin, Terjemahan, Auto Next */}
                 <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                   <div className="flex items-center justify-between">
@@ -553,7 +586,7 @@ export default function QuranBrowser({
                 Membuka Mushaf Surat...
               </h3>
               <p className="max-w-xs text-xs text-muted-foreground leading-relaxed">
-                Menghubungkan ke database Al-Qur'an lengkap, teks berharakat, transliterasi Latin, dan Tafsir resmi Kemenag RI.
+                Memuat mushaf, transliterasi Latin, terjemahan, dan Tafsir Ibnu Katsir dari database lokal...
               </p>
             </div>
           )}
@@ -654,6 +687,26 @@ export default function QuranBrowser({
                   <p className="mt-2 text-xs text-muted-foreground italic">
                     Dengan nama Allah Yang Maha Pengasih lagi Maha Penyayang
                   </p>
+                </div>
+              )}
+
+              {/* Tafsir Ibnu Katsir Availability Banner */}
+              {surahDetail.tafsirStats && surahDetail.tafsirStats.ibnuKatsirCount > 0 && (
+                <div className="flex items-center gap-2.5 rounded-2xl bg-emerald-500/8 border border-emerald-500/20 px-4 py-2.5">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                    <BookOpen className="h-3.5 w-3.5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                      Tafsir Ibnu Katsir tersedia — {surahDetail.tafsirStats.ibnuKatsirCount}/{surahDetail.tafsirStats.totalAyahs} ayat
+                    </p>
+                    <p className="text-[10px] text-emerald-600/70 dark:text-emerald-500/70">
+                      Dimuat dari database lokal · Kitab Tafsir Al-Qur&apos;an Al-Azhim · Al-Hafizh Ibnu Katsir (W. 774 H)
+                    </p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+                    ✓ Lokal
+                  </span>
                 </div>
               )}
 
@@ -772,7 +825,7 @@ export default function QuranBrowser({
                             )}
                           </button>
 
-                          {/* Tafsir Kemenag Button */}
+                          {/* Tafsir Button */}
                           <button
                             onClick={() => toggleTafsir(ayah.ayah_number)}
                             className={`flex h-8 items-center gap-1 rounded-xl px-2 text-xs transition-all ${
@@ -780,7 +833,7 @@ export default function QuranBrowser({
                                 ? 'border border-gold/40 bg-gold/10 text-gold font-semibold'
                                 : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                             }`}
-                            title="Tafsir Kemenag RI"
+                            title="Tafsir Ibnu Katsir & Kemenag"
                           >
                             <BookOpen className="h-3.5 w-3.5" />
                             <span className="hidden sm:inline">Tafsir</span>
@@ -847,26 +900,148 @@ export default function QuranBrowser({
                         </p>
                       )}
 
-                      {/* Tafsir Kemenag Accordion */}
-                      {isTafsirOpen && (
-                        <div className="mt-3 rounded-2xl bg-secondary/50 p-4 border border-gold/25 space-y-2 animate-fade-up">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-gold flex items-center gap-1.5">
-                              <BookOpen className="h-3 w-3" />
-                              Tafsir Ringkas Kemenag RI
-                            </span>
-                            <button
-                              onClick={() => toggleTafsir(ayah.ayah_number)}
-                              className="text-[10px] text-muted-foreground hover:text-foreground"
-                            >
-                              Tutup
-                            </button>
+                      {/* Tafsir Accordion (Ibnu Katsir & Kemenag RI) */}
+                      {isTafsirOpen && (() => {
+                        const currentTafsirTab = activeTafsirTabMap[ayah.ayah_number] || preferredTafsir;
+                        const isIbnuKatsir = currentTafsirTab === 'ibnu_katsir';
+                        const ibnuKatsirText = ayah.tafsir_ibnu_katsir || '';
+                        const kemenagText = ayah.tafsir_kemenag || '';
+                        const hasIbnuKatsir = ibnuKatsirText.length > 0;
+                        const hasKemenag = kemenagText.length > 0;
+                        const currentTafsirText = isIbnuKatsir 
+                          ? (ibnuKatsirText || ayah.tafsir || '')
+                          : (kemenagText || ayah.tafsir || '');
+
+                        return (
+                          <div className="mt-3 rounded-2xl bg-secondary/60 p-4 sm:p-5 border border-gold/30 space-y-3 animate-fade-up shadow-sm">
+                            {/* Tafsir Header with Tabs & Actions */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-2.5">
+                              {/* Source Switcher Tabs */}
+                              <div className="flex items-center gap-1 bg-background/80 p-0.5 rounded-xl border border-border/60">
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTafsirTabMap(prev => ({ ...prev, [ayah.ayah_number]: 'ibnu_katsir' }))}
+                                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                                    isIbnuKatsir
+                                      ? 'bg-gold text-white shadow-xs font-semibold'
+                                      : 'text-muted-foreground hover:text-foreground'
+                                  }`}
+                                >
+                                  <BookOpen className="h-3 w-3" />
+                                  <span>Tafsir Ibnu Katsir</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setActiveTafsirTabMap(prev => ({ ...prev, [ayah.ayah_number]: 'kemenag' }))}
+                                  className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+                                    !isIbnuKatsir
+                                      ? 'bg-gold text-white shadow-xs font-semibold'
+                                      : 'text-muted-foreground hover:text-foreground'
+                                  }`}
+                                >
+                                  <span>Kemenag RI</span>
+                                </button>
+                              </div>
+
+                              {/* Right Actions: Copy & Close */}
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyTafsir(ayah, isIbnuKatsir ? 'Ibnu Katsir' : 'Kemenag RI', currentTafsirText)}
+                                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-muted-foreground hover:text-foreground hover:bg-background/60 transition-colors"
+                                  title="Salin Teks Tafsir"
+                                >
+                                  {copiedTafsirAyah === ayah.ayah_number ? (
+                                    <>
+                                      <Check className="h-3 w-3 text-emerald" />
+                                      <span className="text-emerald font-medium">Tersalin</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="h-3 w-3" />
+                                      <span>Salin</span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => toggleTafsir(ayah.ayah_number)}
+                                  className="rounded-lg p-1 text-muted-foreground hover:text-foreground hover:bg-background/60"
+                                  title="Tutup Tafsir"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Author info pill & Source Badge */}
+                            <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                              <span className="flex items-center gap-1.5 text-gold/90 font-medium">
+                                <Sparkles className="h-3 w-3 text-gold" />
+                                {isIbnuKatsir 
+                                  ? "Kitab Tafsir Al-Qur'an Al-'Azhim • Al-Hafizh Ibnu Katsir (W. 774 H)"
+                                  : "Tafsir Ringkas Resmi Kementerian Agama RI"}
+                              </span>
+                              {isIbnuKatsir && hasIbnuKatsir && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+                                  Database Lokal
+                                </span>
+                              )}
+                              {!isIbnuKatsir && hasKemenag && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 inline-block" />
+                                  API Kemenag
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Tafsir Body Text */}
+                            <div className="max-h-[500px] overflow-y-auto pr-1 text-xs sm:text-sm text-foreground/85 leading-relaxed font-sans space-y-2.5">
+                              {currentTafsirText ? (
+                                <>
+                                  {currentTafsirText.split('\n\n').map((paragraph, pIdx) => {
+                                    const trimmed = paragraph.trim();
+                                    if (!trimmed) return null;
+                                    return (
+                                      <p key={pIdx} className="leading-relaxed">
+                                        {trimmed}
+                                      </p>
+                                    );
+                                  })}
+                                  {currentTafsirText.length > 500 && (
+                                    <p className="text-[10px] text-muted-foreground/50 pt-2 border-t border-border/30 text-right">
+                                      {currentTafsirText.length.toLocaleString()} karakter
+                                    </p>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="flex flex-col items-center gap-2 py-4 text-center">
+                                  <BookOpen className="h-8 w-8 text-muted-foreground/30" />
+                                  {isIbnuKatsir ? (
+                                    <div className="space-y-1">
+                                      <p className="text-xs font-medium text-muted-foreground">
+                                        Tafsir Ibnu Katsir belum tersedia untuk ayat ini
+                                      </p>
+                                      <button
+                                        type="button"
+                                        onClick={() => setActiveTafsirTabMap(prev => ({ ...prev, [ayah.ayah_number]: 'kemenag' }))}
+                                        className="text-[11px] text-gold underline underline-offset-2 hover:opacity-80"
+                                      >
+                                        Tampilkan Tafsir Kemenag RI →
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <p className="text-xs italic text-muted-foreground">
+                                      Tafsir Kemenag RI untuk ayat ini belum berhasil dimuat.
+                                    </p>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed whitespace-pre-line font-sans">
-                            {ayah.tafsir || "Tafsir untuk ayat ini sedang dipersiapkan."}
-                          </p>
-                        </div>
-                      )}
+                        );
+                      })()}
 
                     </article>
                   );
@@ -930,7 +1105,7 @@ export default function QuranBrowser({
                   Al-Qur'an Al-Karim
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  114 Surat, 30 Juz, dilengkapi teks Arab berharakat, transliterasi Latin, Terjemahan & Tafsir resmi Kemenag RI, serta audio lantunan Murottal 6 Qari dunia.
+                  114 Surat, 30 Juz, dilengkapi teks Arab berharakat, transliterasi Latin, Terjemahan Kemenag RI, Tafsir Ibnu Katsir (database lokal), serta Murottal 6 Qari dunia.
                 </p>
               </div>
 
@@ -1411,3 +1586,4 @@ export default function QuranBrowser({
     </div>
   );
 }
+

@@ -1,0 +1,786 @@
+{
+  "source": "Tafsir Ibnu Katsir (Bahasa Indonesia)",
+  "author": "Al-Hafizh Imaduddin Ismail bin Umar bin Katsir",
+  "totalSurahs": 114,
+  "updatedAt": "2026-09-23T01:17:06.981Z",
+  "surahs": [
+    {
+      "surah": 1,
+      "totalAyahs": 7,
+      "totalWithTafsir": 7,
+      "sizeKb": 83
+    },
+    {
+      "surah": 2,
+      "totalAyahs": 286,
+      "totalWithTafsir": 286,
+      "sizeKb": 2119
+    },
+    {
+      "surah": 3,
+      "totalAyahs": 200,
+      "totalWithTafsir": 200,
+      "sizeKb": 757
+    },
+    {
+      "surah": 4,
+      "totalAyahs": 176,
+      "totalWithTafsir": 176,
+      "sizeKb": 969
+    },
+    {
+      "surah": 5,
+      "totalAyahs": 120,
+      "totalWithTafsir": 120,
+      "sizeKb": 863
+    },
+    {
+      "surah": 6,
+      "totalAyahs": 165,
+      "totalWithTafsir": 165,
+      "sizeKb": 565
+    },
+    {
+      "surah": 7,
+      "totalAyahs": 206,
+      "totalWithTafsir": 206,
+      "sizeKb": 636
+    },
+    {
+      "surah": 8,
+      "totalAyahs": 75,
+      "totalWithTafsir": 75,
+      "sizeKb": 380
+    },
+    {
+      "surah": 9,
+      "totalAyahs": 129,
+      "totalWithTafsir": 129,
+      "sizeKb": 518
+    },
+    {
+      "surah": 10,
+      "totalAyahs": 109,
+      "totalWithTafsir": 109,
+      "sizeKb": 216
+    },
+    {
+      "surah": 11,
+      "totalAyahs": 123,
+      "totalWithTafsir": 123,
+      "sizeKb": 216
+    },
+    {
+      "surah": 12,
+      "totalAyahs": 111,
+      "totalWithTafsir": 111,
+      "sizeKb": 235
+    },
+    {
+      "surah": 13,
+      "totalAyahs": 43,
+      "totalWithTafsir": 43,
+      "sizeKb": 174
+    },
+    {
+      "surah": 14,
+      "totalAyahs": 52,
+      "totalWithTafsir": 52,
+      "sizeKb": 147
+    },
+    {
+      "surah": 15,
+      "totalAyahs": 99,
+      "totalWithTafsir": 99,
+      "sizeKb": 117
+    },
+    {
+      "surah": 16,
+      "totalAyahs": 128,
+      "totalWithTafsir": 128,
+      "sizeKb": 243
+    },
+    {
+      "surah": 17,
+      "totalAyahs": 111,
+      "totalWithTafsir": 111,
+      "sizeKb": 350
+    },
+    {
+      "surah": 18,
+      "totalAyahs": 110,
+      "totalWithTafsir": 110,
+      "sizeKb": 276
+    },
+    {
+      "surah": 19,
+      "totalAyahs": 98,
+      "totalWithTafsir": 98,
+      "sizeKb": 230
+    },
+    {
+      "surah": 20,
+      "totalAyahs": 135,
+      "totalWithTafsir": 135,
+      "sizeKb": 225
+    },
+    {
+      "surah": 21,
+      "name": "سُورَةُ الأَنبِيَاءِ",
+      "totalAyahs": 112,
+      "totalWithTafsir": 112,
+      "sizeKb": 229
+    },
+    {
+      "surah": 22,
+      "name": "سُورَةُ الحَجِّ",
+      "totalAyahs": 78,
+      "totalWithTafsir": 78,
+      "sizeKb": 252
+    },
+    {
+      "surah": 23,
+      "name": "سُورَةُ المُؤۡمِنُونَ",
+      "totalAyahs": 118,
+      "totalWithTafsir": 118,
+      "sizeKb": 210
+    },
+    {
+      "surah": 24,
+      "name": "سُورَةُ النُّورِ",
+      "totalAyahs": 64,
+      "totalWithTafsir": 64,
+      "sizeKb": 353
+    },
+    {
+      "surah": 25,
+      "name": "سُورَةُ الفُرۡقَانِ",
+      "totalAyahs": 77,
+      "totalWithTafsir": 77,
+      "sizeKb": 169
+    },
+    {
+      "surah": 26,
+      "name": "سُورَةُ الشُّعَرَاءِ",
+      "totalAyahs": 227,
+      "totalWithTafsir": 227,
+      "sizeKb": 297
+    },
+    {
+      "surah": 27,
+      "name": "سُورَةُ النَّمۡلِ",
+      "totalAyahs": 93,
+      "totalWithTafsir": 93,
+      "sizeKb": 174
+    },
+    {
+      "surah": 28,
+      "name": "سُورَةُ القَصَصِ",
+      "totalAyahs": 88,
+      "totalWithTafsir": 88,
+      "sizeKb": 174
+    },
+    {
+      "surah": 29,
+      "name": "سُورَةُ العَنكَبُوتِ",
+      "totalAyahs": 69,
+      "totalWithTafsir": 69,
+      "sizeKb": 131
+    },
+    {
+      "surah": 30,
+      "name": "سُورَةُ الرُّومِ",
+      "totalAyahs": 60,
+      "totalWithTafsir": 60,
+      "sizeKb": 128
+    },
+    {
+      "surah": 31,
+      "name": "سُورَةُ لُقۡمَانَ",
+      "totalAyahs": 34,
+      "totalWithTafsir": 34,
+      "sizeKb": 111
+    },
+    {
+      "surah": 32,
+      "name": "سُورَةُ السَّجۡدَةِ",
+      "totalAyahs": 30,
+      "totalWithTafsir": 30,
+      "sizeKb": 63
+    },
+    {
+      "surah": 33,
+      "name": "سُورَةُ الأَحۡزَابِ",
+      "totalAyahs": 73,
+      "totalWithTafsir": 73,
+      "sizeKb": 365
+    },
+    {
+      "surah": 34,
+      "name": "سُورَةُ سَبَإٍ",
+      "totalAyahs": 54,
+      "totalWithTafsir": 54,
+      "sizeKb": 157
+    },
+    {
+      "surah": 35,
+      "name": "سُورَةُ فَاطِرٍ",
+      "totalAyahs": 45,
+      "totalWithTafsir": 45,
+      "sizeKb": 113
+    },
+    {
+      "surah": 36,
+      "name": "سُورَةُ يسٓ",
+      "totalAyahs": 83,
+      "totalWithTafsir": 83,
+      "sizeKb": 140
+    },
+    {
+      "surah": 37,
+      "name": "سُورَةُ الصَّافَّاتِ",
+      "totalAyahs": 182,
+      "totalWithTafsir": 182,
+      "sizeKb": 203
+    },
+    {
+      "surah": 38,
+      "name": "سُورَةُ صٓ",
+      "totalAyahs": 88,
+      "totalWithTafsir": 88,
+      "sizeKb": 137
+    },
+    {
+      "surah": 39,
+      "name": "سُورَةُ الزُّمَرِ",
+      "totalAyahs": 75,
+      "totalWithTafsir": 75,
+      "sizeKb": 167
+    },
+    {
+      "surah": 40,
+      "name": "سُورَةُ غَافِرٍ",
+      "totalAyahs": 85,
+      "totalWithTafsir": 85,
+      "sizeKb": 146
+    },
+    {
+      "surah": 41,
+      "name": "سُورَةُ فُصِّلَتۡ",
+      "totalAyahs": 54,
+      "totalWithTafsir": 54,
+      "sizeKb": 114
+    },
+    {
+      "surah": 42,
+      "name": "سُورَةُ الشُّورَىٰ",
+      "totalAyahs": 53,
+      "totalWithTafsir": 53,
+      "sizeKb": 123
+    },
+    {
+      "surah": 43,
+      "name": "سُورَةُ الزُّخۡرُفِ",
+      "totalAyahs": 89,
+      "totalWithTafsir": 89,
+      "sizeKb": 107
+    },
+    {
+      "surah": 44,
+      "name": "سُورَةُ الدُّخَانِ",
+      "totalAyahs": 59,
+      "totalWithTafsir": 59,
+      "sizeKb": 115
+    },
+    {
+      "surah": 45,
+      "name": "سُورَةُ الجَاثِيَةِ",
+      "totalAyahs": 37,
+      "totalWithTafsir": 37,
+      "sizeKb": 38
+    },
+    {
+      "surah": 46,
+      "name": "سُورَةُ الأَحۡقَافِ",
+      "totalAyahs": 35,
+      "totalWithTafsir": 35,
+      "sizeKb": 125
+    },
+    {
+      "surah": 47,
+      "name": "سُورَةُ مُحَمَّدٍ",
+      "totalAyahs": 38,
+      "totalWithTafsir": 38,
+      "sizeKb": 69
+    },
+    {
+      "surah": 48,
+      "name": "سُورَةُ الفَتۡحِ",
+      "totalAyahs": 29,
+      "totalWithTafsir": 29,
+      "sizeKb": 134
+    },
+    {
+      "surah": 49,
+      "name": "سُورَةُ الحُجُرَاتِ",
+      "totalAyahs": 18,
+      "totalWithTafsir": 18,
+      "sizeKb": 104
+    },
+    {
+      "surah": 50,
+      "name": "سُورَةُ قٓ",
+      "totalAyahs": 45,
+      "totalWithTafsir": 45,
+      "sizeKb": 77
+    },
+    {
+      "surah": 51,
+      "name": "سُورَةُ الذَّارِيَاتِ",
+      "totalAyahs": 60,
+      "totalWithTafsir": 60,
+      "sizeKb": 60
+    },
+    {
+      "surah": 52,
+      "name": "سُورَةُ الطُّورِ",
+      "totalAyahs": 49,
+      "totalWithTafsir": 49,
+      "sizeKb": 60
+    },
+    {
+      "surah": 53,
+      "name": "سُورَةُ النَّجۡمِ",
+      "totalAyahs": 62,
+      "totalWithTafsir": 62,
+      "sizeKb": 174
+    },
+    {
+      "surah": 54,
+      "name": "سُورَةُ القَمَرِ",
+      "totalAyahs": 55,
+      "totalWithTafsir": 55,
+      "sizeKb": 86
+    },
+    {
+      "surah": 55,
+      "name": "سُورَةُ الرَّحۡمَٰن",
+      "totalAyahs": 78,
+      "totalWithTafsir": 78,
+      "sizeKb": 124
+    },
+    {
+      "surah": 56,
+      "name": "سُورَةُ الوَاقِعَةِ",
+      "totalAyahs": 96,
+      "totalWithTafsir": 96,
+      "sizeKb": 228
+    },
+    {
+      "surah": 57,
+      "name": "سُورَةُ الحَدِيدِ",
+      "totalAyahs": 29,
+      "totalWithTafsir": 29,
+      "sizeKb": 119
+    },
+    {
+      "surah": 58,
+      "name": "سُورَةُ المُجَادلَةِ",
+      "totalAyahs": 22,
+      "totalWithTafsir": 22,
+      "sizeKb": 95
+    },
+    {
+      "surah": 59,
+      "name": "سُورَةُ الحَشۡرِ",
+      "totalAyahs": 24,
+      "totalWithTafsir": 24,
+      "sizeKb": 103
+    },
+    {
+      "surah": 60,
+      "name": "سُورَةُ المُمۡتَحنَةِ",
+      "totalAyahs": 13,
+      "totalWithTafsir": 13,
+      "sizeKb": 90
+    },
+    {
+      "surah": 61,
+      "name": "سُورَةُ الصَّفِّ",
+      "totalAyahs": 14,
+      "totalWithTafsir": 14,
+      "sizeKb": 41
+    },
+    {
+      "surah": 62,
+      "name": "سُورَةُ الجُمُعَةِ",
+      "totalAyahs": 11,
+      "totalWithTafsir": 11,
+      "sizeKb": 37
+    },
+    {
+      "surah": 63,
+      "name": "سُورَةُ المُنَافِقُونَ",
+      "totalAyahs": 11,
+      "totalWithTafsir": 11,
+      "sizeKb": 43
+    },
+    {
+      "surah": 64,
+      "name": "سُورَةُ التَّغَابُنِ",
+      "totalAyahs": 18,
+      "totalWithTafsir": 18,
+      "sizeKb": 25
+    },
+    {
+      "surah": 65,
+      "name": "سُورَةُ الطَّلَاقِ",
+      "totalAyahs": 12,
+      "totalWithTafsir": 12,
+      "sizeKb": 66
+    },
+    {
+      "surah": 66,
+      "name": "سُورَةُ التَّحۡرِيمِ",
+      "totalAyahs": 12,
+      "totalWithTafsir": 12,
+      "sizeKb": 67
+    },
+    {
+      "surah": 67,
+      "name": "سُورَةُ المُلۡكِ",
+      "totalAyahs": 30,
+      "totalWithTafsir": 30,
+      "sizeKb": 31
+    },
+    {
+      "surah": 68,
+      "name": "سُورَةُ القَلَمِ",
+      "totalAyahs": 52,
+      "totalWithTafsir": 52,
+      "sizeKb": 133
+    },
+    {
+      "surah": 69,
+      "name": "سُورَةُ الحَاقَّةِ",
+      "totalAyahs": 52,
+      "totalWithTafsir": 52,
+      "sizeKb": 129
+    },
+    {
+      "surah": 70,
+      "name": "سُورَةُ المَعَارِجِ",
+      "totalAyahs": 44,
+      "totalWithTafsir": 44,
+      "sizeKb": 96
+    },
+    {
+      "surah": 71,
+      "name": "سُورَةُ نُوحٍ",
+      "totalAyahs": 28,
+      "totalWithTafsir": 28,
+      "sizeKb": 71
+    },
+    {
+      "surah": 72,
+      "name": "سُورَةُ الجِنِّ",
+      "totalAyahs": 28,
+      "totalWithTafsir": 28,
+      "sizeKb": 87
+    },
+    {
+      "surah": 73,
+      "name": "سُورَةُ المُزَّمِّلِ",
+      "totalAyahs": 20,
+      "totalWithTafsir": 20,
+      "sizeKb": 83
+    },
+    {
+      "surah": 74,
+      "name": "سُورَةُ المُدَّثِّرِ",
+      "totalAyahs": 56,
+      "totalWithTafsir": 56,
+      "sizeKb": 119
+    },
+    {
+      "surah": 75,
+      "name": "سُورَةُ القِيَامَةِ",
+      "totalAyahs": 40,
+      "totalWithTafsir": 40,
+      "sizeKb": 137
+    },
+    {
+      "surah": 76,
+      "name": "سُورَةُ الإِنسَانِ",
+      "totalAyahs": 31,
+      "totalWithTafsir": 31,
+      "sizeKb": 64
+    },
+    {
+      "surah": 77,
+      "name": "سُورَةُ المُرۡسَلَاتِ",
+      "totalAyahs": 50,
+      "totalWithTafsir": 50,
+      "sizeKb": 56
+    },
+    {
+      "surah": 78,
+      "name": "سُورَةُ النَّبَإِ",
+      "totalAyahs": 40,
+      "totalWithTafsir": 40,
+      "sizeKb": 102
+    },
+    {
+      "surah": 79,
+      "name": "سُورَةُ النَّازِعَاتِ",
+      "totalAyahs": 46,
+      "totalWithTafsir": 46,
+      "sizeKb": 98
+    },
+    {
+      "surah": 80,
+      "name": "سُورَةُ عَبَسَ",
+      "totalAyahs": 42,
+      "totalWithTafsir": 42,
+      "sizeKb": 75
+    },
+    {
+      "surah": 81,
+      "name": "سُورَةُ التَّكۡوِيرِ",
+      "totalAyahs": 29,
+      "totalWithTafsir": 29,
+      "sizeKb": 83
+    },
+    {
+      "surah": 82,
+      "name": "سُورَةُ الانفِطَارِ",
+      "totalAyahs": 19,
+      "totalWithTafsir": 19,
+      "sizeKb": 57
+    },
+    {
+      "surah": 83,
+      "name": "سُورَةُ المُطَفِّفِينَ",
+      "totalAyahs": 36,
+      "totalWithTafsir": 36,
+      "sizeKb": 75
+    },
+    {
+      "surah": 84,
+      "name": "سُورَةُ الانشِقَاقِ",
+      "totalAyahs": 25,
+      "totalWithTafsir": 25,
+      "sizeKb": 56
+    },
+    {
+      "surah": 85,
+      "name": "سُورَةُ البُرُوجِ",
+      "totalAyahs": 22,
+      "totalWithTafsir": 22,
+      "sizeKb": 50
+    },
+    {
+      "surah": 86,
+      "name": "سُورَةُ الطَّارِقِ",
+      "totalAyahs": 17,
+      "totalWithTafsir": 17,
+      "sizeKb": 99
+    },
+    {
+      "surah": 87,
+      "name": "سُورَةُ الأَعۡلَىٰ",
+      "totalAyahs": 19,
+      "totalWithTafsir": 19,
+      "sizeKb": 43
+    },
+    {
+      "surah": 88,
+      "name": "سُورَةُ الغَاشِيَةِ",
+      "totalAyahs": 26,
+      "totalWithTafsir": 26,
+      "sizeKb": 20
+    },
+    {
+      "surah": 89,
+      "name": "سُورَةُ الفَجۡرِ",
+      "totalAyahs": 30,
+      "totalWithTafsir": 30,
+      "sizeKb": 134
+    },
+    {
+      "surah": 90,
+      "name": "سُورَةُ البَلَدِ",
+      "totalAyahs": 20,
+      "totalWithTafsir": 20,
+      "sizeKb": 79
+    },
+    {
+      "surah": 91,
+      "name": "سُورَةُ الشَّمۡسِ",
+      "totalAyahs": 15,
+      "totalWithTafsir": 15,
+      "sizeKb": 28
+    },
+    {
+      "surah": 92,
+      "name": "سُورَةُ اللَّيۡلِ",
+      "totalAyahs": 21,
+      "totalWithTafsir": 21,
+      "sizeKb": 301
+    },
+    {
+      "surah": 93,
+      "name": "سُورَةُ الضُّحَىٰ",
+      "totalAyahs": 11,
+      "totalWithTafsir": 11,
+      "sizeKb": 36
+    },
+    {
+      "surah": 94,
+      "name": "سُورَةُ الشَّرۡحِ",
+      "totalAyahs": 8,
+      "totalWithTafsir": 8,
+      "sizeKb": 27
+    },
+    {
+      "surah": 95,
+      "name": "سُورَةُ التِّينِ",
+      "totalAyahs": 8,
+      "totalWithTafsir": 8,
+      "sizeKb": 7
+    },
+    {
+      "surah": 96,
+      "name": "سُورَةُ العَلَقِ",
+      "totalAyahs": 19,
+      "totalWithTafsir": 19,
+      "sizeKb": 11
+    },
+    {
+      "surah": 97,
+      "name": "سُورَةُ القَدۡرِ",
+      "totalAyahs": 5,
+      "totalWithTafsir": 5,
+      "sizeKb": 53
+    },
+    {
+      "surah": 98,
+      "name": "سُورَةُ البَيِّنَةِ",
+      "totalAyahs": 8,
+      "totalWithTafsir": 8,
+      "sizeKb": 10
+    },
+    {
+      "surah": 99,
+      "name": "سُورَةُ الزَّلۡزَلَةِ",
+      "totalAyahs": 8,
+      "totalWithTafsir": 8,
+      "sizeKb": 23
+    },
+    {
+      "surah": 100,
+      "name": "سُورَةُ العَادِيَاتِ",
+      "totalAyahs": 11,
+      "totalWithTafsir": 11,
+      "sizeKb": 18
+    },
+    {
+      "surah": 101,
+      "name": "سُورَةُ القَارِعَةِ",
+      "totalAyahs": 11,
+      "totalWithTafsir": 11,
+      "sizeKb": 12
+    },
+    {
+      "surah": 102,
+      "name": "سُورَةُ التَّكَاثُرِ",
+      "totalAyahs": 8,
+      "totalWithTafsir": 8,
+      "sizeKb": 36
+    },
+    {
+      "surah": 103,
+      "name": "سُورَةُ العَصۡرِ",
+      "totalAyahs": 3,
+      "totalWithTafsir": 3,
+      "sizeKb": 3
+    },
+    {
+      "surah": 104,
+      "name": "سُورَةُ الهُمَزَةِ",
+      "totalAyahs": 9,
+      "totalWithTafsir": 9,
+      "sizeKb": 11
+    },
+    {
+      "surah": 105,
+      "name": "سُورَةُ الفِيلِ",
+      "totalAyahs": 5,
+      "totalWithTafsir": 5,
+      "sizeKb": 31
+    },
+    {
+      "surah": 106,
+      "name": "سُورَةُ قُرَيۡشٍ",
+      "totalAyahs": 4,
+      "totalWithTafsir": 4,
+      "sizeKb": 12
+    },
+    {
+      "surah": 107,
+      "name": "سُورَةُ المَاعُونِ",
+      "totalAyahs": 7,
+      "totalWithTafsir": 7,
+      "sizeKb": 18
+    },
+    {
+      "surah": 108,
+      "name": "سُورَةُ الكَوۡثَرِ",
+      "totalAyahs": 3,
+      "totalWithTafsir": 3,
+      "sizeKb": 26
+    },
+    {
+      "surah": 109,
+      "name": "سُورَةُ الكَافِرُونَ",
+      "totalAyahs": 6,
+      "totalWithTafsir": 6,
+      "sizeKb": 7
+    },
+    {
+      "surah": 110,
+      "name": "سُورَةُ النَّصۡرِ",
+      "totalAyahs": 3,
+      "totalWithTafsir": 3,
+      "sizeKb": 17
+    },
+    {
+      "surah": 111,
+      "name": "سُورَةُ المَسَدِ",
+      "totalAyahs": 5,
+      "totalWithTafsir": 5,
+      "sizeKb": 12
+    },
+    {
+      "surah": 112,
+      "name": "سُورَةُ الإِخۡلَاصِ",
+      "totalAyahs": 4,
+      "totalWithTafsir": 4,
+      "sizeKb": 40
+    },
+    {
+      "surah": 113,
+      "name": "سُورَةُ الفَلَقِ",
+      "totalAyahs": 5,
+      "totalWithTafsir": 5,
+      "sizeKb": 17
+    },
+    {
+      "surah": 114,
+      "name": "سُورَةُ النَّاسِ",
+      "totalAyahs": 6,
+      "totalWithTafsir": 6,
+      "sizeKb": 10
+    }
+  ]
+}

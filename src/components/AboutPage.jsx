@@ -14,7 +14,7 @@ export default function AboutPage() {
     },
     {
       label: "Tafsir",
-      body: "Tafsir Kemenag RI dari sumber yang telah dikonfigurasi dan diverifikasi."
+      body: "Database Tafsir Ibnu Katsir (Al-Qur'an Al-'Azhim) lengkap 30 Juz & Tafsir Kemenag RI yang telah diverifikasi."
     },
     {
       label: "Penjelasan AI",
@@ -65,7 +65,7 @@ export default function AboutPage() {
           </span>
         </div>
         <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-          Model AI hanya diperbolehkan merujuk ayat dari database kandidat hasil penelusuran referensi resmi Kemenag RI, guna menjamin keaslian ayat suci dan mencegah segala bentuk kekeliruan kutipan.
+          Model AI hanya diperbolehkan merujuk ayat dari database kandidat hasil penelusuran referensi terverifikasi, guna menjamin keaslian ayat suci dan mencegah segala bentuk kekeliruan kutipan.
         </p>
       </div>
 
@@ -78,7 +78,7 @@ export default function AboutPage() {
           </span>
         </div>
         <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
-          Teks Arab Utsmani, Terjemahan & Tafsir Kementerian Agama RI melalui EQuran.id.
+          Teks Arab Utsmani, Terjemahan & Tafsir Ringkas Kemenag RI melalui EQuran.id, serta Database Lengkap Kitab Tafsir Ibnu Katsir (114 Surah, 30 Juz) dalam Bahasa Indonesia.
         </p>
       </div>
 
