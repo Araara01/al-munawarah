@@ -14,6 +14,7 @@ import AmbientPlayer from './components/AmbientPlayer';
 import DailyWisdomBanner from './components/DailyWisdomBanner';
 import { ToastProvider, useToast } from './components/Toast';
 import { askGuidanceAI } from './services/aiService';
+import { saveLastRead, getLastRead } from './services/quranService';
 import { 
   House, 
   MessageSquareQuote, 
@@ -80,6 +81,9 @@ function AppContent() {
       return [];
     }
   });
+
+  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Ayat Tersimpan)
+  const [lastRead, setLastRead] = useState(() => getLastRead());
 
   // Chat Conversations
   const [conversations, setConversations] = useState(() => {
@@ -217,21 +221,99 @@ function AppContent() {
     }
   };
 
-  // Toggle Save Ayah
+  // Helper to extract normalized surah and ayah keys
+  const getAyahKeys = (ay) => {
+    if (!ay) return { surah: '', ayah: '' };
+    return {
+      surah: String(ay.surah_number || ay.surahNumber || ''),
+      ayah: String(ay.ayah_number || ay.ayahNumber || '')
+    };
+  };
+
+  // Update Last Read / Reading Checkpoint (Synchronizes Jelajah Al-Qur'an & Ayat Tersimpan)
+  const handleUpdateLastRead = (readData, autoSaveToAyahs = false) => {
+    if (!readData) return;
+    const sNum = parseInt(readData.surahNumber, 10);
+    const aNum = parseInt(readData.ayahNumber, 10) || 1;
+    const saved = saveLastRead(
+      sNum,
+      readData.surahName,
+      aNum,
+      readData.surahArabic
+    );
+    if (saved) {
+      setLastRead(saved);
+      if (autoSaveToAyahs && readData.ayahDetails) {
+        const target = {
+          surah: String(sNum),
+          ayah: String(aNum)
+        };
+        const exists = savedAyahs.some(a => {
+          const k = getAyahKeys(a);
+          return k.surah === target.surah && k.ayah === target.ayah;
+        });
+        if (!exists) {
+          const standardizedAyah = {
+            ...readData.ayahDetails,
+            surah_number: sNum,
+            ayah_number: aNum,
+            surah_name: readData.surahName || `Surat ${sNum}`,
+            arabic_text: readData.ayahDetails.arabic_text || readData.surahArabic,
+            isLastRead: true,
+            savedAt: Date.now()
+          };
+          setSavedAyahs(prev => [standardizedAyah, ...prev]);
+        }
+      }
+    }
+  };
+
+  // Toggle Save / Bookmark Ayah
   const handleToggleSaveAyah = (ayah) => {
     if (!ayah) return;
-    const exists = savedAyahs.some(a => a.surah_number === ayah.surah_number && a.ayah_number === ayah.ayah_number);
+    const target = getAyahKeys(ayah);
+    if (!target.surah || !target.ayah) return;
+
+    const exists = savedAyahs.some(a => {
+      const k = getAyahKeys(a);
+      return k.surah === target.surah && k.ayah === target.ayah;
+    });
+
     if (exists) {
-      setSavedAyahs(prev => prev.filter(a => !(a.surah_number === ayah.surah_number && a.ayah_number === ayah.ayah_number)));
-      showToast("Ayat dihapus dari tersimpan", "info");
+      setSavedAyahs(prev => prev.filter(a => {
+        const k = getAyahKeys(a);
+        return !(k.surah === target.surah && k.ayah === target.ayah);
+      }));
+      showToast("Ayat dihapus dari Ayat Tersimpan", "info");
     } else {
-      setSavedAyahs(prev => [ayah, ...prev]);
-      showToast(`QS. ${ayah.surah_name}: ${ayah.ayah_number} disimpan`, "success");
+      const sNum = parseInt(target.surah, 10);
+      const aNum = parseInt(target.ayah, 10);
+      const sName = ayah.surah_name || ayah.surahName || `Surat ${target.surah}`;
+      const standardizedAyah = {
+        ...ayah,
+        surah_number: sNum,
+        ayah_number: aNum,
+        surah_name: sName,
+        savedAt: Date.now()
+      };
+      setSavedAyahs(prev => [standardizedAyah, ...prev]);
+
+      // If user has no active reading position yet, automatically set this marked ayah as reading position
+      if (!lastRead) {
+        const autoRead = saveLastRead(sNum, sName, aNum, ayah.arabic_text || '');
+        if (autoRead) setLastRead(autoRead);
+      }
+
+      showToast(`QS. ${standardizedAyah.surah_name}: ${target.ayah} ditandai & tersimpan`, "success");
     }
   };
 
   const handleRemoveAyah = (ayah) => {
-    setSavedAyahs(prev => prev.filter(a => !(a.surah_number === ayah.surah_number && a.ayah_number === ayah.ayah_number)));
+    const target = getAyahKeys(ayah);
+    setSavedAyahs(prev => prev.filter(a => {
+      const k = getAyahKeys(a);
+      return !(k.surah === target.surah && k.ayah === target.ayah);
+    }));
   };
 
   // Send message
@@ -418,7 +500,10 @@ function AppContent() {
               onClearTarget={() => setQuranTarget({ surahNumber: null, ayahNumber: null })}
               savedAyahs={savedAyahs}
               onToggleSaveAyah={handleToggleSaveAyah}
+              lastRead={lastRead}
+              onUpdateLastRead={handleUpdateLastRead}
               onExportQuote={(q) => setExportQuoteData(q)}
+              onGoToSaved={() => navigateTo('saved')}
               defaultShowLatin={showLatin}
               currentMode={currentMode}
             />
@@ -427,9 +512,24 @@ function AppContent() {
           {currentTab === 'saved' && (
             <SavedAyat
               savedAyahs={savedAyahs}
+              lastRead={lastRead}
+              onSetLastRead={(ayah) => {
+                const sNum = parseInt(ayah.surah_number || ayah.surahNumber, 10);
+                const aNum = parseInt(ayah.ayah_number || ayah.ayahNumber, 10) || 1;
+                const sName = ayah.surah_name || ayah.surahName || `Surat ${sNum}`;
+                const sArabic = ayah.arabic_text || '';
+                handleUpdateLastRead({
+                  surahNumber: sNum,
+                  surahName: sName,
+                  ayahNumber: aNum,
+                  surahArabic: sArabic
+                });
+                showToast(`QS. ${sName} : ${aNum} dijadikan posisi tilawah aktif`, "success");
+              }}
               onRemoveAyah={handleRemoveAyah}
               onOpenSurah={handleOpenSurah}
               onExportQuote={(q) => setExportQuoteData(q)}
+              onGoToQuran={() => navigateTo('quran')}
             />
           )}
 
@@ -460,6 +560,7 @@ function AppContent() {
             <AdminStats
               conversationsCount={conversations.length}
               savedCount={savedAyahs.length}
+              lastRead={lastRead}
               apiKey={apiKey}
             />
           )}

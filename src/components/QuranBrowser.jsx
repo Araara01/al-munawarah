@@ -1,11 +1,14 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SURAH_LIST, JUZ_LIST, THEMES, POPULAR_AYAHS, QARI_LIST } from '../data/quranData';
 import { 
   getSurahDetail, 
   saveLastRead, 
   getLastRead, 
   getAyahAudioUrl, 
-  getSurahFullAudioUrl 
+  getSurahFullAudioUrl,
+  calculateQuranProgress,
+  getSurahStatsMap,
+  getJuzForAyah
 } from '../services/quranService';
 import { 
   Search, 
@@ -30,7 +33,10 @@ import {
   Clock,
   Info,
   ArrowUp,
-  Share2
+  Share2,
+  TrendingUp,
+  CheckCircle2,
+  Trash2
 } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -40,7 +46,10 @@ export default function QuranBrowser({
   onClearTarget,
   savedAyahs = [],
   onToggleSaveAyah,
+  lastRead: externalLastRead = null,
+  onUpdateLastRead = null,
   onExportQuote,
+  onGoToSaved = null,
   defaultShowLatin = true,
   currentMode = 'muslim'
 }) {
@@ -77,9 +86,15 @@ export default function QuranBrowser({
   const [activeTafsirTabMap, setActiveTafsirTabMap] = useState({});
   const [copiedAyah, setCopiedAyah] = useState(null);
   const [copiedTafsirAyah, setCopiedTafsirAyah] = useState(null);
+  const [filterSavedOnlyInReader, setFilterSavedOnlyInReader] = useState(false);
 
-  // Last Read State
-  const [lastRead, setLastRead] = useState(() => getLastRead());
+  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Ayat Tersimpan)
+  const [internalLastRead, setInternalLastRead] = useState(() => getLastRead());
+  const lastRead = externalLastRead !== undefined && externalLastRead !== null ? externalLastRead : internalLastRead;
+
+  // Calculate live Quran reading progress & surah stats map based on marked ayahs
+  const quranProgress = calculateQuranProgress(lastRead, savedAyahs);
+  const surahStatsMap = getSurahStatsMap(savedAyahs, lastRead);
 
   // Audio Engine State
   // { isPlaying, type: 'ayah'|'surah', surahNumber, ayahNumber, qariId }
@@ -140,6 +155,26 @@ export default function QuranBrowser({
       j.end.surahName.toLowerCase().includes(q);
   });
 
+  // Filter Saved Ayahs (Ayat Tersimpan)
+  const filteredSavedAyahs = savedAyahs.filter(ay => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    const surahName = (ay.surah_name || ay.surahName || '').toLowerCase();
+    const translation = (ay.translation_id || '').toLowerCase();
+    const arabic = (ay.arabic_text || '').toLowerCase();
+    const latin = (ay.latin_text || '').toLowerCase();
+    const ayahNum = String(ay.ayah_number || ay.ayahNumber || '');
+    const surahNum = String(ay.surah_number || ay.surahNumber || '');
+    return (
+      surahName.includes(q) ||
+      translation.includes(q) ||
+      arabic.includes(q) ||
+      latin.includes(q) ||
+      ayahNum === q ||
+      surahNum === q
+    );
+  });
+
   // Open Surah in Reader View
   const openSurah = async (surahNumber, ayahToScroll = null) => {
     const sNum = parseInt(surahNumber, 10);
@@ -150,6 +185,7 @@ export default function QuranBrowser({
     setViewMode('reader');
     setIsLoadingSurah(true);
     setSurahError(null);
+    setFilterSavedOnlyInReader(false);
     setTargetAyahToScroll(ayahToScroll);
     setOpenTafsirMap({});
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -158,9 +194,21 @@ export default function QuranBrowser({
       const data = await getSurahDetail(sNum);
       setSurahDetail(data);
 
-      // Automatically record last read for this surah
-      const readData = saveLastRead(sNum, data.name, ayahToScroll || 1, data.arabic);
-      if (readData) setLastRead(readData);
+      // Only initialize reading position if none exists yet — never overwrite user's marked progress!
+      if (!lastRead) {
+        const initialData = {
+          surahNumber: sNum,
+          surahName: data.name,
+          ayahNumber: ayahToScroll || 1,
+          surahArabic: data.arabic
+        };
+        if (onUpdateLastRead) {
+          onUpdateLastRead(initialData, false);
+        } else {
+          const readData = saveLastRead(sNum, data.name, ayahToScroll || 1, data.arabic);
+          if (readData) setInternalLastRead(readData);
+        }
+      }
 
     } catch (err) {
       console.error(err);
@@ -171,41 +219,70 @@ export default function QuranBrowser({
     }
   };
 
+  // Helper to reliably scroll and highlight an ayah with retry
+  const scrollToAyahWithHighlight = (ayahNum) => {
+    if (!ayahNum) return;
+    let attempts = 0;
+    const maxAttempts = 15;
+    const timer = setInterval(() => {
+      attempts++;
+      const el = document.getElementById(`ayah-${ayahNum}`);
+      if (el) {
+        clearInterval(timer);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-gold', 'bg-gold/15');
+        setTimeout(() => {
+          el.classList.remove('ring-2', 'ring-gold', 'bg-gold/15');
+        }, 3500);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(timer);
+      }
+    }, 120);
+  };
+
   // Scroll to target ayah once loaded
   useEffect(() => {
     if (!isLoadingSurah && surahDetail && targetAyahToScroll) {
-      const timer = setTimeout(() => {
-        const el = document.getElementById(`ayah-${targetAyahToScroll}`);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          el.classList.add('ring-2', 'ring-gold', 'bg-gold/10');
-          setTimeout(() => {
-            el.classList.remove('ring-2', 'ring-gold', 'bg-gold/10');
-          }, 3000);
-        }
-      }, 350);
-      return () => clearTimeout(timer);
+      scrollToAyahWithHighlight(targetAyahToScroll);
     }
   }, [isLoadingSurah, surahDetail, targetAyahToScroll]);
 
   // Jump to Ayah inside Reader View
   const handleJumpToAyah = (ayahNum) => {
-    const el = document.getElementById(`ayah-${ayahNum}`);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.classList.add('ring-2', 'ring-gold', 'bg-gold/10');
-      setTimeout(() => {
-        el.classList.remove('ring-2', 'ring-gold', 'bg-gold/10');
-      }, 3000);
-    }
+    scrollToAyahWithHighlight(ayahNum);
   };
 
-  // Mark Specific Ayah as Last Read
-  const handleMarkLastRead = (ayahNumber) => {
-    if (!surahDetail) return;
-    const updated = saveLastRead(surahDetail.number, surahDetail.name, ayahNumber, surahDetail.arabic);
-    setLastRead(updated);
-    showToast(`Ditandai: QS. ${surahDetail.name} ayat ${ayahNumber}`, "success");
+  // Mark Specific Ayah as Last Read / Reading Checkpoint (Synchronizes with Ayat Tersimpan)
+  const handleMarkLastRead = (ayah) => {
+    if (!ayah && !surahDetail) return;
+    const sNum = parseInt(ayah?.surah_number || ayah?.surahNumber || surahDetail?.number, 10);
+    const aNum = parseInt(ayah?.ayah_number || ayah?.ayahNumber || (typeof ayah === 'number' ? ayah : 1), 10);
+    const sName = ayah?.surah_name || ayah?.surahName || surahDetail?.name || `Surat ${sNum}`;
+    const sArabic = ayah?.arabic_text || surahDetail?.arabic || '';
+    const ayahObj = typeof ayah === 'object' ? ayah : surahDetail?.ayahs?.find(a => a.ayah_number === aNum);
+
+    const readData = {
+      surahNumber: sNum,
+      surahName: sName,
+      ayahNumber: aNum,
+      surahArabic: sArabic,
+      ayahDetails: ayahObj || {
+        surah_number: sNum,
+        ayah_number: aNum,
+        surah_name: sName,
+        arabic_text: sArabic,
+        latin_text: ayahObj?.latin_text,
+        translation_id: ayahObj?.translation_id
+      }
+    };
+
+    if (onUpdateLastRead) {
+      onUpdateLastRead(readData, true);
+    } else {
+      const updated = saveLastRead(sNum, sName, aNum, sArabic);
+      if (updated) setInternalLastRead(updated);
+    }
+    showToast(`QS. ${sName} ayat ${aNum} ditandai sebagai posisi tilawah aktif`, "success");
   };
 
   // Audio Playback Engine
@@ -225,8 +302,8 @@ export default function QuranBrowser({
 
   const playAyahAudio = (ayah, surahData = surahDetail) => {
     if (!ayah) return;
-    const sNum = surahData?.number || ayah.surah_number;
-    const aNum = ayah.ayah_number;
+    const sNum = parseInt(surahData?.number || ayah.surah_number || ayah.surahNumber, 10);
+    const aNum = parseInt(ayah.ayah_number || ayah.ayahNumber, 10);
 
     // Toggle pause if currently playing this exact ayah
     if (audioState.isPlaying && audioState.type === 'ayah' && audioState.surahNumber === sNum && audioState.ayahNumber === aNum) {
@@ -346,10 +423,12 @@ export default function QuranBrowser({
 
   // Copy Ayah Text
   const handleCopyAyah = (ayah) => {
-    const textToCopy = `${ayah.arabic_text}\n\n${ayah.latin_text}\n\n"${ayah.translation_id}"\n(QS. ${surahDetail?.name || ayah.surah_name}: ${ayah.ayah_number})`;
+    const sName = surahDetail?.name || ayah.surah_name || ayah.surahName || `Surat ${ayah.surah_number || ayah.surahNumber}`;
+    const aNum = ayah.ayah_number || ayah.ayahNumber;
+    const textToCopy = `${ayah.arabic_text}\n\n${ayah.latin_text ? ayah.latin_text + '\n\n' : ''}"${ayah.translation_id || ''}"\n(QS. ${sName}: ${aNum})`;
     navigator.clipboard.writeText(textToCopy);
-    setCopiedAyah(ayah.ayah_number);
-    showToast(`Ayat ${ayah.ayah_number} berhasil disalin`, "success");
+    setCopiedAyah(aNum);
+    showToast(`Ayat ${aNum} berhasil disalin`, "success");
     setTimeout(() => setCopiedAyah(null), 2500);
   };
 
@@ -365,9 +444,12 @@ export default function QuranBrowser({
 
   // Bookmark check
   const isAyahBookmarked = (surahNum, ayahNum) => {
-    return savedAyahs.some(a => 
-      (a.surah_number === surahNum || a.surahNumber === surahNum) && 
-      (String(a.ayah_number) === String(ayahNum) || String(a.ayahNumber) === String(ayahNum))
+    const s = String(surahNum || '');
+    const a = String(ayahNum || '');
+    if (!s || !a) return false;
+    return savedAyahs.some(item => 
+      String(item.surah_number || item.surahNumber || '') === s && 
+      String(item.ayah_number || item.ayahNumber || '') === a
     );
   };
 
@@ -412,17 +494,43 @@ export default function QuranBrowser({
 
             {/* Jump to Ayah & Settings Toolbar */}
             <div className="flex items-center gap-1.5 shrink-0">
+              {/* Saved Ayahs in Surah Filter Button */}
+              {(() => {
+                const savedInThisSurah = surahDetail ? savedAyahs.filter(a =>
+                  parseInt(a.surah_number || a.surahNumber, 10) === surahDetail.number
+                ) : [];
+                if (savedInThisSurah.length === 0) return null;
+                return (
+                  <button
+                    onClick={() => setFilterSavedOnlyInReader(prev => !prev)}
+                    className={`flex h-8 items-center gap-1 rounded-xl border px-2.5 text-[11px] font-semibold transition-all active:scale-95 ${
+                      filterSavedOnlyInReader
+                        ? 'border-gold bg-gold text-white shadow-xs'
+                        : 'border-gold/40 bg-gold/10 text-gold hover:bg-gold/20'
+                    }`}
+                    title={filterSavedOnlyInReader ? "Tampilkan Semua Ayat" : "Saring Hanya Ayat Tersimpan di Surat Ini"}
+                  >
+                    <BookmarkCheck className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{savedInThisSurah.length} Tersimpan</span>
+                    <span className="sm:hidden">{savedInThisSurah.length}</span>
+                  </button>
+                );
+              })()}
+
               {surahDetail && surahDetail.ayahs && (
                 <div className="relative">
                   <select
-                    onChange={(e) => handleJumpToAyah(e.target.value)}
+                    onChange={(e) => {
+                      setFilterSavedOnlyInReader(false);
+                      handleJumpToAyah(e.target.value);
+                    }}
                     defaultValue=""
                     className="h-8 rounded-xl border border-border/80 bg-secondary/70 px-2 text-[11px] font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-gold"
                   >
                     <option value="" disabled>Lompat Ayat</option>
                     {surahDetail.ayahs.map(a => (
                       <option key={a.ayah_number} value={a.ayah_number}>
-                        Ayat {a.ayah_number}
+                        Ayat {a.ayah_number} {isAyahBookmarked(surahDetail.number, a.ayah_number) ? '★' : ''}
                       </option>
                     ))}
                   </select>
@@ -675,6 +783,90 @@ export default function QuranBrowser({
                       {surahDetail.description}
                     </div>
                   )}
+
+                  {/* Surah Reading Progress bar & checkpoint */}
+                  {(() => {
+                    const markedInSurah = (lastRead && lastRead.surahNumber === surahDetail.number) 
+                      ? lastRead.ayahNumber 
+                      : null;
+                    const savedInSurah = savedAyahs.filter(a => parseInt(a.surah_number || a.surahNumber, 10) === surahDetail.number);
+                    const percent = markedInSurah 
+                      ? Math.min(100, Math.round((markedInSurah / surahDetail.numberOfAyahs) * 100))
+                      : (savedInSurah.length > 0 ? Math.min(100, Math.round((savedInSurah.length / surahDetail.numberOfAyahs) * 100)) : 0);
+
+                    return (
+                      <div className="mt-4 pt-3.5 border-t border-border/40 max-w-md mx-auto space-y-2">
+                        <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
+                          <span className="flex items-center gap-1.5">
+                            <Pin className="h-3.5 w-3.5 text-gold" />
+                            {markedInSurah ? (
+                              <span className="text-foreground">Posisi Ditandai: <strong className="text-gold font-semibold">Ayat {markedInSurah}</strong></span>
+                            ) : savedInSurah.length > 0 ? (
+                              <span>{savedInSurah.length} ayat ditandai di surat ini</span>
+                            ) : (
+                              <span>Belum ada ayat ditandai di surat ini</span>
+                            )}
+                          </span>
+                          <span className="text-gold font-bold">
+                            {percent}% Selesai
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary/80">
+                          <div 
+                            className="h-full rounded-full bg-gradient-to-r from-gold to-emerald-500 transition-all duration-300"
+                            style={{ width: `${Math.max(percent, markedInSurah ? 2 : 0)}%` }}
+                          />
+                        </div>
+                        {markedInSurah && (
+                          <div className="flex items-center justify-center pt-0.5">
+                            <button
+                              onClick={() => handleJumpToAyah(markedInSurah)}
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-gold hover:underline transition-all"
+                            >
+                              <span>Lompat ke Posisi Tilawah (Ayat {markedInSurah})</span>
+                              <ChevronRight className="h-3 w-3" />
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Interactive Jump to Saved Ayahs in this Surah */}
+                        {savedInSurah.length > 0 && (
+                          <div className="pt-2 border-t border-border/30 flex flex-wrap items-center justify-center gap-1.5">
+                            <span className="text-[11px] font-semibold text-gold flex items-center gap-1 mr-1">
+                              <BookmarkCheck className="h-3 w-3" />
+                              Tersimpan ({savedInSurah.length}):
+                            </span>
+                            {savedInSurah.map((sa) => {
+                              const aNum = parseInt(sa.ayah_number || sa.ayahNumber, 10);
+                              return (
+                                <button
+                                  key={aNum}
+                                  onClick={() => {
+                                    setFilterSavedOnlyInReader(false);
+                                    handleJumpToAyah(aNum);
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg border border-gold/40 bg-gold/10 text-[11px] font-bold text-gold hover:bg-gold hover:text-white transition-all active:scale-95"
+                                  title={`Lompat ke Ayat ${aNum}`}
+                                >
+                                  Ayat {aNum}
+                                </button>
+                              );
+                            })}
+                            <button
+                              onClick={() => setFilterSavedOnlyInReader(prev => !prev)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-semibold transition-all ${
+                                filterSavedOnlyInReader
+                                  ? 'bg-gold text-white shadow-xs'
+                                  : 'border border-border/80 bg-secondary/60 text-muted-foreground hover:text-foreground'
+                              }`}
+                            >
+                              {filterSavedOnlyInReader ? 'Tampilkan Semua Ayat' : 'Filter Tersimpan'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -710,9 +902,43 @@ export default function QuranBrowser({
                 </div>
               )}
 
+              {/* Filter Active Alert Banner if filtering saved ayahs */}
+              {filterSavedOnlyInReader && (
+                <div className="flex items-center justify-between gap-3 rounded-2xl border border-gold/50 bg-gold/10 p-3.5 text-xs text-gold shadow-xs animate-fade-up">
+                  <div className="flex items-center gap-2">
+                    <BookmarkCheck className="h-4 w-4 shrink-0 text-gold" />
+                    <span>
+                      Menampilkan <strong className="font-bold text-foreground">{surahDetail.ayahs.filter(a => isAyahBookmarked(surahDetail.number, a.ayah_number)).length}</strong> ayat tersimpan di Surat {surahDetail.name}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setFilterSavedOnlyInReader(false)}
+                    className="px-3 py-1 rounded-xl bg-gold text-white text-[11px] font-bold hover:bg-gold/90 transition-all shrink-0 shadow-xs"
+                  >
+                    Tampilkan Semua Ayat
+                  </button>
+                </div>
+              )}
+
               {/* Ayahs Stream */}
               <div className="space-y-4">
-                {surahDetail.ayahs.map((ayah) => {
+                {filterSavedOnlyInReader && surahDetail.ayahs.filter(a => isAyahBookmarked(surahDetail.number, a.ayah_number)).length === 0 && (
+                  <div className="noor-card rounded-3xl p-10 text-center space-y-3">
+                    <Bookmark className="h-10 w-10 text-gold/50 mx-auto" />
+                    <p className="text-sm font-semibold text-foreground">Belum ada ayat yang ditandai di surat ini</p>
+                    <p className="text-xs text-muted-foreground">Tekan ikon bookmark pada ayat untuk menyimpannya.</p>
+                    <button
+                      onClick={() => setFilterSavedOnlyInReader(false)}
+                      className="px-4 py-2 rounded-xl bg-gold text-white text-xs font-semibold hover:bg-gold/90 transition-all"
+                    >
+                      Tampilkan Semua Ayat
+                    </button>
+                  </div>
+                )}
+                {(filterSavedOnlyInReader
+                  ? surahDetail.ayahs.filter(a => isAyahBookmarked(surahDetail.number, a.ayah_number))
+                  : surahDetail.ayahs
+                ).map((ayah) => {
                   const isCurrentPlayingAyah = audioState.isPlaying && 
                     audioState.type === 'ayah' && 
                     audioState.surahNumber === surahDetail.number && 
@@ -747,9 +973,15 @@ export default function QuranBrowser({
                             QS. {surahDetail.name} : {ayah.ayah_number}
                           </span>
                           {isThisLastRead && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-semibold text-gold">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gold/20 border border-gold/40 px-2.5 py-0.5 text-[10px] font-bold text-gold animate-pulse">
                               <Pin className="h-3 w-3 fill-current" />
-                              Terakhir Dibaca
+                              Posisi Tilawah Aktif
+                            </span>
+                          )}
+                          {isSaved && !isThisLastRead && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-semibold text-gold">
+                              <BookmarkCheck className="h-3 w-3" />
+                              Tersimpan
                             </span>
                           )}
                         </div>
@@ -780,15 +1012,15 @@ export default function QuranBrowser({
                             )}
                           </button>
 
-                          {/* Mark as Last Read */}
+                          {/* Mark as Last Read / Reading Checkpoint */}
                           <button
-                            onClick={() => handleMarkLastRead(ayah.ayah_number)}
+                            onClick={() => handleMarkLastRead(ayah)}
                             className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${
                               isThisLastRead
-                                ? 'text-gold bg-gold/10'
+                                ? 'text-gold bg-gold/20 ring-1 ring-gold/40'
                                 : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                             }`}
-                            title="Tandai sebagai Terakhir Dibaca"
+                            title="Tandai sebagai Posisi Tilawah Terakhir"
                           >
                             <Pin className={`h-3.5 w-3.5 ${isThisLastRead ? 'fill-current' : ''}`} />
                           </button>
@@ -1109,47 +1341,85 @@ export default function QuranBrowser({
                 </p>
               </div>
 
-              {/* Interactive Last Read Card */}
-              {lastRead ? (
+              {/* Interactive Reading Progress & Last Read Card */}
+              {quranProgress.hasProgress ? (
                 <div 
-                  onClick={() => openSurah(lastRead.surahNumber, lastRead.ayahNumber)}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-gold/50 bg-gold/10 p-4 transition-all hover:bg-gold/15 hover:shadow-md md:w-80 shrink-0"
+                  onClick={() => openSurah(quranProgress.currentSurah.number, quranProgress.currentAyah)}
+                  className="group relative cursor-pointer overflow-hidden rounded-3xl border border-gold/50 bg-gold/[0.08] p-5 transition-all hover:bg-gold/15 hover:shadow-lg md:w-96 shrink-0"
                 >
                   <div className="flex items-center justify-between text-xs text-gold font-semibold mb-2">
                     <span className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5" />
-                      Terakhir Dibaca
+                      <Pin className="h-3.5 w-3.5 fill-current" />
+                      Progres Tilawah (Ditandai)
                     </span>
-                    <span className="arabic text-sm font-normal">{lastRead.surahArabic}</span>
+                    <span className="arabic text-sm font-normal">{quranProgress.surahArabic}</span>
                   </div>
-                  <h3 className="font-display text-lg font-bold text-foreground group-hover:text-gold transition-colors">
-                    {lastRead.surahName}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Ayat ke-{lastRead.ayahNumber}
-                  </p>
-                  <div className="mt-3 flex items-center gap-1 text-xs font-semibold text-gold group-hover:translate-x-1 transition-transform">
-                    <span>Lanjutkan Membaca</span>
-                    <ChevronRight className="h-3.5 w-3.5" />
+
+                  <div className="space-y-1">
+                    <h3 className="font-display text-lg font-bold text-foreground group-hover:text-gold transition-colors">
+                      QS. {quranProgress.surahName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-foreground">Ayat ke-{quranProgress.currentAyah}</span>
+                      <span>•</span>
+                      <span>Juz {quranProgress.juzNumber}</span>
+                      <span>•</span>
+                      <span className="text-gold font-bold">{quranProgress.percentage}% Khatam</span>
+                    </p>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div className="mt-3 space-y-1">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/80">
+                      <div 
+                        className="h-full rounded-full bg-gradient-to-r from-gold via-gold-bright to-emerald-500 transition-all duration-500"
+                        style={{ width: `${Math.max(1, quranProgress.percentage)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-0.5">
+                      <span>{quranProgress.cumulativeAyahs.toLocaleString('id-ID')} / {quranProgress.totalAyahs.toLocaleString('id-ID')} Ayat</span>
+                      {savedAyahs.length > 0 && (
+                        <span className="text-gold font-semibold">{savedAyahs.length} ditandai</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-3.5 flex items-center justify-between pt-2 border-t border-border/40 text-xs font-semibold text-gold">
+                    <div className="flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      <span>Lanjutkan Membaca</span>
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
+                    {savedAyahs.length > 0 && (
+                      <span 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActiveTab('bookmark');
+                        }}
+                        className="text-[11px] underline underline-offset-2 text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1"
+                      >
+                        <BookmarkCheck className="h-3 w-3 text-gold" />
+                        <span>Ayat Tersimpan ({savedAyahs.length})</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               ) : (
                 <div 
                   onClick={() => openSurah(1, 1)}
-                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-border/80 bg-secondary/40 p-4 transition-all hover:border-gold/50 md:w-80 shrink-0"
+                  className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border/80 bg-secondary/40 p-5 transition-all hover:border-gold/50 md:w-96 shrink-0"
                 >
                   <div className="flex items-center gap-2 text-xs text-gold font-semibold mb-1">
                     <Sparkles className="h-3.5 w-3.5" />
-                    <span>Mulai Tilawah</span>
+                    <span>Mulai Tilawah & Tandai Ayat</span>
                   </div>
                   <h3 className="font-display text-base font-bold text-foreground">
                     Al-Fatihah (Pembukaan)
                   </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Mulai membaca dari surat pertama.
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Tandai ayat yang kamu baca untuk memantau progres tilawah Al-Qur'an secara real-time.
                   </p>
-                  <div className="mt-2 text-xs font-semibold text-gold flex items-center gap-1">
-                    <span>Buka Mushaf →</span>
+                  <div className="mt-3 text-xs font-semibold text-gold flex items-center gap-1">
+                    <span>Mulai Membaca →</span>
                   </div>
                 </div>
               )}
@@ -1194,10 +1464,12 @@ export default function QuranBrowser({
                     : 'text-muted-foreground hover:text-foreground hover:bg-secondary/60'
                 }`}
               >
-                <Bookmark className="h-3.5 w-3.5" />
-                <span>Bookmark</span>
+                <BookmarkCheck className="h-3.5 w-3.5" />
+                <span>Ayat Tersimpan</span>
                 {savedAyahs.length > 0 && (
-                  <span className="rounded-full bg-gold/30 text-gold px-1.5 py-0.2 text-[10px] font-bold">
+                  <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
+                    activeTab === 'bookmark' ? 'bg-gold text-white' : 'bg-gold/25 text-gold'
+                  }`}>
                     {savedAyahs.length}
                   </span>
                 )}
@@ -1229,7 +1501,7 @@ export default function QuranBrowser({
                     : activeTab === 'juz'
                     ? "Cari nomor juz (1 - 30) atau nama surat awal..."
                     : activeTab === 'bookmark'
-                    ? "Cari ayat yang kamu simpan..."
+                    ? "Cari ayat tersimpan (nama surat, terjemahan, nomor)..."
                     : "Cari topik / tema penyejuk kalbu..."
                 }
                 className="flex w-full border border-border/80 pl-10 pr-10 py-3 shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded-2xl bg-secondary/50 text-xs sm:text-sm text-foreground"
@@ -1257,56 +1529,116 @@ export default function QuranBrowser({
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredSurahs.map((surah) => {
                     const isAudioPlayingThis = audioState.isPlaying && audioState.type === 'surah' && audioState.surahNumber === surah.number;
+                    const stats = surahStatsMap[surah.number] || { markedCount: 0, isCurrent: false, isPassed: false, currentAyah: null, progressPercent: 0 };
+                    const firstSavedInSurah = savedAyahs.find(a => parseInt(a.surah_number || a.surahNumber, 10) === surah.number);
+                    const targetAyahToOpen = stats.isCurrent 
+                      ? stats.currentAyah 
+                      : (firstSavedInSurah ? parseInt(firstSavedInSurah.ayah_number || firstSavedInSurah.ayahNumber, 10) : null);
+
                     return (
                       <div
                         key={surah.number}
-                        onClick={() => openSurah(surah.number)}
-                        className="noor-card group relative flex items-center justify-between p-4 rounded-2xl cursor-pointer hover:-translate-y-0.5 transition-all border-border/60 hover:border-gold/40 shadow-xs hover:shadow-md"
+                        onClick={() => openSurah(surah.number, targetAyahToOpen)}
+                        className={`noor-card group relative flex flex-col justify-between p-4 rounded-2xl cursor-pointer hover:-translate-y-0.5 transition-all shadow-xs hover:shadow-md ${
+                          stats.isCurrent
+                            ? 'border-gold shadow-[0_0_20px_-6px_var(--gold-glow)] bg-gold/[0.04] ring-1 ring-gold/40'
+                            : stats.markedCount > 0
+                            ? 'border-gold/50 bg-secondary/30 hover:border-gold'
+                            : 'border-border/60 hover:border-gold/40'
+                        }`}
                       >
-                        {/* Surah Number Emblem & Info */}
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/40 bg-gold/5 text-xs font-bold text-gold group-hover:bg-gold group-hover:text-white transition-colors">
-                            {surah.number}
-                          </span>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h3 className="truncate text-sm font-bold text-foreground group-hover:text-gold transition-colors">
-                                {surah.name}
-                              </h3>
-                              <span className="text-[10px] uppercase font-medium tracking-wider text-muted-foreground px-1.5 py-0.5 rounded-md bg-secondary shrink-0">
-                                {surah.revelation === 'Makkiyyah' ? 'Mkk' : 'Mdn'}
-                              </span>
+                        <div className="flex items-center justify-between gap-2 w-full">
+                          {/* Surah Number Emblem & Info */}
+                          <div className="flex items-center gap-3.5 min-w-0">
+                            <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-colors ${
+                              stats.isCurrent 
+                                ? 'border-gold bg-gold text-white shadow-xs' 
+                                : 'border-gold/40 bg-gold/5 text-gold group-hover:bg-gold group-hover:text-white'
+                            }`}>
+                              {surah.number}
+                            </span>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <h3 className="truncate text-sm font-bold text-foreground group-hover:text-gold transition-colors">
+                                  {surah.name}
+                                </h3>
+                                <span className="text-[10px] uppercase font-medium tracking-wider text-muted-foreground px-1.5 py-0.5 rounded-md bg-secondary shrink-0">
+                                  {surah.revelation === 'Makkiyyah' ? 'Mkk' : 'Mdn'}
+                                </span>
+                                {stats.isCurrent && (
+                                  <span className="text-[10px] font-bold text-gold px-1.5 py-0.5 rounded-md bg-gold/15 flex items-center gap-1 shrink-0 animate-pulse">
+                                    <Pin className="h-2.5 w-2.5 fill-current" />
+                                    Ayat {stats.currentAyah}
+                                  </span>
+                                )}
+                                {stats.markedCount > 0 && !stats.isCurrent && (
+                                  <span className="text-[10px] font-semibold text-gold px-1.5 py-0.5 rounded-md bg-gold/10 flex items-center gap-1 shrink-0">
+                                    <BookmarkCheck className="h-2.5 w-2.5" />
+                                    {stats.markedCount} tersimpan
+                                  </span>
+                                )}
+                                {stats.isPassed && !stats.isCurrent && (
+                                  <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-md bg-emerald-500/10 shrink-0">
+                                    ✓ Selesai
+                                  </span>
+                                )}
+                              </div>
+                              <p className="truncate text-xs text-muted-foreground mt-0.5">
+                                {surah.translation} · {surah.numberOfAyahs} ayat
+                              </p>
                             </div>
-                            <p className="truncate text-xs text-muted-foreground mt-0.5">
-                              {surah.translation} · {surah.numberOfAyahs} ayat
-                            </p>
+                          </div>
+
+                          {/* Arabic Title & Play Audio Button */}
+                          <div className="flex items-center gap-2 shrink-0 pl-2">
+                            <span className="arabic text-xl font-normal text-gold select-none group-hover:scale-105 transition-transform">
+                              {surah.arabic}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                playFullSurahAudio(surah);
+                              }}
+                              className={`p-2 rounded-xl transition-colors ${
+                                isAudioPlayingThis
+                                  ? 'bg-gold text-white animate-pulse'
+                                  : 'text-muted-foreground hover:text-gold hover:bg-gold/10'
+                              }`}
+                              title={isAudioPlayingThis ? "Hentikan Tilawah" : "Putar Tilawah Surat"}
+                            >
+                              {isAudioPlayingThis ? (
+                                <VolumeX className="h-4 w-4" />
+                              ) : (
+                                <Volume2 className="h-4 w-4" />
+                              )}
+                            </button>
                           </div>
                         </div>
 
-                        {/* Arabic Title & Play Audio Button */}
-                        <div className="flex items-center gap-2 shrink-0 pl-2">
-                          <span className="arabic text-xl font-normal text-gold select-none group-hover:scale-105 transition-transform">
-                            {surah.arabic}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              playFullSurahAudio(surah);
-                            }}
-                            className={`p-2 rounded-xl transition-colors ${
-                              isAudioPlayingThis
-                                ? 'bg-gold text-white animate-pulse'
-                                : 'text-muted-foreground hover:text-gold hover:bg-gold/10'
-                            }`}
-                            title={isAudioPlayingThis ? "Hentikan Tilawah" : "Putar Tilawah Surat"}
-                          >
-                            {isAudioPlayingThis ? (
-                              <VolumeX className="h-4 w-4" />
-                            ) : (
-                              <Volume2 className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
+                        {/* Surah Mini Reading Progress Bar */}
+                        {(stats.isCurrent || stats.markedCount > 0 || stats.isPassed) && (
+                          <div className="mt-3 pt-2 border-t border-border/40 w-full flex items-center justify-between text-[10px] text-muted-foreground">
+                            <div className="h-1 flex-1 mr-2 overflow-hidden rounded-full bg-secondary/80">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-300 ${
+                                  stats.isCurrent 
+                                    ? 'bg-gold' 
+                                    : stats.isPassed 
+                                    ? 'bg-emerald-500' 
+                                    : 'bg-gold/60'
+                                }`}
+                                style={{ width: `${Math.max(stats.progressPercent, 3)}%` }}
+                              />
+                            </div>
+                            <span className="shrink-0 font-medium">
+                              {stats.isCurrent 
+                                ? `${stats.currentAyah}/${surah.numberOfAyahs} ayat (${stats.progressPercent}%)` 
+                                : stats.isPassed 
+                                ? '100% selesai' 
+                                : `${stats.markedCount} ayat ditandai`}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1324,39 +1656,58 @@ export default function QuranBrowser({
                 </div>
               ) : (
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredJuz.map((juz) => (
-                    <div
-                      key={juz.number}
-                      onClick={() => openSurah(juz.start.surah, juz.start.ayah)}
-                      className="noor-card group relative flex items-center justify-between p-4 rounded-2xl cursor-pointer hover:-translate-y-0.5 transition-all border-border/60 hover:border-gold/40 shadow-xs hover:shadow-md"
-                    >
-                      <div className="flex items-center gap-3.5 min-w-0">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gold/40 bg-gold/10 text-xs font-bold text-gold group-hover:bg-gold group-hover:text-white transition-colors">
-                          {juz.number}
-                        </span>
-                        <div className="min-w-0">
-                          <h3 className="truncate text-sm font-bold text-foreground group-hover:text-gold transition-colors">
-                            Juz {juz.number}
-                          </h3>
-                          <p className="truncate text-xs text-muted-foreground mt-0.5">
-                            Mulai: {juz.start.surahName} : {juz.start.ayah}
-                          </p>
-                          <p className="truncate text-[11px] text-muted-foreground/75">
-                            Akhir: {juz.end.surahName} : {juz.end.ayah}
-                          </p>
+                  {filteredJuz.map((juz) => {
+                    const isCurrentJuz = quranProgress.hasProgress && juz.number === quranProgress.juzNumber;
+                    return (
+                      <div
+                        key={juz.number}
+                        onClick={() => openSurah(juz.start.surah, juz.start.ayah)}
+                        className={`noor-card group relative flex items-center justify-between p-4 rounded-2xl cursor-pointer hover:-translate-y-0.5 transition-all shadow-xs hover:shadow-md ${
+                          isCurrentJuz 
+                            ? 'border-gold shadow-[0_0_20px_-6px_var(--gold-glow)] bg-gold/[0.04] ring-1 ring-gold/40' 
+                            : 'border-border/60 hover:border-gold/40'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3.5 min-w-0">
+                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border text-xs font-bold transition-colors ${
+                            isCurrentJuz
+                              ? 'border-gold bg-gold text-white shadow-xs'
+                              : 'border-gold/40 bg-gold/5 text-gold group-hover:bg-gold group-hover:text-white'
+                          }`}>
+                            {juz.number}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <h3 className="truncate text-sm font-bold text-foreground group-hover:text-gold transition-colors">
+                                Juz {juz.number}
+                              </h3>
+                              {isCurrentJuz && (
+                                <span className="text-[10px] font-bold text-gold px-1.5 py-0.5 rounded-md bg-gold/15 flex items-center gap-1 shrink-0 animate-pulse">
+                                  <Pin className="h-2.5 w-2.5 fill-current" />
+                                  Juz Tilawah Aktif
+                                </span>
+                              )}
+                            </div>
+                            <p className="truncate text-xs text-muted-foreground mt-0.5">
+                              Mulai: {juz.start.surahName} : {juz.start.ayah}
+                            </p>
+                            <p className="truncate text-[11px] text-muted-foreground/75">
+                              Akhir: {juz.end.surahName} : {juz.end.ayah}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0 pl-2">
+                          <span className="arabic text-lg font-normal text-gold block">
+                            {juz.name}
+                          </span>
+                          <span className="text-[10px] text-gold font-medium flex items-center justify-end gap-1 mt-1 group-hover:translate-x-0.5 transition-transform">
+                            Buka Juz <ChevronRight className="h-3 w-3" />
+                          </span>
                         </div>
                       </div>
-
-                      <div className="text-right shrink-0 pl-2">
-                        <span className="arabic text-lg font-normal text-gold block">
-                          {juz.name}
-                        </span>
-                        <span className="text-[10px] text-gold font-medium flex items-center justify-end gap-1 mt-1 group-hover:translate-x-0.5 transition-transform">
-                          Buka Juz <ChevronRight className="h-3 w-3" />
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -1365,68 +1716,217 @@ export default function QuranBrowser({
           {/* ── TAB 3: BOOKMARK / AYAT TERSIMPAN ── */}
           {activeTab === 'bookmark' && (
             <div className="space-y-4">
+              {/* Header inside Ayat Tersimpan tab */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/40">
+                <div className="space-y-0.5">
+                  <h3 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                    <BookmarkCheck className="h-5 w-5 text-gold" />
+                    Ayat Tersimpan ({savedAyahs.length})
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Koleksi ayat yang kamu tandai — tersinkronisasi langsung dengan Jelajah Al-Qur'an.
+                  </p>
+                </div>
+                {onGoToSaved && (
+                  <button
+                    onClick={onGoToSaved}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gold/40 bg-gold/10 text-gold text-xs font-semibold hover:bg-gold hover:text-white transition-all shadow-xs"
+                    title="Buka Halaman Khusus Ayat Tersimpan"
+                  >
+                    <span>Buka Halaman Tersimpan</span>
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+
               {savedAyahs.length === 0 ? (
                 <div className="noor-card flex flex-col items-center rounded-3xl px-6 py-16 text-center">
                   <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gold/30 bg-gold/10 text-gold mb-4">
                     <Bookmark className="h-7 w-7" />
                   </span>
                   <h3 className="font-display text-lg font-semibold text-foreground">
-                    Belum ada ayat yang ditandai
+                    Belum ada ayat yang disimpan
                   </h3>
                   <p className="mt-2 max-w-sm text-xs text-muted-foreground leading-relaxed">
-                    Saat membaca Al-Qur'an, tekan tombol bookmark pada ayat mana pun untuk menyimpannya ke daftar ini agar mudah dibaca kembali.
+                    Saat menjelajahi atau membaca Al-Qur'an, tekan tombol <strong className="text-gold font-semibold">Bookmark</strong> pada ayat mana pun untuk menyimpannya ke daftar ini.
                   </p>
+                  <button
+                    onClick={() => setActiveTab('surat')}
+                    className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary/90 transition-all shadow-xs"
+                  >
+                    <BookOpen className="h-3.5 w-3.5" />
+                    <span>Mulai Jelajah Surat</span>
+                  </button>
+                </div>
+              ) : filteredSavedAyahs.length === 0 ? (
+                <div className="noor-card rounded-3xl p-12 text-center text-muted-foreground text-xs sm:text-sm space-y-3">
+                  <p>Tidak ditemukan ayat tersimpan dengan kata kunci &ldquo;{searchQuery}&rdquo;.</p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="px-4 py-1.5 rounded-xl bg-gold/15 text-gold text-xs font-semibold hover:bg-gold/25 transition-all"
+                  >
+                    Hapus Kata Kunci
+                  </button>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {savedAyahs.map((ay, idx) => {
-                    const surahNum = ay.surah_number || ay.surahNumber;
-                    const ayahNum = ay.ayah_number || ay.ayahNumber;
-                    const surahName = ay.surah_name || ay.surahName;
+                <div className="space-y-4">
+                  {filteredSavedAyahs.map((ay, idx) => {
+                    const surahNum = parseInt(ay.surah_number || ay.surahNumber, 10);
+                    const ayahNum = parseInt(ay.ayah_number || ay.ayahNumber, 10);
+                    const surahName = ay.surah_name || ay.surahName || `Surat ${surahNum}`;
+                    const isThisReadingAyah = lastRead && 
+                      parseInt(lastRead.surahNumber, 10) === surahNum && 
+                      parseInt(lastRead.ayahNumber, 10) === ayahNum;
+
+                    const isAudioPlayingThis = audioState.isPlaying && 
+                      audioState.type === 'ayah' && 
+                      audioState.surahNumber === surahNum && 
+                      audioState.ayahNumber === ayahNum;
 
                     return (
-                      <div
-                        key={idx}
-                        className="noor-card rounded-2xl p-5 border border-border/60 hover:border-gold/40 transition-all space-y-3"
+                      <article
+                        key={`${surahNum}-${ayahNum}-${idx}`}
+                        className={`noor-card rounded-3xl p-5 sm:p-6 transition-all space-y-3.5 shadow-xs ${
+                          isThisReadingAyah 
+                            ? 'border-gold shadow-[0_0_20px_-6px_var(--gold-glow)] bg-gold/[0.04] ring-1 ring-gold/40' 
+                            : isAudioPlayingThis
+                            ? 'border-gold bg-gold/[0.03]'
+                            : 'border-border/60 hover:border-gold/40'
+                        }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span className="rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-gold">
-                            QS. {surahName}: {ayahNum}
-                          </span>
+                        {/* Header Bar */}
+                        <div className="flex items-center justify-between flex-wrap gap-2 border-b border-border/40 pb-3">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/40 bg-gold/10 px-3 py-1 text-xs font-semibold text-gold">
+                              <BookmarkCheck className="h-3.5 w-3.5" />
+                              QS. {surahName}: {ayahNum}
+                            </span>
+                            {isThisReadingAyah && (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-gold/50 bg-gold/20 px-2.5 py-0.5 text-[11px] font-bold text-gold animate-pulse">
+                                <Pin className="h-3 w-3 fill-current" />
+                                Posisi Tilawah Aktif
+                              </span>
+                            )}
+                          </div>
                           
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {/* Play Audio Button */}
+                            <button
+                              onClick={() => playAyahAudio(ay)}
+                              className={`flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium transition-all ${
+                                isAudioPlayingThis
+                                  ? 'bg-gold text-white font-semibold shadow-xs'
+                                  : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                              }`}
+                              title={isAudioPlayingThis ? "Hentikan Tilawah" : "Putar Tilawah Ayat Ini"}
+                            >
+                              {isAudioPlayingThis ? (
+                                <>
+                                  <VolumeX className="h-3.5 w-3.5 animate-pulse" />
+                                  <span className="hidden sm:inline">Berhenti</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Volume2 className="h-3.5 w-3.5" />
+                                  <span className="hidden sm:inline">Dengarkan</span>
+                                </>
+                              )}
+                            </button>
+
+                            {/* Mark Reading Position */}
+                            {!isThisReadingAyah && (
+                              <button
+                                onClick={() => handleMarkLastRead(ay)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-secondary/80 hover:bg-gold/15 hover:text-gold text-xs font-semibold text-muted-foreground transition-all"
+                                title="Tandai sebagai Posisi Tilawah Aktif"
+                              >
+                                <Pin className="h-3.5 w-3.5" />
+                                <span className="hidden sm:inline">Tandai Posisi</span>
+                              </button>
+                            )}
+
+                            {/* Open in Reader */}
                             <button
                               onClick={() => openSurah(surahNum, ayahNum)}
-                              className="inline-flex items-center gap-1 px-3 py-1 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all"
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs"
+                              title="Buka dan baca lengkap di dalam Surat"
                             >
+                              <BookOpen className="h-3.5 w-3.5" />
                               <span>Buka di Surat</span>
                               <ChevronRight className="h-3.5 w-3.5" />
                             </button>
 
+                            {/* Copy Text */}
+                            <button
+                              onClick={() => handleCopyAyah(ay)}
+                              className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary hover:text-foreground transition-all"
+                              title="Salin Ayat"
+                            >
+                              {copiedAyah === ayahNum ? (
+                                <Check className="h-3.5 w-3.5 text-green-500" />
+                              ) : (
+                                <Copy className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+
+                            {/* Export / Share */}
+                            {onExportQuote && (
+                              <button
+                                onClick={() =>
+                                  onExportQuote({
+                                    arabic: ay.arabic_text,
+                                    latin: ay.latin_text,
+                                    translation: ay.translation_id,
+                                    reference: `QS. ${surahName}: ${ayahNum}`
+                                  })
+                                }
+                                className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary hover:text-gold transition-all"
+                                title="Bagikan Kutipan"
+                              >
+                                <Share2 className="h-3.5 w-3.5" />
+                              </button>
+                            )}
+
+                            {/* Remove Bookmark */}
                             {onToggleSaveAyah && (
                               <button
                                 onClick={() => onToggleSaveAyah(ay)}
-                                className="p-1.5 rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                                title="Hapus dari Bookmark"
+                                className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                                title="Hapus dari Ayat Tersimpan"
                               >
-                                <X className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </button>
                             )}
                           </div>
                         </div>
 
+                        {/* Arabic Text */}
                         {ay.arabic_text && (
-                          <p className="arabic text-xl sm:text-2xl text-right text-foreground pt-1">
+                          <p 
+                            className="arabic text-right leading-[2.3] font-normal text-foreground select-text py-1"
+                            style={{ fontSize: `${fontSize}px` }}
+                          >
                             {ay.arabic_text}
+                            <span className="inline-block px-2 text-gold font-normal text-xl select-none">
+                              ۝
+                            </span>
                           </p>
                         )}
 
+                        {/* Latin Transliteration */}
+                        {showLatin && ay.latin_text && (
+                          <p className="text-xs sm:text-sm italic text-muted-foreground/85 leading-relaxed">
+                            {ay.latin_text}
+                          </p>
+                        )}
+
+                        {/* Indonesian Translation */}
                         {ay.translation_id && (
-                          <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed italic">
+                          <p className="text-sm text-foreground/85 leading-relaxed border-t border-border/30 pt-2 font-sans">
                             &ldquo;{ay.translation_id}&rdquo;
                           </p>
                         )}
-                      </div>
+                      </article>
                     );
                   })}
                 </div>

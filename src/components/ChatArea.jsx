@@ -79,7 +79,13 @@ export default function ChatArea({
 
   const isAyahSaved = (ayah) => {
     if (!ayah) return false;
-    return savedAyahs.some(s => s.surah_number === ayah.surah_number && s.ayah_number === ayah.ayah_number);
+    const sTarget = String(ayah.surah_number || ayah.surahNumber || '');
+    const aTarget = String(ayah.ayah_number || ayah.ayahNumber || '');
+    if (!sTarget || !aTarget) return false;
+    return savedAyahs.some(s => 
+      String(s.surah_number || s.surahNumber || '') === sTarget && 
+      String(s.ayah_number || s.ayahNumber || '') === aTarget
+    );
   };
 
   return (

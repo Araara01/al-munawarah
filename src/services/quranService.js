@@ -1,6 +1,6 @@
 // Quran Database Service
 // Connects to local static Tafsir Ibnu Katsir database, equran.id API v2 & alquran.cloud
-import { SURAH_LIST } from '../data/quranData.js';
+import { SURAH_LIST, JUZ_LIST } from '../data/quranData.js';
 
 // Cache version — bump this to invalidate stale sessionStorage caches
 const CACHE_VERSION = 'v3_ibk';
@@ -349,7 +349,17 @@ export function getAyahAudioUrl(ayah, qariId = '05') {
   if (ayah.audio && ayah.audio['05']) {
     return ayah.audio['05'];
   }
-  return ayah.audio_url || '';
+  if (ayah.audio_url) {
+    return ayah.audio_url;
+  }
+  const sNum = parseInt(ayah.surah_number || ayah.surahNumber, 10);
+  const aNum = parseInt(ayah.ayah_number || ayah.ayahNumber, 10);
+  if (sNum && aNum) {
+    const sStr = String(sNum).padStart(3, '0');
+    const aStr = String(aNum).padStart(3, '0');
+    return `https://everyayah.com/data/Alafasy_128kbps/${sStr}${aStr}.mp3`;
+  }
+  return '';
 }
 
 /**
@@ -365,3 +375,153 @@ export function getSurahFullAudioUrl(surah, qariId = '05') {
   }
   return `https://cdn.islamic.network/quran/audio-surah/128/ar.alafasy/${surah.number || surah}.mp3`;
 }
+
+/**
+ * Total Ayahs in the complete 114 Surahs of the Al-Qur'an (Hafs 'an 'Asim standard)
+ */
+export const TOTAL_QURAN_AYAHS = 6236;
+
+/**
+ * Determine which Juz (1-30) an ayah belongs to
+ */
+export function getJuzForAyah(surahNumber, ayahNumber) {
+  const sNum = parseInt(surahNumber, 10);
+  const aNum = parseInt(ayahNumber, 10) || 1;
+  if (!sNum) return 1;
+
+  for (const juz of JUZ_LIST) {
+    const isAfterStart = sNum > juz.start.surah || (sNum === juz.start.surah && aNum >= juz.start.ayah);
+    const isBeforeEnd = sNum < juz.end.surah || (sNum === juz.end.surah && aNum <= juz.end.ayah);
+    if (isAfterStart && isBeforeEnd) {
+      return juz.number;
+    }
+  }
+  return 1;
+}
+
+/**
+ * Calculate complete Quran reading progress based on marked last read & saved ayahs
+ */
+export function calculateQuranProgress(lastRead, savedAyahs = []) {
+  let activeSurah = null;
+  let activeAyah = 1;
+  let surahArabic = '';
+  let surahName = '';
+  let source = 'none';
+
+  if (lastRead && lastRead.surahNumber) {
+    activeSurah = parseInt(lastRead.surahNumber, 10);
+    activeAyah = parseInt(lastRead.ayahNumber, 10) || 1;
+    surahArabic = lastRead.surahArabic || '';
+    surahName = lastRead.surahName || '';
+    source = 'last_read';
+  } else if (savedAyahs && savedAyahs.length > 0) {
+    const latest = savedAyahs[0];
+    activeSurah = parseInt(latest.surah_number || latest.surahNumber, 10);
+    activeAyah = parseInt(latest.ayah_number || latest.ayahNumber, 10) || 1;
+    surahArabic = latest.arabic_text || '';
+    surahName = latest.surah_name || latest.surahName || '';
+    source = 'saved_ayahs';
+  }
+
+  if (!activeSurah) {
+    return {
+      hasProgress: false,
+      percentage: 0,
+      cumulativeAyahs: 0,
+      totalAyahs: TOTAL_QURAN_AYAHS,
+      currentSurah: null,
+      currentAyah: 1,
+      juzNumber: 1,
+      surahPercentage: 0,
+      savedCount: savedAyahs.length,
+      surahName: '',
+      surahArabic: '',
+      source: 'none'
+    };
+  }
+
+  const surahObj = SURAH_LIST.find(s => s.number === activeSurah);
+  const resolvedSurahName = surahObj ? surahObj.name : (surahName || `Surah ${activeSurah}`);
+  const resolvedSurahArabic = surahObj ? surahObj.arabic : surahArabic;
+  const surahAyahs = surahObj ? surahObj.numberOfAyahs : 1;
+
+  let cumulative = 0;
+  for (let i = 0; i < SURAH_LIST.length; i++) {
+    const s = SURAH_LIST[i];
+    if (s.number < activeSurah) {
+      cumulative += s.numberOfAyahs;
+    } else if (s.number === activeSurah) {
+      cumulative += Math.min(activeAyah, s.numberOfAyahs);
+      break;
+    }
+  }
+
+  const surahPercentage = Math.min(100, Math.round((activeAyah / surahAyahs) * 100));
+  const overallPercentage = ((cumulative / TOTAL_QURAN_AYAHS) * 100).toFixed(1);
+  const currentJuz = getJuzForAyah(activeSurah, activeAyah);
+
+  return {
+    hasProgress: true,
+    percentage: parseFloat(overallPercentage),
+    cumulativeAyahs: cumulative,
+    totalAyahs: TOTAL_QURAN_AYAHS,
+    currentSurah: surahObj || { 
+      number: activeSurah, 
+      name: resolvedSurahName, 
+      arabic: resolvedSurahArabic, 
+      numberOfAyahs: surahAyahs 
+    },
+    currentAyah: activeAyah,
+    surahName: resolvedSurahName,
+    surahArabic: resolvedSurahArabic,
+    juzNumber: currentJuz,
+    surahPercentage,
+    savedCount: savedAyahs.length,
+    source
+  };
+}
+
+/**
+ * Generate a fast lookup map for all 114 surahs to show progress and marked count
+ */
+export function getSurahStatsMap(savedAyahs = [], lastRead = null) {
+  const map = {};
+  const activeSurahNum = lastRead?.surahNumber ? parseInt(lastRead.surahNumber, 10) : null;
+  const activeAyahNum = lastRead?.ayahNumber ? parseInt(lastRead.ayahNumber, 10) : 1;
+
+  // Pre-aggregate saved count per surah
+  const savedCountBySurah = {};
+  for (const a of savedAyahs) {
+    const s = parseInt(a.surah_number || a.surahNumber, 10);
+    if (s) {
+      savedCountBySurah[s] = (savedCountBySurah[s] || 0) + 1;
+    }
+  }
+
+  for (const s of SURAH_LIST) {
+    const sNum = s.number;
+    const markedCount = savedCountBySurah[sNum] || 0;
+    const isCurrent = activeSurahNum === sNum;
+    const isPassed = activeSurahNum ? sNum < activeSurahNum : false;
+
+    let progressPercent = 0;
+    if (isCurrent) {
+      progressPercent = Math.min(100, Math.round((activeAyahNum / s.numberOfAyahs) * 100));
+    } else if (isPassed) {
+      progressPercent = 100;
+    } else if (markedCount > 0) {
+      progressPercent = Math.min(100, Math.round((markedCount / s.numberOfAyahs) * 100));
+    }
+
+    map[sNum] = {
+      markedCount,
+      isCurrent,
+      isPassed,
+      currentAyah: isCurrent ? activeAyahNum : null,
+      progressPercent
+    };
+  }
+  return map;
+}
+

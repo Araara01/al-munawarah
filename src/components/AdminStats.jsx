@@ -5,10 +5,15 @@ import {
   Bookmark, 
   Cpu, 
   Zap, 
-  CheckCircle2 
+  CheckCircle2,
+  Pin,
+  BookOpen
 } from 'lucide-react';
+import { calculateQuranProgress } from '../services/quranService';
 
-export default function AdminStats({ conversationsCount = 0, savedCount = 0, apiKey = '' }) {
+export default function AdminStats({ conversationsCount = 0, savedCount = 0, lastRead = null, apiKey = '' }) {
+  const quranProgress = calculateQuranProgress(lastRead);
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 text-foreground space-y-6">
       
@@ -68,6 +73,37 @@ export default function AdminStats({ conversationsCount = 0, savedCount = 0, api
           <span className="text-[11px] text-emerald font-medium">Sangat Cepat</span>
         </div>
       </div>
+
+      {/* Quran Tilawah Progress Stat */}
+      {quranProgress.hasProgress && (
+        <div className="noor-card rounded-3xl p-6 space-y-3 border-gold/40 bg-gold/[0.04]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gold/15 text-gold">
+                <Pin className="h-4 w-4 fill-current" />
+              </span>
+              <div>
+                <h3 className="font-display text-base font-semibold text-foreground">
+                  Progres Tilawah Al-Qur'an (Sesuai yang Ditandai)
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  QS. {quranProgress.surahName} : Ayat {quranProgress.currentAyah} • Juz {quranProgress.juzNumber}
+                </p>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="text-xl font-bold font-display text-gold">{quranProgress.percentage}%</span>
+              <span className="text-xs text-muted-foreground block">{quranProgress.cumulativeAyahs.toLocaleString('id-ID')} / {quranProgress.totalAyahs.toLocaleString('id-ID')} Ayat</span>
+            </div>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/80">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-gold via-gold-bright to-emerald-500"
+              style={{ width: `${Math.max(1, quranProgress.percentage)}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Top Queried Verses */}
       <div className="noor-card rounded-3xl p-6 space-y-4">
