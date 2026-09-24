@@ -113,25 +113,42 @@ export default function SettingsModal({
         <section className="space-y-2.5">
           <label className="text-xs font-semibold text-foreground flex items-center gap-1.5">
             <Cpu className="h-3.5 w-3.5 text-gold" />
-            Mesin AI & Penelusuran
+            Model AI Utama (Flagship Tertinggi)
           </label>
 
           {(() => {
-            const model = selectedModel || '';
+            const model = selectedModel || 'gemini-2.5-pro';
             const isOpenAI = model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4');
             const isAnthropic = model.startsWith('claude');
-            const providerLabel = isOpenAI ? 'OpenAI API Key' : isAnthropic ? 'Anthropic API Key' : 'Gemini API Key (Opsional)';
+            const isQwen = model.startsWith('qwen');
+            const providerLabel = isOpenAI
+              ? 'OpenAI API Key'
+              : isAnthropic
+              ? 'Anthropic API Key'
+              : isQwen
+              ? 'Qwen / DashScope API Key'
+              : 'Google Gemini API Key (Opsional)';
             const providerLink = isOpenAI
               ? 'https://platform.openai.com/api-keys'
               : isAnthropic
               ? 'https://console.anthropic.com/settings/keys'
+              : isQwen
+              ? 'https://dashscope.console.aliyun.com/'
               : 'https://aistudio.google.com/app/apikey';
-            const providerLinkLabel = isOpenAI ? 'Dapatkan Key OpenAI' : isAnthropic ? 'Dapatkan Key Anthropic' : 'Dapatkan Kunci Gratis';
+            const providerLinkLabel = isOpenAI
+              ? 'Dapatkan Key OpenAI'
+              : isAnthropic
+              ? 'Dapatkan Key Anthropic'
+              : isQwen
+              ? 'Dapatkan Key DashScope'
+              : 'Dapatkan Kunci Gratis';
             const placeholder = isOpenAI
               ? 'sk-... (OpenAI API Key)'
               : isAnthropic
               ? 'sk-ant-... (Anthropic API Key)'
-              : 'AIzaSy... (kosongkan jika memakai offline engine)';
+              : isQwen
+              ? 'sk-... (DashScope / OpenRouter API Key)'
+              : 'AIzaSy... (kosongkan jika memakai database bawaan)';
 
             return (
               <div className="space-y-3">
@@ -140,22 +157,10 @@ export default function SettingsModal({
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground font-medium"
                 >
-                  <optgroup label="🔵 Google Gemini">
-                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (Sangat Cepat &amp; Cerdas)</option>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Ringan &amp; Cepat)</option>
-                    <option value="gemini-1.5-pro">Gemini 1.5 Pro (Analisis Mendalam)</option>
-                  </optgroup>
-                  <optgroup label="🟢 OpenAI">
-                    <option value="gpt-4.1">GPT-4.1 (Terbaru &amp; Paling Mampu)</option>
-                    <option value="gpt-4.1-mini">GPT-4.1 Mini (Cepat &amp; Efisien)</option>
-                    <option value="gpt-4o">GPT-4o (Multimodal)</option>
-                    <option value="o3">o3 (Penalaran Tinggi)</option>
-                  </optgroup>
-                  <optgroup label="🟠 Anthropic Claude">
-                    <option value="claude-opus-4-5">Claude Opus 4.5 (Paling Canggih)</option>
-                    <option value="claude-sonnet-4-5">Claude Sonnet 4.5 (Seimbang &amp; Cerdas)</option>
-                    <option value="claude-haiku-3-5">Claude Haiku 3.5 (Sangat Cepat)</option>
-                  </optgroup>
+                  <option value="gemini-2.5-pro">🔵 Google Gemini — Gemini 2.5 Pro (Flagship Tertinggi)</option>
+                  <option value="gpt-4o">🟢 OpenAI — GPT-4o (Flagship Tertinggi)</option>
+                  <option value="claude-3-7-sonnet">🟠 Anthropic — Claude 3.7 Sonnet (Flagship Tertinggi)</option>
+                  <option value="qwen-max">🟣 Alibaba Cloud — Qwen-Max (Flagship Tertinggi)</option>
                 </select>
 
                 <div className="space-y-1.5">
@@ -184,13 +189,13 @@ export default function SettingsModal({
                     <button
                       type="button"
                       onClick={() => setShowKey(!showKey)}
-                      className="absolute right-3 top-2 text-[11px] text-gold hover:text-gold/80 font-medium"
+                      className="absolute right-3 top-2 text-[11px] text-gold hover:text-gold/80 font-medium cursor-pointer"
                     >
                       {showKey ? "Sembunyikan" : "Tampilkan"}
                     </button>
                   </div>
                   <p className="text-[11px] text-muted-foreground leading-relaxed pt-0.5">
-                    ✦ <strong>Zero-Setup:</strong> Tanpa API key, Al Munawwarah tetap dapat menjawab ribuan persoalan hidup secara instan dengan basis data Kemenag RI bawaan.
+                    ✦ <strong>Zero-Setup:</strong> Tanpa API key, Al Munawwarah tetap dapat menjawab ribuan persoalan hidup secara instan dengan basis data Al-Qur'an &amp; Kemenag RI bawaan.
                   </p>
                 </div>
               </div>

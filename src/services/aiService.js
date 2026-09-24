@@ -10,6 +10,7 @@ import { getAyahFromDatabase, getSurahMeta, findQuranReferenceForProblem } from 
 function getProvider(model = '') {
   if (model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4')) return 'openai';
   if (model.startsWith('claude')) return 'anthropic';
+  if (model.startsWith('qwen')) return 'qwen';
   return 'google'; // gemini-*
 }
 
@@ -17,7 +18,7 @@ export async function askGuidanceAI({
   messages,
   mode = 'muslim', // 'muslim' or 'wawasan'
   apiKey = '',
-  model = 'gemini-2.0-flash',
+  model = 'gemini-2.5-pro',
   temperature = 0.7
 }) {
   const latestMessage = messages[messages.length - 1];
@@ -31,12 +32,17 @@ export async function askGuidanceAI({
         response = await callOpenAIMunawwarah(messages, mode, apiKey.trim(), model, temperature);
       } else if (provider === 'anthropic') {
         response = await callClaudeMunawwarah(messages, mode, apiKey.trim(), model, temperature);
+      } else if (provider === 'qwen') {
+        response = await callQwenMunawwarah(messages, mode, apiKey.trim(), model, temperature);
       } else {
         response = await callGeminiMunawwarah(messages, mode, apiKey.trim(), model, temperature);
       }
       return response;
     } catch (err) {
-      const providerName = provider === 'openai' ? 'OpenAI' : provider === 'anthropic' ? 'Anthropic Claude' : 'Gemini';
+      const providerName =
+        provider === 'openai' ? 'OpenAI GPT' :
+        provider === 'anthropic' ? 'Anthropic Claude' :
+        provider === 'qwen' ? 'Alibaba Qwen' : 'Google Gemini';
       console.warn(`${providerName} API call failed, falling back to built-in Al Munawwarah engine:`, err);
       const fallback = generateOfflineMunawwarah(userQuery, mode);
       return {
@@ -213,9 +219,10 @@ async function callGeminiMunawwarah(messages, mode, apiKey, model, temperature) 
     parts: [{ text: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content)) }]
   }));
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  let targetModel = model || 'gemini-2.5-pro';
+  let endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
 
-  const response = await fetch(endpoint, {
+  let response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -228,6 +235,24 @@ async function callGeminiMunawwarah(messages, mode, apiKey, model, temperature) 
     })
   });
 
+  // Auto fallback if gemini-2.5-pro is not yet enabled for the key
+  if (!response.ok && (targetModel === 'gemini-2.5-pro' || targetModel === 'gemini-2.0-pro')) {
+    targetModel = 'gemini-2.0-flash';
+    endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${targetModel}:generateContent?key=${apiKey}`;
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        generationConfig: {
+          temperature: parseFloat(temperature) || 0.7,
+          responseMimeType: "application/json"
+        }
+      })
+    });
+  }
+
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     throw new Error(err.error?.message || `HTTP ${response.status}`);
@@ -235,12 +260,12 @@ async function callGeminiMunawwarah(messages, mode, apiKey, model, temperature) 
 
   const data = await response.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Respon kosong dari Gemini AI");
+  if (!text) throw new Error("Respon kosong dari Google Gemini AI");
 
   return await enrichWithQuranDatabase(text, messages, mode);
 }
 
-// ─── OpenAI (GPT-4 / GPT-5 / o-series) ───────────────────────────────────────
+// ─── OpenAI (GPT-4o Flagship Tertinggi) ───────────────────────────────────────
 async function callOpenAIMunawwarah(messages, mode, apiKey, model, temperature) {
   const isMuslim = mode === 'muslim';
   const systemPrompt = buildSystemPrompt(isMuslim);
@@ -253,6 +278,8 @@ async function callOpenAIMunawwarah(messages, mode, apiKey, model, temperature) 
     }))
   ];
 
+  const targetModel = model || 'gpt-4o';
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -260,7 +287,7 @@ async function callOpenAIMunawwarah(messages, mode, apiKey, model, temperature) 
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model,
+      model: targetModel,
       messages: openaiMessages,
       temperature: parseFloat(temperature) || 0.7,
       response_format: { type: 'json_object' }
@@ -279,7 +306,7 @@ async function callOpenAIMunawwarah(messages, mode, apiKey, model, temperature) 
   return await enrichWithQuranDatabase(text, messages, mode);
 }
 
-// ─── Anthropic Claude ─────────────────────────────────────────────────────────
+// ─── Anthropic Claude (Claude 3.7 Sonnet Flagship Tertinggi) ──────────────────
 async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) {
   const isMuslim = mode === 'muslim';
   const systemPrompt = buildSystemPrompt(isMuslim);
@@ -289,7 +316,10 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
     content: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content))
   }));
 
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
+  let targetModel = model || 'claude-3-7-sonnet';
+  if (targetModel === 'claude-3-7-sonnet') targetModel = 'claude-3-7-sonnet-20250219';
+
+  let response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -297,13 +327,33 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model,
+      model: targetModel,
       system: systemPrompt,
       messages: claudeMessages,
       max_tokens: 2048,
       temperature: parseFloat(temperature) || 0.7
     })
   });
+
+  // Fallback to claude-3-5-sonnet if 3.7 returns 404
+  if (!response.ok && targetModel === 'claude-3-7-sonnet-20250219') {
+    targetModel = 'claude-3-5-sonnet-20241022';
+    response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: targetModel,
+        system: systemPrompt,
+        messages: claudeMessages,
+        max_tokens: 2048,
+        temperature: parseFloat(temperature) || 0.7
+      })
+    });
+  }
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
@@ -313,6 +363,68 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
   const data = await response.json();
   const text = data.content?.[0]?.text;
   if (!text) throw new Error("Respon kosong dari Anthropic Claude");
+
+  return await enrichWithQuranDatabase(text, messages, mode);
+}
+
+// ─── Alibaba Qwen (Qwen-Max Flagship Tertinggi) ──────────────────────────────
+async function callQwenMunawwarah(messages, mode, apiKey, model, temperature) {
+  const isMuslim = mode === 'muslim';
+  const systemPrompt = buildSystemPrompt(isMuslim);
+
+  const qwenMessages = [
+    { role: 'system', content: systemPrompt },
+    ...messages.map(msg => ({
+      role: msg.role === 'assistant' ? 'assistant' : 'user',
+      content: typeof msg.content === 'string' ? msg.content : (msg.content?.rawText || JSON.stringify(msg.content))
+    }))
+  ];
+
+  const actualModel = model || 'qwen-max';
+  const isDashScope = !apiKey.startsWith('sk-or-');
+  
+  // Support Alibaba DashScope International or OpenRouter
+  const primaryEndpoint = apiKey.startsWith('sk-or-')
+    ? 'https://openrouter.ai/api/v1/chat/completions'
+    : 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions';
+
+  let response = await fetch(primaryEndpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: apiKey.startsWith('sk-or-') ? 'qwen/qwen-2.5-72b-instruct' : actualModel,
+      messages: qwenMessages,
+      temperature: parseFloat(temperature) || 0.7
+    })
+  });
+
+  // If international endpoint fails, try domestic DashScope endpoint
+  if (!response.ok && isDashScope && (response.status === 401 || response.status === 404)) {
+    response = await fetch('https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: actualModel,
+        messages: qwenMessages,
+        temperature: parseFloat(temperature) || 0.7
+      })
+    });
+  }
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error?.message || err.message || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error("Respon kosong dari Alibaba Qwen AI");
 
   return await enrichWithQuranDatabase(text, messages, mode);
 }

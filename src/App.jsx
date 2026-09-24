@@ -63,7 +63,14 @@ function AppContent() {
 
   // AI settings
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('munawwarah_api_key') || '');
-  const [selectedModel, setSelectedModel] = useState(() => localStorage.getItem('munawwarah_model') || 'gemini-2.0-flash');
+  const [selectedModel, setSelectedModel] = useState(() => {
+    const saved = localStorage.getItem('munawwarah_model');
+    if (!saved || saved.startsWith('gemini')) return 'gemini-2.5-pro';
+    if (saved.startsWith('gpt') || saved.startsWith('o1') || saved.startsWith('o3')) return 'gpt-4o';
+    if (saved.startsWith('claude')) return 'claude-3-7-sonnet';
+    if (saved.startsWith('qwen')) return 'qwen-max';
+    return 'gemini-2.5-pro';
+  });
 
   // Modals & Drawers
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
