@@ -27,8 +27,8 @@ export default function MessageItem({
 }) {
   const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
-  const [showAyahDropdown, setShowAyahDropdown] = useState(false);
   const [showDetailDropdown, setShowDetailDropdown] = useState(false);
+  const [showAyahDropdown, setShowAyahDropdown] = useState(false);
   const [showTafsir, setShowTafsir] = useState(false);
   const [tafsirSource, setTafsirSource] = useState('ibnu_katsir'); // 'ibnu_katsir' | 'kemenag'
   const [ibnuKatsirMap, setIbnuKatsirMap] = useState({});
@@ -61,14 +61,20 @@ export default function MessageItem({
   const ayahs = data?.ayahs || [];
   const primaryAyah = ayahs[0] || null;
 
-  // 1. Jawaban Singkat On Point
+  // 1. Jawaban Singkat On Point (Jawaban Pertama)
   const shortAnswer = (
     data?.short_answer ||
     data?.opening ||
     (typeof message.content === 'string' ? message.content : '')
   ).trim();
 
-  // 2. Al-Qur'an Yang Cocok (Surah metadata)
+  // 2. Jawaban Detail & Bimbingan Lengkap (Opsi di bawah jawaban pertama)
+  const detailedAnswer = (data?.detailed_answer || data?.explanation || '').trim();
+  const hadith = (data?.hadith || '').trim();
+  const practicalSteps = data?.practical_steps || [];
+  const closing = (data?.closing || '').trim();
+
+  // 3. Al-Qur'an Yang Cocok (Surahnya Saja + Dropdown Ayat)
   const rawSurahInfo = data?.surah_info || null;
   const fallbackMeta = primaryAyah ? getSurahMeta(primaryAyah.surah_number) : null;
 
@@ -85,11 +91,6 @@ export default function MessageItem({
       : `Surah pilihan dari Al-Qur'an yang relevan dengan pertanyaan Anda.`
   } : null);
 
-  // 3. Jawaban Detail & Bimbingan Lengkap
-  const detailedAnswer = (data?.detailed_answer || data?.explanation || '').trim();
-  const hadith = (data?.hadith || '').trim();
-  const practicalSteps = data?.practical_steps || [];
-  const closing = (data?.closing || '').trim();
   const isDatabaseConnected = data?.isDatabaseConnected || !!primaryAyah?.fromDatabase;
 
   // Load Tafsir Ibnu Katsir on demand when Tafsir is opened inside Ayah dropdown
@@ -177,7 +178,7 @@ export default function MessageItem({
     <div className="space-y-4 animate-fade-up text-foreground">
 
       {/* ─────────────────────────────────────────────────────────────
-          1. JAWABAN SINGKAT ON POINT
+          1. JAWABAN SINGKAT ON POINT (Jawaban Pertama)
           ───────────────────────────────────────────────────────────── */}
       {shortAnswer && (
         <div
@@ -205,7 +206,7 @@ export default function MessageItem({
               type="button"
               onClick={handleCopyShortAnswer}
               title="Salin jawaban singkat"
-              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
+              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md cursor-pointer"
             >
               {copiedShort ? <Check className="h-3 w-3 text-emerald" /> : <Copy className="h-3 w-3" />}
               <span className="hidden sm:inline">{copiedShort ? 'Tersalin' : 'Salin'}</span>
@@ -219,8 +220,147 @@ export default function MessageItem({
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          2. AL-QUR'AN YANG COCOK DENGAN PERMASALAHAN
-             - Tampilkan Suratnya Saja terlebih dahulu
+          2. JAWABAN DETAIL (Opsi di bawah jawaban pertama disertai button dropdown)
+          ───────────────────────────────────────────────────────────── */}
+      {(detailedAnswer || hadith || practicalSteps.length > 0) && (
+        <div
+          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs"
+          style={{
+            background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.45))',
+            borderColor: showDetailDropdown ? 'hsl(var(--gold) / 0.45)' : 'hsl(var(--border) / 0.7)'
+          }}
+          data-testid="detailed-answer-card"
+        >
+          {/* Button Dropdown: Toggle Jawaban Detail */}
+          <button
+            type="button"
+            onClick={() => setShowDetailDropdown(!showDetailDropdown)}
+            className="w-full p-4 sm:p-4.5 flex items-center justify-between gap-3 text-left transition-colors hover:bg-gold/5 cursor-pointer"
+            data-testid="toggle-detail-dropdown-btn"
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0"
+                style={{
+                  background: 'hsl(var(--gold) / 0.12)',
+                  border: '1px solid hsl(var(--gold) / 0.3)',
+                  color: 'hsl(var(--gold))'
+                }}
+              >
+                <Sparkles className="h-4 w-4" />
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-foreground">
+                    {showDetailDropdown ? 'Tutup Jawaban & Bimbingan Detail' : 'Buka Jawaban Detail & Bimbingan Lengkap'}
+                  </span>
+                  <span
+                    className="text-[10px] rounded-md px-1.5 py-0.5 font-medium"
+                    style={{
+                      background: 'hsl(var(--gold) / 0.15)',
+                      color: 'hsl(var(--gold))'
+                    }}
+                  >
+                    Opsi Detail
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Uraian hikmah mendalam Kyai, landasan hadits Nabi ﷺ & amalan praktis
+                </p>
+              </div>
+            </div>
+
+            <ChevronDown
+              className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
+                showDetailDropdown ? 'rotate-180 text-gold' : ''
+              }`}
+            />
+          </button>
+
+          {/* Konten Dropdown Jawaban Detail (Ketika dibuka / expanded) */}
+          {showDetailDropdown && (
+            <div className="border-t border-border/40 p-4 sm:p-6 space-y-5 bg-secondary/35 animate-fade-down">
+
+              {/* Nasihat & Penjelasan Mendalam */}
+              {detailedAnswer && (
+                <div
+                  className="pl-4 sm:pl-5 border-l-2 space-y-2"
+                  style={{ borderLeftColor: 'hsl(var(--gold))' }}
+                >
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-[0.2em]"
+                    style={{ color: 'hsl(var(--gold))' }}
+                  >
+                    Nasihat Mendalam Kyai Al Munawwarah
+                  </span>
+                  <div className="text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-2.5">
+                    {detailedAnswer.split('\n\n').map((paragraph, pIdx) => {
+                      const trimmed = paragraph.trim();
+                      if (!trimmed) return null;
+                      return <p key={pIdx}>{trimmed}</p>;
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Hadits Pendukung */}
+              {hadith && (
+                <div
+                  className="da-card rounded-xl p-4 border bg-background/70 space-y-1.5"
+                  style={{ borderColor: 'hsl(var(--gold) / 0.25)' }}
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block">
+                    Hadits Nabi ﷺ
+                  </span>
+                  <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 italic">
+                    &ldquo;{hadith}&rdquo;
+                  </p>
+                </div>
+              )}
+
+              {/* Langkah Amalan Nyata */}
+              {practicalSteps.length > 0 && (
+                <div className="pt-2">
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-[0.2em] block mb-2.5"
+                    style={{ color: 'hsl(var(--gold))' }}
+                  >
+                    Langkah Nyata Hari Ini
+                  </span>
+                  <ol className="space-y-2.5">
+                    {practicalSteps.map((step, sIdx) => (
+                      <li key={sIdx} className="flex items-start gap-2.5">
+                        <span
+                          className="flex-shrink-0 font-cormorant font-semibold text-sm w-5 text-right"
+                          style={{ color: 'hsl(var(--gold))' }}
+                        >
+                          {String(sIdx + 1).padStart(2, '0')}
+                        </span>
+                        <span className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
+                          {step}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+              {/* Doa Penutup */}
+              {closing && (
+                <p className="font-cormorant text-[15px] italic text-muted-foreground text-center leading-relaxed pt-3 border-t border-border/30">
+                  {closing}
+                </p>
+              )}
+
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          3. AL-QUR'AN YANG COCOK DENGAN PERMASALAHAN
+             - Munculkan SURAHNYA SAJA terlebih dahulu
              - Disertai button dropdown untuk melihat ayat tersebut
              - Tersambung dengan database Al-Qur'an
           ───────────────────────────────────────────────────────────── */}
@@ -246,7 +386,7 @@ export default function MessageItem({
                   }}
                 >
                   <BookOpen className="h-3 w-3" />
-                  <span>Al-Qur'an Terkait Permasalahan</span>
+                  <span>Al-Qur'an Yang Cocok</span>
                 </span>
 
                 {isDatabaseConnected && (
@@ -300,7 +440,7 @@ export default function MessageItem({
               )}
             </div>
 
-            {/* Keterangan Relevansi / Kenapa Surah ini Cocok */}
+            {/* Keterangan Relevansi / Kenapa Surah ini Cocok dengan Permasalahan */}
             {resolvedSurahInfo.relevance && (
               <div className="mt-3 rounded-xl p-3 border border-gold/15 bg-gold/5 text-xs sm:text-[13px] text-foreground/85 leading-relaxed">
                 <span className="font-semibold text-gold block mb-0.5 text-[11px] uppercase tracking-wider">
@@ -326,8 +466,8 @@ export default function MessageItem({
                   <FileText className="h-3.5 w-3.5" />
                   <span>
                     {showAyahDropdown
-                      ? `Tutup Teks Ayat (${resolvedSurahInfo.name}: ${resolvedSurahInfo.ayah_number})`
-                      : `Lihat Teks & Terjemahan Ayat (${resolvedSurahInfo.name}: ${resolvedSurahInfo.ayah_number})`}
+                      ? `Tutup Ayat (${resolvedSurahInfo.name}: ${resolvedSurahInfo.ayah_number})`
+                      : `Lihat Ayat (${resolvedSurahInfo.name}: ${resolvedSurahInfo.ayah_number})`}
                   </span>
                 </span>
                 <ChevronDown
@@ -343,7 +483,7 @@ export default function MessageItem({
                   className="flex items-center gap-1.5 rounded-xl border border-border/70 px-3 py-2 text-xs text-muted-foreground hover:border-gold/50 hover:text-gold transition-all active:scale-95 cursor-pointer flex-shrink-0"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Jelajah Surah</span>
+                  <span className="hidden sm:inline">Jelajah Al-Qur'an</span>
                 </button>
               )}
             </div>
@@ -361,7 +501,7 @@ export default function MessageItem({
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-gold">
                     QS. {resolvedSurahInfo.name} : Ayat {resolvedSurahInfo.ayah_number}
                   </span>
-                  <span className="text-[10px] text-muted-foreground">· Kemenag RI</span>
+                  <span className="text-[10px] text-muted-foreground">· Database Kemenag RI</span>
                 </div>
 
                 {/* Audio button */}
@@ -464,7 +604,7 @@ export default function MessageItem({
                       </div>
 
                       <span className="text-[10px] text-gold/80 font-medium tracking-wider uppercase">
-                        {isIbnuKatsir ? "Tafsir Ibnu Katsir (Lokal)" : "Tafsir Ringkas Kemenag"}
+                        {isIbnuKatsir ? "Tafsir Ibnu Katsir (Database Lokal)" : "Tafsir Ringkas Kemenag"}
                       </span>
                     </div>
 
@@ -548,147 +688,6 @@ export default function MessageItem({
                   </button>
                 ))}
               </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ─────────────────────────────────────────────────────────────
-          3. JAWABAN DETAIL & BIMBINGAN LENGKAP
-             - Opsi di bawah jawaban pertama disertai button dropdown
-             - Berisi penjelasan mendalam, Hadits Nabi ﷺ, langkah praktis, dan doa
-          ───────────────────────────────────────────────────────────── */}
-      {(detailedAnswer || hadith || practicalSteps.length > 0) && (
-        <div
-          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs"
-          style={{
-            background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.45))',
-            borderColor: showDetailDropdown ? 'hsl(var(--gold) / 0.45)' : 'hsl(var(--border) / 0.7)'
-          }}
-          data-testid="detailed-answer-card"
-        >
-          {/* Button Dropdown: Toggle Jawaban Detail */}
-          <button
-            type="button"
-            onClick={() => setShowDetailDropdown(!showDetailDropdown)}
-            className="w-full p-4 sm:p-4.5 flex items-center justify-between gap-3 text-left transition-colors hover:bg-gold/5 cursor-pointer"
-            data-testid="toggle-detail-dropdown-btn"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className="h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: 'hsl(var(--gold) / 0.12)',
-                  border: '1px solid hsl(var(--gold) / 0.3)',
-                  color: 'hsl(var(--gold))'
-                }}
-              >
-                <Sparkles className="h-4 w-4" />
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">
-                    {showDetailDropdown ? 'Tutup Bimbingan & Nasihat Lengkap' : 'Lihat Bimbingan & Nasihat Lengkap'}
-                  </span>
-                  <span
-                    className="text-[10px] rounded-md px-1.5 py-0.5 font-medium"
-                    style={{
-                      background: 'hsl(var(--gold) / 0.15)',
-                      color: 'hsl(var(--gold))'
-                    }}
-                  >
-                    Opsi Detail
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Uraian hikmah mendalam Kyai, landasan hadits Nabi ﷺ & amalan praktis
-                </p>
-              </div>
-            </div>
-
-            <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform duration-200 flex-shrink-0 ${
-                showDetailDropdown ? 'rotate-180 text-gold' : ''
-              }`}
-            />
-          </button>
-
-          {/* Konten Dropdown Jawaban Detail (Ketika dibuka / expanded) */}
-          {showDetailDropdown && (
-            <div className="border-t border-border/40 p-4 sm:p-6 space-y-5 bg-secondary/35 animate-fade-down">
-
-              {/* Nasihat & Penjelasan Mendalam */}
-              {detailedAnswer && (
-                <div
-                  className="pl-4 sm:pl-5 border-l-2 space-y-2"
-                  style={{ borderLeftColor: 'hsl(var(--gold))' }}
-                >
-                  <span
-                    className="text-[10px] font-semibold uppercase tracking-[0.2em]"
-                    style={{ color: 'hsl(var(--gold))' }}
-                  >
-                    Nasihat Mendalam Kyai Al Munawwarah
-                  </span>
-                  <div className="text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-2.5">
-                    {detailedAnswer.split('\n\n').map((paragraph, pIdx) => {
-                      const trimmed = paragraph.trim();
-                      if (!trimmed) return null;
-                      return <p key={pIdx}>{trimmed}</p>;
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Hadits Pendukung */}
-              {hadith && (
-                <div
-                  className="da-card rounded-xl p-4 border bg-background/70 space-y-1.5"
-                  style={{ borderColor: 'hsl(var(--gold) / 0.25)' }}
-                >
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block">
-                    Hadits Nabi ﷺ
-                  </span>
-                  <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 italic">
-                    &ldquo;{hadith}&rdquo;
-                  </p>
-                </div>
-              )}
-
-              {/* Langkah Amalan Nyata */}
-              {practicalSteps.length > 0 && (
-                <div className="pt-2">
-                  <span
-                    className="text-[10px] font-semibold uppercase tracking-[0.2em] block mb-2.5"
-                    style={{ color: 'hsl(var(--gold))' }}
-                  >
-                    Langkah Nyata Hari Ini
-                  </span>
-                  <ol className="space-y-2.5">
-                    {practicalSteps.map((step, sIdx) => (
-                      <li key={sIdx} className="flex items-start gap-2.5">
-                        <span
-                          className="flex-shrink-0 font-cormorant font-semibold text-sm w-5 text-right"
-                          style={{ color: 'hsl(var(--gold))' }}
-                        >
-                          {String(sIdx + 1).padStart(2, '0')}
-                        </span>
-                        <span className="text-xs sm:text-sm text-foreground/90 leading-relaxed">
-                          {step}
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-
-              {/* Doa Penutup */}
-              {closing && (
-                <p className="font-cormorant text-[15px] italic text-muted-foreground text-center leading-relaxed pt-3 border-t border-border/30">
-                  {closing}
-                </p>
-              )}
-
             </div>
           )}
         </div>

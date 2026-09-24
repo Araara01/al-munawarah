@@ -162,7 +162,7 @@ export default function ChatArea({
                       Al Munawwarah sedang mencari hikmah Al-Qur'an...
                     </p>
                     <p className="text-[11px] text-muted-foreground">
-                      Menghubungkan ke teks Arab, terjemahan resmi Kemenag RI, dan tafsir.
+                      Menghubungkan ke database Al-Qur'an, terjemahan resmi Kemenag RI, dan Tafsir Ibnu Katsir.
                     </p>
                   </div>
                 </div>
