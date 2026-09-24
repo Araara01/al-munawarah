@@ -173,7 +173,7 @@ export const POPULAR_AYAHS = [
     translation_id: "Maka sesungguhnya bersama kesulitan ada kemudahan. Sesungguhnya bersama kesulitan ada kemudahan.",
     tafsir: "Kata 'al-'usr' (kesulitan) menggunakan bentuk tertentu (ma'rifah), sedangkan 'yusr' (kemudahan) berbentuk umum (nakirah). Para ulama tafsir menerangkan bahwa satu kesulitan tidak akan mengalahkan dua kemudahan yang senantiasa menyertainya.",
     audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/6090.mp3",
-    theme_tags: ["sabar", "berat", "kesulitan", "masalah", "lelah", "beban", "hidup"]
+    theme_tags: ["kesulitan", "kesempitan", "kesabaran", "kesusahan", "kelapangan", "kemudahan"]
   },
   {
     surah_number: 2,
@@ -282,6 +282,66 @@ export const POPULAR_AYAHS = [
     tafsir: "Prinsip luhur kesetaraan manusia sedunia. Perbedaan diciptakan untuk saling memahami, bekerja sama dalam kebajikan, dan menjunjung tinggi martabat kemanusiaan.",
     audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/4625.mp3",
     theme_tags: ["kemanusiaan", "toleransi", "sesama", "persaudaraan", "wawasan", "non-muslim", "sosial"]
+  },
+  {
+    surah_number: 2,
+    surah_name: "Al-Baqarah",
+    ayah_number: "155-156",
+    revelation: "MADANIYYAH",
+    arabic_text: "وَلَنَبْلُوَنَّكُم بِشَيْءٍ مِّنَ الْخَوْفِ وَالْجُوعِ وَنَقْصٍ مِّنَ الْأَمْوَالِ وَالْأَنفُسِ وَالثَّمَرَاتِ ۗ وَبَشِّرِ الصَّابِرِينَ • الَّذِينَ إِذَا أَصَابَتْهُم مُّصِيبَةٌ قَالُوا إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ",
+    latin_text: "Wa lanabluwannakum bisyai'im minal-khaufi wal-jū'i wa naqsim minal-amwāli wal-anfusi waṡ-ṡamarāt, wa basysyiriṣ-ṣābirīn. Allażīna iżā aṣābathum muṣībatun qālū innā lillāhi wa innā ilaihi rāji'ūn.",
+    translation_id: "Dan Kami pasti akan menguji kamu dengan sedikit ketakutan, kelaparan, kekurangan harta, jiwa, dan buah-buahan. Dan sampaikanlah kabar gembira kepada orang-orang yang sabar, (yaitu) orang-orang yang apabila ditimpa musibah, mereka berkata 'Inna lillahi wa inna ilaihi raji'un'.",
+    tafsir: "Ujian kehilangan dan rasa takut adalah keniscayaan dalam perjalanan duniawi. Kunci keselamatan batin terletak pada pengembalian segala kepemilikan kepada Sang Pemilik Sejati.",
+    audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/162.mp3",
+    theme_tags: ["ujian", "musibah", "kehilangan", "kematian", "meninggal", "sabar", "sedih", "takut"]
+  },
+  {
+    surah_number: 3,
+    surah_name: "Ali 'Imran",
+    ayah_number: "139",
+    revelation: "MADANIYYAH",
+    arabic_text: "وَلَا تَهِنُوا وَلَا تَحْزَنُوا وَأَنتُمُ الْأَعْلَوْنَ إِن كُنتُم مُّؤْمِنِينَ",
+    latin_text: "Wa lā tahinū wa lā taḥzanū wa antumul-a'launa in kuntum mu'minīn.",
+    translation_id: "Dan janganlah kamu (merasa) lemah, dan jangan (pula) bersedih hati, sebab kamu paling tinggi (derajatnya), jika kamu orang beriman.",
+    tafsir: "Seruan optimisme dan kekuatan mental. Penolakan terhadap rasa minder, patah arang, dan keputusasaan setelah kegagalan, karena martabat seorang mukmin tetap mulia di sisi Allah.",
+    audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/432.mp3",
+    theme_tags: ["lemah", "sedih", "minder", "gagal", "bangkit", "kalah", "patah arang", "kecewa", "putus asa"]
+  },
+  {
+    surah_number: 30,
+    surah_name: "Ar-Rum",
+    ayah_number: "21",
+    revelation: "MAKKIYYAH",
+    arabic_text: "وَمِنْ آيَاتِهِ أَنْ خَلَقَ لَكُم مِّنْ أَنفُسِكُمْ أَزْوَاجًا لِّتَسْكُنُوا إِلَيْهَا وَجَعَلَ بَيْنَكُم مَّوَدَّةً وَرَحْمَةً",
+    latin_text: "Wa min āyātihī an khalaqa lakum min anfusikum azwājal litaskunū ilaihā wa ja'ala bainakum mawaddataw wa raḥmah.",
+    translation_id: "Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.",
+    tafsir: "Fondasi pernikahan dan jodoh dalam Islam yang bertumpu pada ketenteraman batin (sakinah), rasa cinta yang bersemi (mawaddah), dan kasih sayang yang tulus (rahmah).",
+    audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/3430.mp3",
+    theme_tags: ["jodoh", "pasangan", "pernikahan", "nikah", "cinta", "suami", "istri", "sakinah"]
+  },
+  {
+    surah_number: 26,
+    surah_name: "Asy-Syu'ara'",
+    ayah_number: "80",
+    revelation: "MAKKIYYAH",
+    arabic_text: "وَإِذَا مَرِضْتُ فَهُوَ يَشْفِينِ",
+    latin_text: "Wa iżā mariḍtu fahuwa yasyfīn.",
+    translation_id: "Dan apabila aku sakit, Dialah yang menyembuhkan aku.",
+    tafsir: "Adab luhur Nabi Ibrahim: menyandarkan sakit sebagai kondisi manusiawi dan menyandarkan kesembuhan mutlak kepada Allah, seraya menumbuhkan harapan dan ikhtiar pengobatan.",
+    audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/3012.mp3",
+    theme_tags: ["sakit", "sembuh", "penyakit", "obat", "kesembuhan", "sehat", "kesehatan"]
+  },
+  {
+    surah_number: 21,
+    surah_name: "Al-Anbiya'",
+    ayah_number: "87",
+    revelation: "MAKKIYYAH",
+    arabic_text: "لَّا إِلَٰهَ إِلَّا أَنتَ سُبْحَانَكَ إِنِّي كُنتُ مِنَ الظَّالِمِينَ",
+    latin_text: "Lā ilāha illā anta sub-ḥānaka innī kuntu minaẓ-ẓālimīn.",
+    translation_id: "Tidak ada tuhan selain Engkau, Mahasuci Engkau. Sungguh, aku termasuk orang-orang yang zalim.",
+    tafsir: "Doa Dzun Nun (Nabi Yunus) di dalam tiga kegelapan (malam, laut, dan perut ikan). Pengakuan dosa dan ketundukan total yang menjadi pembuka jalan keluar dari segala himpitan hidup yang paling buntu.",
+    audio_url: "https://cdn.islamic.network/quran/audio/128/ar.alafasy/2570.mp3",
+    theme_tags: ["terjebak", "buntu", "sesak", "yunus", "himpitan", "gelap", "sulit", "kepepet"]
   }
 ];
 

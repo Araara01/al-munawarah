@@ -1,6 +1,6 @@
 // Quran Database Service
 // Connects to local static Tafsir Ibnu Katsir database, equran.id API v2 & alquran.cloud
-import { SURAH_LIST, JUZ_LIST } from '../data/quranData.js';
+import { SURAH_LIST, JUZ_LIST, POPULAR_AYAHS } from '../data/quranData.js';
 
 // Cache version — bump this to invalidate stale sessionStorage caches
 const CACHE_VERSION = 'v3_ibk';
@@ -523,5 +523,201 @@ export function getSurahStatsMap(savedAyahs = [], lastRead = null) {
     };
   }
   return map;
+}
+
+/**
+ * Get Surah Metadata by number or name
+ */
+export function getSurahMeta(surahNumberOrName) {
+  if (!surahNumberOrName) return null;
+  const num = parseInt(surahNumberOrName, 10);
+  if (num && num >= 1 && num <= 114) {
+    return SURAH_LIST.find(s => s.number === num) || null;
+  }
+  const clean = String(surahNumberOrName).toLowerCase().replace(/^qs\.?\s*/i, '').replace(/^surat\s*/i, '').replace(/^surah\s*/i, '').trim();
+  return SURAH_LIST.find(s => 
+    s.name.toLowerCase() === clean || 
+    s.name.toLowerCase().replace(/[^a-z]/g, '') === clean.replace(/[^a-z]/g, '') ||
+    s.translation.toLowerCase().includes(clean)
+  ) || null;
+}
+
+/**
+ * Retrieve verified Ayah data from the Quran Database.
+ * First checks curated POPULAR_AYAHS for instant lookup,
+ * then queries getSurahDetail() to load authentic Arabic, Latin,
+ * official Kemenag Indonesian translation, and Ibnu Katsir Tafsir from local static JSON.
+ */
+export async function getAyahFromDatabase(surahNumber, ayahNumber) {
+  const sNum = parseInt(surahNumber, 10);
+  if (!sNum || sNum < 1 || sNum > 114) return null;
+
+  const aNumStr = String(ayahNumber || '1').trim();
+
+  // 1. Try finding in curated POPULAR_AYAHS first (instant retrieval)
+  const popular = POPULAR_AYAHS.find(a => 
+    a.surah_number === sNum && 
+    (String(a.ayah_number) === aNumStr || aNumStr.includes(String(a.ayah_number)) || String(a.ayah_number).includes(aNumStr))
+  );
+
+  // 2. Fetch full authentic data from database / cache
+  try {
+    const surah = await getSurahDetail(sNum);
+    if (surah && surah.ayahs && surah.ayahs.length > 0) {
+      const parsedANum = parseInt(aNumStr, 10) || 1;
+      const foundAyah = surah.ayahs.find(a => a.ayah_number === parsedANum) || surah.ayahs[0];
+
+      let combinedArabic = foundAyah.arabic_text;
+      let combinedTranslation = foundAyah.translation_id;
+      let combinedLatin = foundAyah.latin_text;
+      let combinedTafsir = foundAyah.tafsir;
+      let combinedIbnuKatsir = foundAyah.tafsir_ibnu_katsir;
+      let combinedKemenag = foundAyah.tafsir_kemenag;
+
+      if (aNumStr.includes('-')) {
+        const parts = aNumStr.split('-').map(p => parseInt(p.trim(), 10)).filter(Boolean);
+        if (parts.length === 2 && parts[1] >= parts[0] && parts[1] - parts[0] <= 5) {
+          const rangeAyahs = surah.ayahs.filter(a => a.ayah_number >= parts[0] && a.ayah_number <= parts[1]);
+          if (rangeAyahs.length > 0) {
+            combinedArabic = rangeAyahs.map(a => a.arabic_text).join(' • ');
+            combinedTranslation = rangeAyahs.map(a => a.translation_id).join(' ');
+            combinedLatin = rangeAyahs.map(a => a.latin_text).join(' ');
+            combinedTafsir = rangeAyahs.map(a => a.tafsir).filter(Boolean).join('\n\n');
+            combinedIbnuKatsir = rangeAyahs.map(a => a.tafsir_ibnu_katsir).filter(Boolean).join('\n\n');
+            combinedKemenag = rangeAyahs.map(a => a.tafsir_kemenag).filter(Boolean).join('\n\n');
+          }
+        }
+      }
+
+      return {
+        surah_number: surah.number,
+        surah_name: surah.name,
+        surah_arabic: surah.arabic,
+        surah_translation: surah.translation,
+        revelation: surah.revelation,
+        total_ayahs: surah.numberOfAyahs,
+        ayah_number: aNumStr,
+        arabic_text: combinedArabic || popular?.arabic_text || '',
+        latin_text: combinedLatin || popular?.latin_text || '',
+        translation_id: combinedTranslation || popular?.translation_id || '',
+        translation_en: foundAyah.translation_en || '',
+        tafsir: combinedTafsir || popular?.tafsir || '',
+        tafsir_ibnu_katsir: combinedIbnuKatsir || popular?.tafsir || '',
+        tafsir_kemenag: combinedKemenag || '',
+        tafsir_source: foundAyah.tafsir_source || 'ibnu_katsir_local',
+        audio_url: foundAyah.audio_url || popular?.audio_url || getAyahAudioUrl(foundAyah),
+        fromDatabase: true,
+        databaseSource: 'Kemenag RI & Tafsir Ibnu Katsir'
+      };
+    }
+  } catch (err) {
+    console.warn(`[getAyahFromDatabase] Detail fetch failed for Surah ${sNum}, using fallback:`, err.message);
+  }
+
+  // 3. Fallback to POPULAR_AYAHS if available
+  if (popular) {
+    const surahMeta = SURAH_LIST.find(s => s.number === sNum);
+    return {
+      ...popular,
+      surah_arabic: surahMeta?.arabic || '',
+      surah_translation: surahMeta?.translation || '',
+      total_ayahs: surahMeta?.numberOfAyahs || 1,
+      fromDatabase: true,
+      databaseSource: 'Kemenag RI & Tafsir Ibnu Katsir'
+    };
+  }
+
+  // 4. Last fallback to SURAH_LIST meta
+  const surahMeta = SURAH_LIST.find(s => s.number === sNum);
+  if (surahMeta) {
+    return {
+      surah_number: sNum,
+      surah_name: surahMeta.name,
+      surah_arabic: surahMeta.arabic,
+      surah_translation: surahMeta.translation,
+      revelation: surahMeta.revelation,
+      total_ayahs: surahMeta.numberOfAyahs,
+      ayah_number: aNumStr,
+      arabic_text: '',
+      latin_text: surahMeta.name,
+      translation_id: `Surah ${surahMeta.name} (${surahMeta.translation})`,
+      tafsir: '',
+      tafsir_ibnu_katsir: '',
+      fromDatabase: true,
+      databaseSource: 'Kemenag RI'
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Match user problem/query to the most appropriate Surah and Ayah in the Quran database.
+ */
+export function findQuranReferenceForProblem(query = '') {
+  const q = (query || '').toLowerCase().trim();
+  if (!q) {
+    return POPULAR_AYAHS[0]; // QS. Asy-Syarh: 5-6
+  }
+
+  // 1. Direct name match (e.g. user mentions specific Surah name)
+  const nameMatch = POPULAR_AYAHS.find(item => q.includes(item.surah_name.toLowerCase()));
+  if (nameMatch) return nameMatch;
+
+  // 2. High-priority keyword cluster heuristics
+  if (q.includes("rezeki") || q.includes("uang") || q.includes("kerja") || q.includes("karir") || q.includes("bisnis") || q.includes("finansial") || q.includes("miskin") || q.includes("utang") || q.includes("nafkah")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "At-Talaq") || POPULAR_AYAHS[3];
+  }
+  if (q.includes("tenang") || q.includes("gelisah") || q.includes("cemas") || q.includes("overthinking") || q.includes("takut") || q.includes("panik") || q.includes("khawatir") || q.includes("gundah") || q.includes("waswas")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Ar-Ra'd") || POPULAR_AYAHS[2];
+  }
+  if (q.includes("dosa") || q.includes("salah") || q.includes("sesal") || q.includes("taubat") || q.includes("maksiat") || q.includes("ampun") || q.includes("hina") || q.includes("bersalah")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Az-Zumar") || POPULAR_AYAHS[5];
+  }
+  if (q.includes("orang tua") || q.includes("ibu") || q.includes("ayah") || q.includes("keluarga") || q.includes("bapak") || q.includes("anak") || q.includes("berbakti")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Al-Isra'") || POPULAR_AYAHS[6];
+  }
+  if (q.includes("doa") || q.includes("berdoa") || q.includes("minta") || q.includes("hajat") || q.includes("kabul") || q.includes("dengar")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Al-Baqarah" && String(a.ayah_number) === "186") || POPULAR_AYAHS[7];
+  }
+  if (q.includes("syukur") || q.includes("nikmat") || q.includes("terima kasih") || q.includes("bahagia") || q.includes("berkah")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Ibrahim") || POPULAR_AYAHS[8];
+  }
+  if (q.includes("sendiri") || q.includes("kesepian") || q.includes("ditinggal") || q.includes("hampa") || q.includes("patah hati") || q.includes("ditinggalkan")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Ad-Duha") || POPULAR_AYAHS[4];
+  }
+  if (q.includes("jodoh") || q.includes("nikah") || q.includes("pasangan") || q.includes("suami") || q.includes("istri") || q.includes("cinta") || q.includes("rumah tangga")) {
+    const jodohAyah = POPULAR_AYAHS.find(a => a.surah_name === "Ar-Rum");
+    if (jodohAyah) return jodohAyah;
+  }
+  if (q.includes("sakit") || q.includes("kesembuhan") || q.includes("penyakit") || q.includes("sembuh") || q.includes("sehat") || q.includes("obat")) {
+    const sakitAyah = POPULAR_AYAHS.find(a => a.surah_name === "Asy-Syu'ara'");
+    if (sakitAyah) return sakitAyah;
+  }
+  if (q.includes("ujian") || q.includes("musibah") || q.includes("meninggal") || q.includes("kehilangan") || q.includes("wafat") || q.includes("kematian") || q.includes("duka")) {
+    const musibahAyah = POPULAR_AYAHS.find(a => a.surah_name === "Al-Baqarah" && String(a.ayah_number).includes("155"));
+    if (musibahAyah) return musibahAyah;
+  }
+  if (q.includes("lemah") || q.includes("gagal") || q.includes("minder") || q.includes("bangkit") || q.includes("kalah") || q.includes("kecewa")) {
+    const bangkitAyah = POPULAR_AYAHS.find(a => a.surah_name === "Ali 'Imran" && String(a.ayah_number) === "139");
+    if (bangkitAyah) return bangkitAyah;
+  }
+  if (q.includes("terjebak") || q.includes("buntu") || q.includes("sesak") || q.includes("himpitan") || q.includes("kepepet") || q.includes("yunus")) {
+    const yunusAyah = POPULAR_AYAHS.find(a => a.surah_name === "Al-Anbiya'");
+    if (yunusAyah) return yunusAyah;
+  }
+  if (q.includes("beban") || q.includes("tidak sanggup") || q.includes("tak sanggup") || q.includes("lelah") || q.includes("berat")) {
+    return POPULAR_AYAHS.find(a => a.surah_name === "Al-Baqarah" && String(a.ayah_number) === "286") || POPULAR_AYAHS[1];
+  }
+
+  // 3. Fallback direct match with remaining POPULAR_AYAHS theme_tags or translations
+  const directMatch = POPULAR_AYAHS.find(item => {
+    return (item.theme_tags || []).some(tag => q.includes(tag.toLowerCase())) ||
+      q.includes(item.translation_id.toLowerCase());
+  });
+  if (directMatch) return directMatch;
+
+  // 4. Default fallback: QS. Asy-Syarh (5-6)
+  return POPULAR_AYAHS[0];
 }
 
