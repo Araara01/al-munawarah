@@ -304,20 +304,100 @@ export default function MessageItem({
                 </div>
               )}
 
-              {/* Hadits Pendukung */}
-              {hadith && (
-                <div
-                  className="da-card rounded-xl p-4 border bg-background/70 space-y-1.5"
-                  style={{ borderColor: 'hsl(var(--gold) / 0.25)' }}
-                >
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block">
-                    Hadits Nabi ﷺ
-                  </span>
-                  <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 italic">
-                    &ldquo;{hadith}&rdquo;
-                  </p>
-                </div>
-              )}
+              {/* Hadits Pendukung — Database Hadis Riwayat Bukhari */}
+              {hadith && (() => {
+                const hData = data?.hadithData || null;
+                return (
+                  <div
+                    className="da-card rounded-xl border space-y-3"
+                    style={{ borderColor: 'hsl(var(--gold) / 0.3)', background: 'hsl(var(--background) / 0.7)' }}
+                  >
+                    {/* Header Kartu Hadis */}
+                    <div
+                      className="flex flex-wrap items-center justify-between gap-2 px-4 pt-4 pb-2 border-b"
+                      style={{ borderColor: 'hsl(var(--gold) / 0.2)' }}
+                    >
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                        Hadits Nabi ﷺ
+                      </span>
+                      {hData && (
+                        <span
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                          style={{
+                            background: 'hsl(var(--gold) / 0.12)',
+                            color: 'hsl(var(--gold))',
+                            border: '1px solid hsl(var(--gold) / 0.3)'
+                          }}
+                        >
+                          <ShieldCheck className="h-2.5 w-2.5" />
+                          {hData.nomor || 'Shahih Bukhari'}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="px-4 pb-4 space-y-3">
+                      {/* Teks Arab Hadis */}
+                      {hData?.arabic && (
+                        <p
+                          className="arabic text-right leading-loose text-foreground/90"
+                          style={{ fontSize: '1.35rem', lineHeight: 2.1 }}
+                          dir="rtl"
+                        >
+                          {hData.arabic}
+                        </p>
+                      )}
+
+                      {/* Teks Latin Hadis */}
+                      {hData?.latin && (
+                        <p className="text-xs italic text-muted-foreground/80 leading-relaxed">
+                          {hData.latin}
+                        </p>
+                      )}
+
+                      {/* Separator jika ada teks Arab */}
+                      {hData?.arabic && <div className="hairline" />}
+
+                      {/* Terjemahan / Matan Hadis */}
+                      <p className="text-xs sm:text-sm leading-relaxed text-foreground/90 italic">
+                        &ldquo;{hadith}&rdquo;
+                      </p>
+
+                      {/* Faedah / Penjelasan Hadis */}
+                      {hData?.faedah && (
+                        <div
+                          className="rounded-lg p-3 text-xs leading-relaxed text-foreground/80"
+                          style={{
+                            background: 'hsl(var(--secondary) / 0.5)',
+                            borderLeft: '3px solid hsl(var(--gold) / 0.5)'
+                          }}
+                        >
+                          <span
+                            className="text-[10px] font-semibold uppercase tracking-wider block mb-1"
+                            style={{ color: 'hsl(var(--gold))' }}
+                          >
+                            Faedah Hadis:
+                          </span>
+                          <p>{hData.faedah}</p>
+                        </div>
+                      )}
+
+                      {/* Sumber Hadis */}
+                      {hData && (
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          <span className="text-[10px] text-muted-foreground/70">
+                            📚 {hData.sumber || `Shahih Al-Bukhari — ${hData.kitab || ''}`}
+                          </span>
+                          {hData.bab && (
+                            <span className="text-[10px] text-muted-foreground/50">
+                              · {hData.bab}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Langkah Amalan Nyata */}
               {practicalSteps.length > 0 && (

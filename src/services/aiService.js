@@ -5,6 +5,7 @@
 // 3. Jawaban Detail & Bimbingan Lengkap (Deep explanation, Hadith, Practical steps, Closing prayer)
 import { POPULAR_AYAHS, SURAH_LIST } from '../data/quranData.js';
 import { getAyahFromDatabase, getSurahMeta, findQuranReferenceForProblem } from './quranService.js';
+import { findRelevantHadith, formatHadithForDisplay, formatHadithFull } from './hadithService.js';
 
 // Detect provider from model id
 function getProvider(model = '') {
@@ -145,8 +146,12 @@ export function generateOfflineMunawwarah(query, mode = 'muslim') {
     ayahRelevance = "QS. Asy-Syarh ayat 5-6 adalah penegasan ilahi bahwa bersama setiap kesulitan, Allah pasti menyertakan jalan kemudahan yang berlipat ganda.";
   }
 
-  const hadith = isMuslimMode 
-    ? "Rasulullah ﷺ bersabda: 'Sungguh menakjubkan urusan seorang mukmin, semua urusannya baik baginya. Jika mendapat kesenangan ia bersyukur, dan jika ditimpa kesusahan ia bersabar, maka itu pun baik baginya.' (HR. Muslim)"
+  // Ambil Hadis Bukhari yang paling relevan berdasarkan query pengguna
+  const relevantHadith = findRelevantHadith(query);
+  const hadithFull = relevantHadith ? formatHadithFull(relevantHadith) : null;
+
+  const hadith = isMuslimMode
+    ? (hadithFull ? formatHadithForDisplay(relevantHadith) : "Rasulullah ﷺ bersabda: 'Sungguh menakjubkan urusan seorang mukmin, semua urusannya baik baginya. Jika mendapat kesenangan ia bersyukur, dan jika ditimpa kesusahan ia bersabar.' (HR. Bukhari No. 5647)")
     : "Pepatah bijak mengingatkan bahwa: 'Tidaklah seseorang ditimpa kesulitan, kelelahan, dan kesedihan, melainkan hal itu akan mematangkan jiwa dan membersihkan bebannya.'";
 
   const detailedAnswer = isMuslimMode
@@ -199,6 +204,7 @@ export function generateOfflineMunawwarah(query, mode = 'muslim') {
     ayahs: [enrichedAyah],
     detailed_answer: detailedAnswer,
     hadith,
+    hadithData: hadithFull,  // Data lengkap Hadis Bukhari (Arab, Latin, faedah, nomor)
     practical_steps: practicalSteps,
     closing,
     // Backward compatibility for existing UI/conversations
@@ -548,7 +554,14 @@ async function enrichWithQuranDatabase(rawResponseText, messages, mode) {
     relevance: parsed.ayah_relevance || `Surah rujukan kalamullah yang relevan dan menuntun solusi untuk persoalan ini.`
   };
 
-  const hadithSection = hadith ? `\n\n**Hadits Nabi ﷺ:**\n> "${hadith}"` : "";
+  // Ambil Hadis Bukhari yang relevan untuk memperkaya respons AI
+  const relevantHadithFromDB = findRelevantHadith(query);
+  const hadithDataFromDB = relevantHadithFromDB ? formatHadithFull(relevantHadithFromDB) : null;
+
+  // Gunakan hadis dari AI jika ada, fallback ke database Bukhari
+  const finalHadith = hadith || (hadithDataFromDB ? formatHadithForDisplay(relevantHadithFromDB) : '');
+
+  const hadithSection = finalHadith ? `\n\n**Hadits Nabi ﷺ:**\n> "${finalHadith}"` : "";
   const rawText = `${shortAnswer}\n\n### QS. ${surahInfo.name} (${surahInfo.number}:${surahInfo.ayah_number}) - ${surahInfo.translation}\n*${surahInfo.relevance}*\n\n${verifiedAyah.arabic_text}\n\n*${verifiedAyah.latin_text}*\n\n> "${verifiedAyah.translation_id}"${hadithSection}\n\n**Bimbingan Detail Kyai Al Munawwarah:**\n${detailedAnswer}\n\n${closing}`;
 
   return {
@@ -556,7 +569,8 @@ async function enrichWithQuranDatabase(rawResponseText, messages, mode) {
     surah_info: surahInfo,
     ayahs: [verifiedAyah],
     detailed_answer: detailedAnswer,
-    hadith,
+    hadith: finalHadith,
+    hadithData: hadithDataFromDB,  // Data lengkap Hadis Bukhari untuk UI kartu hadis
     practical_steps: practicalSteps,
     closing,
     // Backward compatibility for existing views

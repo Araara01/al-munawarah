@@ -5,6 +5,7 @@ import ChatArea from './components/ChatArea';
 import LandingPage from './components/LandingPage';
 import QuranBrowser from './components/QuranBrowser';
 import SavedAyat from './components/SavedAyat';
+import HadithBrowser from './components/HadithBrowser';
 import AboutPage from './components/AboutPage';
 import AdminStats from './components/AdminStats';
 import SettingsModal from './components/SettingsModal';
@@ -20,6 +21,7 @@ import {
   MessageSquareQuote, 
   BookOpen, 
   BookmarkCheck, 
+  BookMarked,
   Settings 
 } from 'lucide-react';
 
@@ -44,6 +46,7 @@ function AppContent() {
     if (path === 'chat') return 'chat';
     if (path === 'quran') return 'quran';
     if (path === 'saved') return 'saved';
+    if (path === 'hadith') return 'hadith';
     if (path === 'settings') return 'settings';
     if (path === 'about') return 'about';
     if (path === 'admin') return 'admin';
@@ -159,6 +162,7 @@ function AppContent() {
       if (path === 'chat') setCurrentTab('chat');
       else if (path === 'quran') setCurrentTab('quran');
       else if (path === 'saved') setCurrentTab('saved');
+      else if (path === 'hadith') setCurrentTab('hadith');
       else if (path === 'settings') setCurrentTab('settings');
       else if (path === 'about') setCurrentTab('about');
       else if (path === 'admin') setCurrentTab('admin');
@@ -406,6 +410,7 @@ function AppContent() {
     chat: "Tanya AI",
     quran: "Jelajahi Al-Qur'an",
     saved: "Ayat Tersimpan",
+    hadith: "Hadits Riwayat Bukhari",
     settings: "Pengaturan",
     about: "Tentang Al Munawwarah",
     admin: "Admin & Statistik"
@@ -420,6 +425,7 @@ function AppContent() {
           onStartChatWithPrompt={handleStartChatWithPrompt}
           onOpenQuran={() => navigateTo('quran')}
           onOpenSaved={() => navigateTo('saved')}
+          onOpenHadith={() => navigateTo('hadith')}
           onOpenAbout={() => navigateTo('about')}
           onOpenSettings={() => navigateTo('settings')}
           onOpenAdmin={() => navigateTo('admin')}
@@ -456,6 +462,7 @@ function AppContent() {
         currentMode={currentMode}
         onOpenQuran={() => navigateTo('quran')}
         onOpenSaved={() => navigateTo('saved')}
+        onOpenHadith={() => navigateTo('hadith')}
         onOpenSettings={() => navigateTo('settings')}
         onOpenAdmin={() => navigateTo('admin')}
         onGoHome={() => navigateTo('landing')}
@@ -537,6 +544,12 @@ function AppContent() {
               onOpenSurah={handleOpenSurah}
               onExportQuote={(q) => setExportQuoteData(q)}
               onGoToQuran={() => navigateTo('quran')}
+            />
+          )}
+
+          {currentTab === 'hadith' && (
+            <HadithBrowser
+              onExportQuote={(q) => setExportQuoteData(q)}
             />
           )}
 
@@ -622,6 +635,17 @@ function AppContent() {
         >
           <BookmarkCheck className="h-5 w-5" />
           <span>Tersimpan</span>
+        </button>
+
+        <button
+          onClick={() => navigateTo('hadith')}
+          data-testid="mnav-hadith"
+          className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] transition-colors ${
+            currentTab === 'hadith' ? 'text-gold font-semibold' : 'text-muted-foreground'
+          }`}
+        >
+          <BookMarked className="h-5 w-5" />
+          <span>Hadits</span>
         </button>
 
         <button

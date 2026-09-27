@@ -5,6 +5,7 @@ import {
   MessageSquareQuote,
   BookOpen,
   BookmarkCheck,
+  BookMarked,
   Settings,
   LayoutDashboard,
   Search,
@@ -45,6 +46,7 @@ export default function Sidebar({
   currentMode,
   onOpenQuran,
   onOpenSaved,
+  onOpenHadith,
   onOpenSettings,
   onOpenAdmin,
   onGoHome
@@ -140,6 +142,14 @@ export default function Sidebar({
             testId="nav-saved"
             iconColor="text-gold"
             onClick={() => { onOpenSaved?.(); onClose?.(); }}
+          />
+          <NavItem
+            icon={BookMarked}
+            label="Hadits"
+            active={currentTab === 'hadith'}
+            testId="nav-hadith"
+            iconColor="text-emerald"
+            onClick={() => { onOpenHadith?.(); onClose?.(); }}
           />
           <NavItem
             icon={Settings}

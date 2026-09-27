@@ -6,6 +6,7 @@ import {
   ArrowRight, 
   BookOpen, 
   BookmarkCheck, 
+  BookMarked,
   Moon, 
   Sun, 
   MessageSquare, 
@@ -23,6 +24,7 @@ export default function LandingPage({
   onStartChatWithPrompt,
   onOpenQuran,
   onOpenSaved,
+  onOpenHadith,
   onOpenAbout,
   onOpenSettings,
   onOpenAdmin,
@@ -93,6 +95,15 @@ export default function LandingPage({
               data-testid="landing-nav-quran"
             >
               Jelajahi Al-Qur'an
+            </button>
+
+            {/* Nav to Hadith */}
+            <button
+              onClick={onOpenHadith}
+              className="hidden rounded-full text-xs font-semibold px-4 py-2 text-foreground/80 hover:text-foreground hover:bg-secondary/60 md:inline-flex transition-colors"
+              data-testid="landing-nav-hadith"
+            >
+              Hadits Bukhari
             </button>
 
             {/* CTA button */}
@@ -312,6 +323,14 @@ export default function LandingPage({
                 <BookmarkCheck className="h-4 w-4 text-gold" />
                 <span>Ayat Tersimpan</span>
               </button>
+              <button
+                onClick={onOpenHadith}
+                data-testid="footer-cta-hadith"
+                className="flex items-center justify-center gap-2 h-[3.25rem] rounded-full border border-emerald/35 px-8 text-sm font-medium text-foreground hover:bg-emerald/5 transition-transform active:scale-95"
+              >
+                <BookMarked className="h-4 w-4 text-emerald" />
+                <span>Hadits Bukhari</span>
+              </button>
             </div>
           </div>
         </div>
@@ -321,10 +340,10 @@ export default function LandingPage({
       <footer className="border-t border-border/60 px-4 py-10 sm:px-6 lg:px-8 bg-background">
         <div className="mx-auto max-w-6xl space-y-4">
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Al Munawwarah adalah AI untuk membantu memahami dan menemukan referensi ayat Al-Qur'an. Jawaban AI bukan pengganti ulama, ustaz, ahli tafsir, atau fatwa resmi. Untuk keputusan hukum/fatwa, sebaiknya konsultasikan kepada ulama atau ahli yang terpercaya.
+            Al Munawwarah adalah AI untuk membantu memahami dan menemukan referensi ayat Al-Qur'an dan Hadis Nabi ﷺ. Jawaban AI bukan pengganti ulama, ustaz, ahli tafsir, atau fatwa resmi. Untuk keputusan hukum/fatwa, sebaiknya konsultasikan kepada ulama atau ahli yang terpercaya.
           </p>
           <p className="text-xs text-muted-foreground">
-            Sumber data: Teks Arab Utsmani, Terjemahan & Tafsir Ringkas Kemenag RI, serta Database Lengkap Kitab Tafsir Ibnu Katsir (114 Surat, 30 Juz).
+            Sumber data: Teks Arab Utsmani, Terjemahan & Tafsir Ringkas Kemenag RI, Database Lengkap Kitab Tafsir Ibnu Katsir (114 Surat, 30 Juz), serta Database Shahih Al-Bukhari.
           </p>
           <div className="flex flex-wrap gap-4 text-xs font-medium pt-2">
             <button
