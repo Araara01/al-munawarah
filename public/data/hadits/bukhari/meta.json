@@ -1,0 +1,883 @@
+{
+  "source": "Shahih Al-Bukhari (Al-Jami' Al-Musnad As-Shahih)",
+  "author": "Imam Abu Abdullah Muhammad ibn Ismail Al-Bukhari (194–256 H)",
+  "totalBooks": 97,
+  "totalHadiths": 7589,
+  "range": "1 - 7563",
+  "updatedAt": "2026-09-27T13:48:40.494Z",
+  "books": [
+    {
+      "bookNumber": 1,
+      "nameId": "Permulaan Wahyu (Bad'ul Wahyi)",
+      "nameEn": "Revelation",
+      "firstHadithNumber": 1,
+      "lastHadithNumber": 7,
+      "totalHadiths": 7,
+      "sizeKb": 44
+    },
+    {
+      "bookNumber": 2,
+      "nameId": "Iman (Al-Iman)",
+      "nameEn": "Belief",
+      "firstHadithNumber": 8,
+      "lastHadithNumber": 58,
+      "totalHadiths": 51,
+      "sizeKb": 90
+    },
+    {
+      "bookNumber": 3,
+      "nameId": "Ilmu (Al-'Ilm)",
+      "nameEn": "Knowledge",
+      "firstHadithNumber": 59,
+      "lastHadithNumber": 134,
+      "totalHadiths": 76,
+      "sizeKb": 160
+    },
+    {
+      "bookNumber": 4,
+      "nameId": "Wudhu (Al-Wudhu')",
+      "nameEn": "Ablutions (Wudu')",
+      "firstHadithNumber": 135,
+      "lastHadithNumber": 247,
+      "totalHadiths": 113,
+      "sizeKb": 176
+    },
+    {
+      "bookNumber": 5,
+      "nameId": "Mandi Junub (Al-Ghusl)",
+      "nameEn": "Bathing (Ghusl)",
+      "firstHadithNumber": 248,
+      "lastHadithNumber": 293,
+      "totalHadiths": 46,
+      "sizeKb": 68
+    },
+    {
+      "bookNumber": 6,
+      "nameId": "Haid (Al-Haid)",
+      "nameEn": "Menstrual Periods",
+      "firstHadithNumber": 294,
+      "lastHadithNumber": 333,
+      "totalHadiths": 40,
+      "sizeKb": 64
+    },
+    {
+      "bookNumber": 7,
+      "nameId": "Tayammum (At-Tayammum)",
+      "nameEn": "Rubbing hands and feet with dust (Tayammum)",
+      "firstHadithNumber": 334,
+      "lastHadithNumber": 348,
+      "totalHadiths": 15,
+      "sizeKb": 42
+    },
+    {
+      "bookNumber": 8,
+      "nameId": "Salat (Ash-Shalah)",
+      "nameEn": "Prayers (Salat)",
+      "firstHadithNumber": 349,
+      "lastHadithNumber": 521,
+      "totalHadiths": 174,
+      "sizeKb": 302
+    },
+    {
+      "bookNumber": 9,
+      "nameId": "Waktu-Waktu Salat (Mawaqit Ash-Shalah)",
+      "nameEn": "Times of the Prayers",
+      "firstHadithNumber": 522,
+      "lastHadithNumber": 602,
+      "totalHadiths": 81,
+      "sizeKb": 144
+    },
+    {
+      "bookNumber": 10,
+      "nameId": "Adzan (Al-Adzan)",
+      "nameEn": "Call to Prayers (Adhaan)",
+      "firstHadithNumber": 603,
+      "lastHadithNumber": 875,
+      "totalHadiths": 275,
+      "sizeKb": 486
+    },
+    {
+      "bookNumber": 11,
+      "nameId": "Salat Jumat (Al-Jumu'ah)",
+      "nameEn": "Friday Prayer",
+      "firstHadithNumber": 876,
+      "lastHadithNumber": 941,
+      "totalHadiths": 66,
+      "sizeKb": 107
+    },
+    {
+      "bookNumber": 12,
+      "nameId": "Salat Khauf (Shalatul Khauf)",
+      "nameEn": "Fear Prayer",
+      "firstHadithNumber": 942,
+      "lastHadithNumber": 947,
+      "totalHadiths": 6,
+      "sizeKb": 13
+    },
+    {
+      "bookNumber": 13,
+      "nameId": "Dua Hari Raya (Al-'Idain)",
+      "nameEn": "The Two Festivals (Eids)",
+      "firstHadithNumber": 948,
+      "lastHadithNumber": 989,
+      "totalHadiths": 42,
+      "sizeKb": 83
+    },
+    {
+      "bookNumber": 14,
+      "nameId": "Salat Witir (Al-Witr)",
+      "nameEn": "Witr Prayer",
+      "firstHadithNumber": 990,
+      "lastHadithNumber": 1004,
+      "totalHadiths": 15,
+      "sizeKb": 21
+    },
+    {
+      "bookNumber": 15,
+      "nameId": "Istisqa' / Minta Hujan (Al-Istisqa')",
+      "nameEn": "Invoking Allah for Rain (Istisqaa)",
+      "firstHadithNumber": 1005,
+      "lastHadithNumber": 1039,
+      "totalHadiths": 35,
+      "sizeKb": 68
+    },
+    {
+      "bookNumber": 16,
+      "nameId": "Gerhana (Al-Kusuf)",
+      "nameEn": "Eclipses",
+      "firstHadithNumber": 1040,
+      "lastHadithNumber": 1066,
+      "totalHadiths": 27,
+      "sizeKb": 71
+    },
+    {
+      "bookNumber": 17,
+      "nameId": "Sujud Al-Qur'an (Sujudul Qur'an)",
+      "nameEn": "Prostration During Recital of Qur'an",
+      "firstHadithNumber": 1067,
+      "lastHadithNumber": 1079,
+      "totalHadiths": 13,
+      "sizeKb": 17
+    },
+    {
+      "bookNumber": 18,
+      "nameId": "Meringkas Salat (Taqshir Ash-Shalah)",
+      "nameEn": "Shortening the Prayers (At-Taqseer)",
+      "firstHadithNumber": 1080,
+      "lastHadithNumber": 1119,
+      "totalHadiths": 40,
+      "sizeKb": 59
+    },
+    {
+      "bookNumber": 19,
+      "nameId": "Tahajjud & Salat Malam (At-Tahajjud)",
+      "nameEn": "Prayer at Night (Tahajjud)",
+      "firstHadithNumber": 1120,
+      "lastHadithNumber": 1187,
+      "totalHadiths": 69,
+      "sizeKb": 137
+    },
+    {
+      "bookNumber": 20,
+      "nameId": "Keutamaan Salat di Masjid Mekah & Madinah",
+      "nameEn": "Virtues of Prayer at Masjid Makkah and Madinah",
+      "firstHadithNumber": 1188,
+      "lastHadithNumber": 1197,
+      "totalHadiths": 10,
+      "sizeKb": 15
+    },
+    {
+      "bookNumber": 21,
+      "nameId": "Perbuatan dalam Salat (Al-'Amal fish-Shalah)",
+      "nameEn": "Actions while Praying",
+      "firstHadithNumber": 1198,
+      "lastHadithNumber": 1223,
+      "totalHadiths": 27,
+      "sizeKb": 52
+    },
+    {
+      "bookNumber": 22,
+      "nameId": "Sujud Sahwi (As-Sahw)",
+      "nameEn": "Forgetfulness in Prayer",
+      "firstHadithNumber": 1224,
+      "lastHadithNumber": 1236,
+      "totalHadiths": 14,
+      "sizeKb": 31
+    },
+    {
+      "bookNumber": 23,
+      "nameId": "Jenazah (Al-Jana'iz)",
+      "nameEn": "Funerals (Al-Janaa'iz)",
+      "firstHadithNumber": 1237,
+      "lastHadithNumber": 1394,
+      "totalHadiths": 160,
+      "sizeKb": 335
+    },
+    {
+      "bookNumber": 24,
+      "nameId": "Zakat (Az-Zakat)",
+      "nameEn": "Obligatory Charity Tax (Zakat)",
+      "firstHadithNumber": 1395,
+      "lastHadithNumber": 1512,
+      "totalHadiths": 118,
+      "sizeKb": 250
+    },
+    {
+      "bookNumber": 25,
+      "nameId": "Haji (Al-Hajj)",
+      "nameEn": "Hajj (Pilgrimage)",
+      "firstHadithNumber": 1513,
+      "lastHadithNumber": 1772,
+      "totalHadiths": 260,
+      "sizeKb": 456
+    },
+    {
+      "bookNumber": 26,
+      "nameId": "Umrah (Al-'Umrah)",
+      "nameEn": "`Umrah (Minor pilgrimage)",
+      "firstHadithNumber": 1773,
+      "lastHadithNumber": 1805,
+      "totalHadiths": 33,
+      "sizeKb": 69
+    },
+    {
+      "bookNumber": 27,
+      "nameId": "Orang yang Terhalang Haji (Al-Muhshar)",
+      "nameEn": "Pilgrims Prevented from Completing the Pilgrimage",
+      "firstHadithNumber": 1806,
+      "lastHadithNumber": 1820,
+      "totalHadiths": 15,
+      "sizeKb": 25
+    },
+    {
+      "bookNumber": 28,
+      "nameId": "Denda Berburu saat Ihram (Jaza'ush Shaid)",
+      "nameEn": "Penalty of Hunting while on Pilgrimage",
+      "firstHadithNumber": 1821,
+      "lastHadithNumber": 1866,
+      "totalHadiths": 46,
+      "sizeKb": 83
+    },
+    {
+      "bookNumber": 29,
+      "nameId": "Keutamaan Kota Madinah (Fadhail Al-Madinah)",
+      "nameEn": "Virtues of Madinah",
+      "firstHadithNumber": 1867,
+      "lastHadithNumber": 1890,
+      "totalHadiths": 24,
+      "sizeKb": 39
+    },
+    {
+      "bookNumber": 30,
+      "nameId": "Puasa (Ash-Shaum)",
+      "nameEn": "Fasting",
+      "firstHadithNumber": 1891,
+      "lastHadithNumber": 2007,
+      "totalHadiths": 117,
+      "sizeKb": 199
+    },
+    {
+      "bookNumber": 31,
+      "nameId": "Salat Tarawih (Shalatut Tarawih)",
+      "nameEn": "Praying at Night in Ramadaan (Taraweeh)",
+      "firstHadithNumber": 2008,
+      "lastHadithNumber": 2013,
+      "totalHadiths": 6,
+      "sizeKb": 12
+    },
+    {
+      "bookNumber": 32,
+      "nameId": "Keutamaan Lailatul Qadar",
+      "nameEn": "Virtues of the Night of Qadr",
+      "firstHadithNumber": 2014,
+      "lastHadithNumber": 2024,
+      "totalHadiths": 11,
+      "sizeKb": 18
+    },
+    {
+      "bookNumber": 33,
+      "nameId": "I'tikaf (Al-I'tikaf)",
+      "nameEn": "Retiring to a Mosque for Remembrance of Allah (I'tikaf)",
+      "firstHadithNumber": 2025,
+      "lastHadithNumber": 2046,
+      "totalHadiths": 22,
+      "sizeKb": 42
+    },
+    {
+      "bookNumber": 34,
+      "nameId": "Jual Beli (Al-Buyu')",
+      "nameEn": "Sales and Trade",
+      "firstHadithNumber": 2047,
+      "lastHadithNumber": 2238,
+      "totalHadiths": 193,
+      "sizeKb": 319
+    },
+    {
+      "bookNumber": 35,
+      "nameId": "Jual Beli Salam (As-Salam)",
+      "nameEn": "Sales in which a Price is paid for Goods to be Delivered Later (As-Salam)",
+      "firstHadithNumber": 2239,
+      "lastHadithNumber": 2256,
+      "totalHadiths": 20,
+      "sizeKb": 32
+    },
+    {
+      "bookNumber": 36,
+      "nameId": "Hak Memilih dalam Jual Beli (Asy-Syuf'ah)",
+      "nameEn": "Shuf'a",
+      "firstHadithNumber": 2257,
+      "lastHadithNumber": 2259,
+      "totalHadiths": 3,
+      "sizeKb": 5
+    },
+    {
+      "bookNumber": 37,
+      "nameId": "Sewa-Menyewa (Al-Ijarah)",
+      "nameEn": "Hiring",
+      "firstHadithNumber": 2260,
+      "lastHadithNumber": 2286,
+      "totalHadiths": 27,
+      "sizeKb": 56
+    },
+    {
+      "bookNumber": 38,
+      "nameId": "Pengalihan Utang (Al-Hawalat)",
+      "nameEn": "Transferance of a Debt from One Person to Another (Al-Hawaala)",
+      "firstHadithNumber": 2287,
+      "lastHadithNumber": 2289,
+      "totalHadiths": 3,
+      "sizeKb": 5
+    },
+    {
+      "bookNumber": 39,
+      "nameId": "Tanggungan / Jaminan (Al-Kafalah)",
+      "nameEn": "Kafalah",
+      "firstHadithNumber": 2290,
+      "lastHadithNumber": 2298,
+      "totalHadiths": 9,
+      "sizeKb": 28
+    },
+    {
+      "bookNumber": 40,
+      "nameId": "Perwakilan (Al-Wakalah)",
+      "nameEn": "Representation, Authorization, Business by Proxy",
+      "firstHadithNumber": 2299,
+      "lastHadithNumber": 2319,
+      "totalHadiths": 21,
+      "sizeKb": 52
+    },
+    {
+      "bookNumber": 41,
+      "nameId": "Bercocok Tanam (Al-Muzara'ah)",
+      "nameEn": "Agriculture",
+      "firstHadithNumber": 2320,
+      "lastHadithNumber": 2350,
+      "totalHadiths": 31,
+      "sizeKb": 63
+    },
+    {
+      "bookNumber": 42,
+      "nameId": "Pengairan (Al-Musaqat)",
+      "nameEn": "Distribution of Water",
+      "firstHadithNumber": 2351,
+      "lastHadithNumber": 2384,
+      "totalHadiths": 34,
+      "sizeKb": 65
+    },
+    {
+      "bookNumber": 43,
+      "nameId": "Pinjam-Meminjam & Utang Piutang (Al-Istiqradh)",
+      "nameEn": "Loans, Payment of Loans, Freezing of Property, Bankruptcy",
+      "firstHadithNumber": 2385,
+      "lastHadithNumber": 2409,
+      "totalHadiths": 25,
+      "sizeKb": 49
+    },
+    {
+      "bookNumber": 44,
+      "nameId": "Gugatan & Permusuhan (Al-Khushumat)",
+      "nameEn": "Khusoomaat",
+      "firstHadithNumber": 2410,
+      "lastHadithNumber": 2425,
+      "totalHadiths": 16,
+      "sizeKb": 32
+    },
+    {
+      "bookNumber": 45,
+      "nameId": "Barang Temuan (Al-Luqathah)",
+      "nameEn": "Lost Things Picked up by Someone (Luqatah)",
+      "firstHadithNumber": 2426,
+      "lastHadithNumber": 2439,
+      "totalHadiths": 15,
+      "sizeKb": 32
+    },
+    {
+      "bookNumber": 46,
+      "nameId": "Kezaliman & Rampasan (Al-Mazhalim)",
+      "nameEn": "Oppressions",
+      "firstHadithNumber": 2440,
+      "lastHadithNumber": 2482,
+      "totalHadiths": 43,
+      "sizeKb": 86
+    },
+    {
+      "bookNumber": 47,
+      "nameId": "Serikat / Kongsi (Asy-Syarikah)",
+      "nameEn": "Partnership",
+      "firstHadithNumber": 2483,
+      "lastHadithNumber": 2507,
+      "totalHadiths": 25,
+      "sizeKb": 55
+    },
+    {
+      "bookNumber": 48,
+      "nameId": "Gadai (Ar-Rahn)",
+      "nameEn": "Mortgaging",
+      "firstHadithNumber": 2508,
+      "lastHadithNumber": 2516,
+      "totalHadiths": 9,
+      "sizeKb": 17
+    },
+    {
+      "bookNumber": 49,
+      "nameId": "Memerdekakan Budak (Al-'Itq)",
+      "nameEn": "Manumission of Slaves",
+      "firstHadithNumber": 2517,
+      "lastHadithNumber": 2559,
+      "totalHadiths": 43,
+      "sizeKb": 76
+    },
+    {
+      "bookNumber": 50,
+      "nameId": "Perbudakan Mukatab (Al-Mukatab)",
+      "nameEn": "Makaatib",
+      "firstHadithNumber": 2560,
+      "lastHadithNumber": 2565,
+      "totalHadiths": 6,
+      "sizeKb": 16
+    },
+    {
+      "bookNumber": 51,
+      "nameId": "Hibah & Hadiah (Al-Hibah)",
+      "nameEn": "Gifts",
+      "firstHadithNumber": 2566,
+      "lastHadithNumber": 2636,
+      "totalHadiths": 71,
+      "sizeKb": 137
+    },
+    {
+      "bookNumber": 52,
+      "nameId": "Persaksian (Asy-Syahadat)",
+      "nameEn": "Witnesses",
+      "firstHadithNumber": 2637,
+      "lastHadithNumber": 2689,
+      "totalHadiths": 53,
+      "sizeKb": 132
+    },
+    {
+      "bookNumber": 53,
+      "nameId": "Perdamaian (Ash-Shulh)",
+      "nameEn": "Peacemaking",
+      "firstHadithNumber": 2690,
+      "lastHadithNumber": 2711,
+      "totalHadiths": 22,
+      "sizeKb": 62
+    },
+    {
+      "bookNumber": 54,
+      "nameId": "Syarat-Syarat (Asy-Syuruth)",
+      "nameEn": "Conditions",
+      "firstHadithNumber": 2712,
+      "lastHadithNumber": 2737,
+      "totalHadiths": 26,
+      "sizeKb": 143
+    },
+    {
+      "bookNumber": 55,
+      "nameId": "Wasiat (Al-Washaya)",
+      "nameEn": "Wills and Testaments (Wasaayaa)",
+      "firstHadithNumber": 2738,
+      "lastHadithNumber": 2781,
+      "totalHadiths": 44,
+      "sizeKb": 84
+    },
+    {
+      "bookNumber": 56,
+      "nameId": "Jihad & Ekspedisi (Al-Jihad)",
+      "nameEn": "Fighting for the Cause of Allah (Jihaad)",
+      "firstHadithNumber": 2782,
+      "lastHadithNumber": 3090,
+      "totalHadiths": 309,
+      "sizeKb": 628
+    },
+    {
+      "bookNumber": 57,
+      "nameId": "Seperlima Harta Rampasan (Fardhul Khumus)",
+      "nameEn": "One-fifth of Booty to the Cause of Allah (Khumus)",
+      "firstHadithNumber": 3091,
+      "lastHadithNumber": 3156,
+      "totalHadiths": 66,
+      "sizeKb": 179
+    },
+    {
+      "bookNumber": 58,
+      "nameId": "Upeti & Perdamaian Musuh (Al-Jizyah)",
+      "nameEn": "Jizyah and Mawaada'ah",
+      "firstHadithNumber": 3157,
+      "lastHadithNumber": 3189,
+      "totalHadiths": 33,
+      "sizeKb": 93
+    },
+    {
+      "bookNumber": 59,
+      "nameId": "Awal Mula Penciptaan (Bad'ul Khalq)",
+      "nameEn": "Beginning of Creation",
+      "firstHadithNumber": 3190,
+      "lastHadithNumber": 3325,
+      "totalHadiths": 136,
+      "sizeKb": 200
+    },
+    {
+      "bookNumber": 60,
+      "nameId": "Kisah Para Nabi (Ahaditsul Anbiya')",
+      "nameEn": "Prophets",
+      "firstHadithNumber": 3326,
+      "lastHadithNumber": 3488,
+      "totalHadiths": 163,
+      "sizeKb": 380
+    },
+    {
+      "bookNumber": 61,
+      "nameId": "Keutamaan Sahabat & Kabilah (Al-Manaqib)",
+      "nameEn": "Virtues and Merits of the Prophet (pbuh) and his Companions",
+      "firstHadithNumber": 3489,
+      "lastHadithNumber": 3648,
+      "totalHadiths": 162,
+      "sizeKb": 262
+    },
+    {
+      "bookNumber": 62,
+      "nameId": "Keutamaan Sahabat Nabi (Fadhail Ashhabin Nabi)",
+      "nameEn": "Companions of the Prophet",
+      "firstHadithNumber": 3649,
+      "lastHadithNumber": 3775,
+      "totalHadiths": 128,
+      "sizeKb": 269
+    },
+    {
+      "bookNumber": 63,
+      "nameId": "Keutamaan Kaum Anshar (Manaqibul Anshar)",
+      "nameEn": "Merits of the Helpers in Madinah (Ansaar)",
+      "firstHadithNumber": 3776,
+      "lastHadithNumber": 3948,
+      "totalHadiths": 173,
+      "sizeKb": 388
+    },
+    {
+      "bookNumber": 64,
+      "nameId": "Peperangan Nabi / Maghazi (Al-Maghazi)",
+      "nameEn": "Military Expeditions led by the Prophet (pbuh) (Al-Maghaazi)",
+      "firstHadithNumber": 3949,
+      "lastHadithNumber": 4473,
+      "totalHadiths": 526,
+      "sizeKb": 1153
+    },
+    {
+      "bookNumber": 65,
+      "nameId": "Tafsir Al-Qur'an (Tafsirul Qur'an)",
+      "nameEn": "Prophetic Commentary on the Qur'an (Tafseer of the Prophet (pbuh))",
+      "firstHadithNumber": 4474,
+      "lastHadithNumber": 4978,
+      "totalHadiths": 507,
+      "sizeKb": 1179
+    },
+    {
+      "bookNumber": 66,
+      "nameId": "Keutamaan Al-Qur'an (Fadhailul Qur'an)",
+      "nameEn": "Virtues of the Qur'an",
+      "firstHadithNumber": 4979,
+      "lastHadithNumber": 5062,
+      "totalHadiths": 87,
+      "sizeKb": 156
+    },
+    {
+      "bookNumber": 67,
+      "nameId": "Pernikahan (An-Nikah)",
+      "nameEn": "Wedlock, Marriage (Nikaah)",
+      "firstHadithNumber": 5063,
+      "lastHadithNumber": 5250,
+      "totalHadiths": 188,
+      "sizeKb": 355
+    },
+    {
+      "bookNumber": 68,
+      "nameId": "Perceraian / Talak (Ath-Thalaq)",
+      "nameEn": "Divorce",
+      "firstHadithNumber": 5251,
+      "lastHadithNumber": 5350,
+      "totalHadiths": 100,
+      "sizeKb": 184
+    },
+    {
+      "bookNumber": 69,
+      "nameId": "Nafkah Keluarga (An-Nafaqat)",
+      "nameEn": "Supporting the Family",
+      "firstHadithNumber": 5351,
+      "lastHadithNumber": 5372,
+      "totalHadiths": 22,
+      "sizeKb": 49
+    },
+    {
+      "bookNumber": 70,
+      "nameId": "Makanan (Al-Ath'imah)",
+      "nameEn": "Food, Meals",
+      "firstHadithNumber": 5373,
+      "lastHadithNumber": 5466,
+      "totalHadiths": 95,
+      "sizeKb": 157
+    },
+    {
+      "bookNumber": 71,
+      "nameId": "Aqiqah (Al-'Aqiqah)",
+      "nameEn": "Sacrifice on Occasion of Birth (`Aqiqa)",
+      "firstHadithNumber": 5467,
+      "lastHadithNumber": 5474,
+      "totalHadiths": 9,
+      "sizeKb": 14
+    },
+    {
+      "bookNumber": 72,
+      "nameId": "Sembelihan & Berburu (Adz-Dzaba'ih)",
+      "nameEn": "Hunting, Slaughtering",
+      "firstHadithNumber": 5475,
+      "lastHadithNumber": 5544,
+      "totalHadiths": 70,
+      "sizeKb": 117
+    },
+    {
+      "bookNumber": 73,
+      "nameId": "Kurban (Al-Adhahi)",
+      "nameEn": "Al-Adha Festival Sacrifice (Adaahi)",
+      "firstHadithNumber": 5545,
+      "lastHadithNumber": 5574,
+      "totalHadiths": 30,
+      "sizeKb": 51
+    },
+    {
+      "bookNumber": 74,
+      "nameId": "Minuman (Al-Asyribah)",
+      "nameEn": "Drinks",
+      "firstHadithNumber": 5575,
+      "lastHadithNumber": 5639,
+      "totalHadiths": 65,
+      "sizeKb": 98
+    },
+    {
+      "bookNumber": 75,
+      "nameId": "Orang Sakit (Al-Mardha)",
+      "nameEn": "Patients",
+      "firstHadithNumber": 5640,
+      "lastHadithNumber": 5677,
+      "totalHadiths": 38,
+      "sizeKb": 76
+    },
+    {
+      "bookNumber": 76,
+      "nameId": "Pengobatan (Ath-Thibb)",
+      "nameEn": "Medicine",
+      "firstHadithNumber": 5678,
+      "lastHadithNumber": 5782,
+      "totalHadiths": 105,
+      "sizeKb": 194
+    },
+    {
+      "bookNumber": 77,
+      "nameId": "Pakaian & Perhiasan (Al-Libas)",
+      "nameEn": "Dress",
+      "firstHadithNumber": 5783,
+      "lastHadithNumber": 5969,
+      "totalHadiths": 188,
+      "sizeKb": 286
+    },
+    {
+      "bookNumber": 78,
+      "nameId": "Adab & Akhlak Mulia (Al-Adab)",
+      "nameEn": "Good Manners and Form (Al-Adab)",
+      "firstHadithNumber": 5970,
+      "lastHadithNumber": 6226,
+      "totalHadiths": 257,
+      "sizeKb": 455
+    },
+    {
+      "bookNumber": 79,
+      "nameId": "Meminta Izin (Al-Isti'dzan)",
+      "nameEn": "Asking Permission",
+      "firstHadithNumber": 6227,
+      "lastHadithNumber": 6303,
+      "totalHadiths": 77,
+      "sizeKb": 154
+    },
+    {
+      "bookNumber": 80,
+      "nameId": "Doa-Doa (Ad-Da'awat)",
+      "nameEn": "Invocations",
+      "firstHadithNumber": 6304,
+      "lastHadithNumber": 6411,
+      "totalHadiths": 108,
+      "sizeKb": 206
+    },
+    {
+      "bookNumber": 81,
+      "nameId": "Pelebut Hati / Zuhud (Ar-Riqaq)",
+      "nameEn": "To make the Heart Tender (Ar-Riqaq)",
+      "firstHadithNumber": 6412,
+      "lastHadithNumber": 6593,
+      "totalHadiths": 182,
+      "sizeKb": 309
+    },
+    {
+      "bookNumber": 82,
+      "nameId": "Takdir Ilahi (Al-Qadar)",
+      "nameEn": "Divine Will (Al-Qadar)",
+      "firstHadithNumber": 6594,
+      "lastHadithNumber": 6620,
+      "totalHadiths": 27,
+      "sizeKb": 49
+    },
+    {
+      "bookNumber": 83,
+      "nameId": "Sumpah & Nazar (Al-Aiman wan Nudzur)",
+      "nameEn": "Oaths and Vows",
+      "firstHadithNumber": 6621,
+      "lastHadithNumber": 6707,
+      "totalHadiths": 87,
+      "sizeKb": 152
+    },
+    {
+      "bookNumber": 84,
+      "nameId": "Kifarat Sumpah (Kaffaratul Aiman)",
+      "nameEn": "Expiation for Unfulfilled Oaths",
+      "firstHadithNumber": 6708,
+      "lastHadithNumber": 6722,
+      "totalHadiths": 15,
+      "sizeKb": 33
+    },
+    {
+      "bookNumber": 85,
+      "nameId": "Hukum Waris / Faraidh (Al-Fara'idh)",
+      "nameEn": "Laws of Inheritance (Al-Faraa'id)",
+      "firstHadithNumber": 6723,
+      "lastHadithNumber": 6771,
+      "totalHadiths": 49,
+      "sizeKb": 79
+    },
+    {
+      "bookNumber": 86,
+      "nameId": "Hukum Had / Pidana Islam (Al-Hudud)",
+      "nameEn": "Limits and Punishments set by Allah (Hudood)",
+      "firstHadithNumber": 6772,
+      "lastHadithNumber": 6860,
+      "totalHadiths": 89,
+      "sizeKb": 186
+    },
+    {
+      "bookNumber": 87,
+      "nameId": "Qishash / Tebusan Darah (Ad-Diyat)",
+      "nameEn": "Blood Money (Ad-Diyat)",
+      "firstHadithNumber": 6861,
+      "lastHadithNumber": 6917,
+      "totalHadiths": 59,
+      "sizeKb": 109
+    },
+    {
+      "bookNumber": 88,
+      "nameId": "Orang yang Murtad (Istitabatul Murtaddin)",
+      "nameEn": "Apostates",
+      "firstHadithNumber": 6918,
+      "lastHadithNumber": 6939,
+      "totalHadiths": 22,
+      "sizeKb": 53
+    },
+    {
+      "bookNumber": 89,
+      "nameId": "Pemaksaan / Ikrah (Al-Ikrah)",
+      "nameEn": "(Statements made under) Coercion",
+      "firstHadithNumber": 6940,
+      "lastHadithNumber": 6952,
+      "totalHadiths": 13,
+      "sizeKb": 21
+    },
+    {
+      "bookNumber": 90,
+      "nameId": "Trik / Tipu Muslihat (Al-Hiyal)",
+      "nameEn": "Tricks",
+      "firstHadithNumber": 6953,
+      "lastHadithNumber": 6981,
+      "totalHadiths": 29,
+      "sizeKb": 59
+    },
+    {
+      "bookNumber": 91,
+      "nameId": "Takwil Mimpi (Ta'birur Ru'ya)",
+      "nameEn": "Interpretation of Dreams",
+      "firstHadithNumber": 6982,
+      "lastHadithNumber": 7047,
+      "totalHadiths": 66,
+      "sizeKb": 152
+    },
+    {
+      "bookNumber": 92,
+      "nameId": "Fitnah & Ujian Akhir Zaman (Al-Fitan)",
+      "nameEn": "Afflictions and the End of the World",
+      "firstHadithNumber": 7048,
+      "lastHadithNumber": 7136,
+      "totalHadiths": 89,
+      "sizeKb": 156
+    },
+    {
+      "bookNumber": 93,
+      "nameId": "Hukum & Kepemimpinan (Al-Ahkam)",
+      "nameEn": "Judgments (Ahkaam)",
+      "firstHadithNumber": 7137,
+      "lastHadithNumber": 7225,
+      "totalHadiths": 89,
+      "sizeKb": 177
+    },
+    {
+      "bookNumber": 94,
+      "nameId": "Harapan & Cita-Cita (At-Tamanni)",
+      "nameEn": "Wishes",
+      "firstHadithNumber": 7226,
+      "lastHadithNumber": 7245,
+      "totalHadiths": 20,
+      "sizeKb": 35
+    },
+    {
+      "bookNumber": 95,
+      "nameId": "Berpegang pada Hadis Ahad (Akhbarul Ahad)",
+      "nameEn": "Accepting Information Given by a Truthful Person",
+      "firstHadithNumber": 7246,
+      "lastHadithNumber": 7267,
+      "totalHadiths": 22,
+      "sizeKb": 36
+    },
+    {
+      "bookNumber": 96,
+      "nameId": "Berpegang pada Al-Qur'an & Sunnah (Al-I'tisham)",
+      "nameEn": "Holding Fast to the Qur'an and Sunnah",
+      "firstHadithNumber": 7268,
+      "lastHadithNumber": 7370,
+      "totalHadiths": 103,
+      "sizeKb": 202
+    },
+    {
+      "bookNumber": 97,
+      "nameId": "Keesaan Allah / Tauhid (At-Tauhid)",
+      "nameEn": "Oneness, Uniqueness of Allah (Tawheed)",
+      "firstHadithNumber": 7371,
+      "lastHadithNumber": 7563,
+      "totalHadiths": 193,
+      "sizeKb": 423
+    }
+  ]
+}
