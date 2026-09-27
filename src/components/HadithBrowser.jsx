@@ -6,9 +6,15 @@ import {
   getHadithsByTheme 
 } from '../data/hadithData';
 import {
-  getBukhariMeta,
-  getBukhariBook,
-  searchBukhariGlobal,
+  HADITH_MUSLIM,
+  HADITH_MUSLIM_THEMES,
+  getMuslimHadithById,
+  getMuslimHadithsByTheme
+} from '../data/hadithMuslimData';
+import {
+  getHadithCollectionMeta,
+  getHadithCollectionBook,
+  searchHadithCollectionGlobal,
   findBookForHadithNumber,
   getHadithByGlobalNumber
 } from '../services/hadithService';
@@ -33,12 +39,16 @@ import {
   Library,
   Zap,
   Bookmark,
-  Layers
+  Layers,
+  Book
 } from 'lucide-react';
 import { useToast } from './Toast';
 
 export default function HadithBrowser({ onExportQuote }) {
   const { showToast } = useToast();
+
+  // Koleksi Hadits yang Dipilih: 'bukhari' | 'muslim'
+  const [selectedCollection, setSelectedCollection] = useState('bukhari');
 
   // Mode Navigasi Utama: 'tematik' | 'kitab' | 'cari'
   const [activeTab, setActiveTab] = useState('tematik');
@@ -47,7 +57,7 @@ export default function HadithBrowser({ onExportQuote }) {
   const [thematicQuery, setThematicQuery] = useState('');
   const [selectedTheme, setSelectedTheme] = useState('all');
 
-  // State 97 Kitab Bukhari
+  // State Daftar Kitab
   const [booksMeta, setBooksMeta] = useState([]);
   const [isLoadingMeta, setIsLoadingMeta] = useState(false);
   const [bookFilterQuery, setBookFilterQuery] = useState('');
@@ -70,29 +80,56 @@ export default function HadithBrowser({ onExportQuote }) {
   const [copiedId, setCopiedId] = useState(null);
   const readerTopRef = useRef(null);
 
-  // Kategori Tema Hadits Pilihan
-  const THEME_OPTIONS = [
-    { id: 'all', label: 'Semua Mutiara', count: HADITH_BUKHARI.length },
-    { id: 'sabar_ujian', label: 'Sabar & Ujian', count: HADITH_THEMES.sabar_ujian?.length || 0 },
-    { id: 'rezeki_tawakal', label: 'Rezeki & Tawakal', count: HADITH_THEMES.rezeki_tawakal?.length || 0 },
-    { id: 'ketenangan_dzikir', label: 'Ketenangan & Dzikir', count: HADITH_THEMES.ketenangan_dzikir?.length || 0 },
-    { id: 'taubat_ampunan', label: 'Taubat & Ampunan', count: HADITH_THEMES.taubat_ampunan?.length || 0 },
-    { id: 'keluarga_sosial', label: 'Keluarga & Sosial', count: HADITH_THEMES.keluarga_sosial?.length || 0 },
-    { id: 'akhlak_ilmu', label: 'Akhlak & Ilmu', count: HADITH_THEMES.akhlak_ilmu?.length || 0 },
-    { id: 'syukur_nikmat', label: 'Syukur & Qana\'ah', count: HADITH_THEMES.syukur_nikmat?.length || 0 },
-    { id: 'sakit_sehat', label: 'Sakit & Obat', count: HADITH_THEMES.sakit_sehat?.length || 0 },
-    { id: 'niat_ikhlas', label: 'Niat & Amal', count: HADITH_THEMES.niat_ikhlas?.length || 0 },
-    { id: 'ibadah_salat', label: 'Salat & Ibadah', count: HADITH_THEMES.ibadah_salat?.length || 0 },
-    { id: 'akhirat_dunia', label: 'Akhirat & Kematian', count: HADITH_THEMES.akhirat_dunia?.length || 0 },
-  ];
+  // Konfigurasi Koleksi
+  const COLLECTIONS = {
+    bukhari: {
+      id: 'bukhari',
+      name: 'Shahih Al-Bukhari',
+      shortName: 'Bukhari',
+      imam: 'Imam Al-Bukhari (194–256 H)',
+      totalBooks: 97,
+      totalHadiths: 7589,
+      subtitle: '97 Kitab • 7.589 Hadits Shahih'
+    },
+    muslim: {
+      id: 'muslim',
+      name: 'Shahih Muslim',
+      shortName: 'Muslim',
+      imam: 'Imam Muslim ibn al-Hajjaj (204–261 H)',
+      totalBooks: 57,
+      totalHadiths: 7563,
+      coreHadiths: 3033,
+      subtitle: '57 Kitab • 7.563 Hadits Sanad (~3.033 Inti Fuad Baqi)'
+    }
+  };
 
-  // Muat metadata 97 kitab saat komponen dimuat atau tab kitab dibuka
+  const currentCol = COLLECTIONS[selectedCollection] || COLLECTIONS.bukhari;
+
+  const currentThematicRaw = selectedCollection === 'muslim' ? HADITH_MUSLIM : HADITH_BUKHARI;
+  const currentThemesRaw = selectedCollection === 'muslim' ? HADITH_MUSLIM_THEMES : HADITH_THEMES;
+
+  // Kategori Tema Hadits Pilihan (Responsif Bukhari / Muslim)
+  const THEME_OPTIONS = useMemo(() => [
+    { id: 'all', label: 'Semua Mutiara', count: currentThematicRaw.length },
+    { id: 'sabar_ujian', label: 'Sabar & Ujian', count: currentThemesRaw.sabar_ujian?.length || 0 },
+    { id: 'rezeki_tawakal', label: 'Rezeki & Tawakal', count: currentThemesRaw.rezeki_tawakal?.length || 0 },
+    { id: 'ketenangan_dzikir', label: 'Ketenangan & Dzikir', count: currentThemesRaw.ketenangan_dzikir?.length || 0 },
+    { id: 'taubat_ampunan', label: 'Taubat & Ampunan', count: currentThemesRaw.taubat_ampunan?.length || 0 },
+    { id: 'keluarga_sosial', label: 'Keluarga & Sosial', count: currentThemesRaw.keluarga_sosial?.length || 0 },
+    { id: 'akhlak_ilmu', label: 'Akhlak & Ilmu', count: currentThemesRaw.akhlak_ilmu?.length || 0 },
+    { id: 'syukur_nikmat', label: 'Syukur & Qana\'ah', count: currentThemesRaw.syukur_nikmat?.length || 0 },
+    { id: 'sakit_sehat', label: 'Sakit & Obat', count: currentThemesRaw.sakit_sehat?.length || 0 },
+    { id: 'niat_ikhlas', label: 'Niat & Amal', count: currentThemesRaw.niat_ikhlas?.length || 0 },
+    { id: 'ibadah_salat', label: 'Salat & Ibadah', count: currentThemesRaw.ibadah_salat?.length || 0 },
+    { id: 'akhirat_dunia', label: 'Akhirat & Kematian', count: currentThemesRaw.akhirat_dunia?.length || 0 },
+  ], [selectedCollection, currentThematicRaw, currentThemesRaw]);
+
+  // Muat metadata saat koleksi berubah
   useEffect(() => {
     let isMounted = true;
     async function loadMeta() {
-      if (booksMeta.length > 0) return;
       setIsLoadingMeta(true);
-      const meta = await getBukhariMeta();
+      const meta = await getHadithCollectionMeta(selectedCollection);
       if (isMounted && meta && meta.books) {
         setBooksMeta(meta.books);
       }
@@ -100,19 +137,19 @@ export default function HadithBrowser({ onExportQuote }) {
     }
     loadMeta();
     return () => { isMounted = false; };
-  }, [booksMeta.length]);
+  }, [selectedCollection]);
 
-  // Muat isi kitab saat activeBookId berubah
+  // Muat isi kitab saat activeBookId atau selectedCollection berubah
   useEffect(() => {
     let isMounted = true;
     async function loadBook() {
-      if (!activeBookId) {
+      if (activeBookId === null || activeBookId === undefined) {
         setActiveBookData(null);
         return;
       }
       setIsLoadingBook(true);
       setDisplayCount(25);
-      const data = await getBukhariBook(activeBookId);
+      const data = await getHadithCollectionBook(selectedCollection, activeBookId);
       if (isMounted && data) {
         setActiveBookData(data);
       }
@@ -120,7 +157,7 @@ export default function HadithBrowser({ onExportQuote }) {
     }
     loadBook();
     return () => { isMounted = false; };
-  }, [activeBookId]);
+  }, [activeBookId, selectedCollection]);
 
   // Scroll otomatis ke hadits target jika ada
   useEffect(() => {
@@ -134,6 +171,17 @@ export default function HadithBrowser({ onExportQuote }) {
     }
   }, [targetHadithNumber, activeBookData, isLoadingBook]);
 
+  // Handler Ganti Koleksi (Bukhari <-> Muslim)
+  const handleSelectCollection = (colId) => {
+    if (colId === selectedCollection) return;
+    setSelectedCollection(colId);
+    setActiveBookId(null);
+    setActiveBookData(null);
+    setTargetHadithNumber(null);
+    setHasSearchedGlobal(false);
+    setGlobalSearchResults([]);
+  };
+
   // Handler Buka Kitab Tertentu
   const handleOpenBook = (bookNumber, targetNum = null) => {
     setActiveBookId(bookNumber);
@@ -146,14 +194,15 @@ export default function HadithBrowser({ onExportQuote }) {
   // Handler Lompat ke Nomor Hadits Global
   const handleJumpToHadithNumber = async (num) => {
     const target = parseFloat(num);
-    if (isNaN(target) || target < 1 || target > 7563) {
-      showToast('Masukkan nomor hadits antara 1 hingga 7563', 'warning');
+    const maxHadith = selectedCollection === 'muslim' ? 7563 : 7563;
+    if (isNaN(target) || target < 1 || target > maxHadith) {
+      showToast(`Masukkan nomor hadits antara 1 hingga ${maxHadith}`, 'warning');
       return;
     }
 
     let metaList = booksMeta;
     if (!metaList || !metaList.length) {
-      const meta = await getBukhariMeta();
+      const meta = await getHadithCollectionMeta(selectedCollection);
       metaList = meta?.books || [];
       setBooksMeta(metaList);
     }
@@ -163,7 +212,7 @@ export default function HadithBrowser({ onExportQuote }) {
       handleOpenBook(book.bookNumber, target);
       showToast(`Membuka Hadits No. ${target} di Kitab ${book.nameId}`, 'success');
     } else {
-      showToast(`Hadits nomor ${target} tidak ditemukan`, 'error');
+      showToast(`Hadits nomor ${target} tidak ditemukan di Shahih ${currentCol.shortName}`, 'error');
     }
   };
 
@@ -175,16 +224,16 @@ export default function HadithBrowser({ onExportQuote }) {
     setIsSearchingGlobal(true);
     setHasSearchedGlobal(true);
     try {
-      const results = await searchBukhariGlobal(q, 60);
+      const results = await searchHadithCollectionGlobal(selectedCollection, q, 60);
       setGlobalSearchResults(results);
       if (results.length === 0) {
-        showToast(`Tidak ada hadits yang cocok dengan "${q}"`, 'info');
+        showToast(`Tidak ada hadits ${currentCol.shortName} yang cocok dengan "${q}"`, 'info');
       } else {
-        showToast(`Ditemukan ${results.length} hadits Shahih Bukhari`, 'success');
+        showToast(`Ditemukan ${results.length} hadits Shahih ${currentCol.shortName}`, 'success');
       }
     } catch (err) {
       console.error(err);
-      showToast('Gagal menjalankan pencarian global', 'error');
+      showToast('Gagal menjalankan pencarian', 'error');
     } finally {
       setIsSearchingGlobal(false);
     }
@@ -194,15 +243,20 @@ export default function HadithBrowser({ onExportQuote }) {
   const handleCopy = (hadith, bookName = '') => {
     const arab = hadith.arabic || hadith.arab || '';
     const indo = hadith.terjemahan || hadith.id || hadith.text || '';
-    const no = hadith.number || hadith.nomor || '';
+    const colName = hadith.collection 
+      ? (hadith.collection === 'muslim' ? 'Muslim' : 'Bukhari')
+      : (hadith.nomor ? (hadith.nomor.includes('Muslim') ? 'Muslim' : 'Bukhari') : (selectedCollection === 'muslim' ? 'Muslim' : 'Bukhari'));
+    const no = hadith.number ? `No. ${hadith.number}` : (hadith.nomor || '');
     const perawi = hadith.perawi ? `(${hadith.perawi})` : '';
-    const bName = bookName || hadith.kitab || (activeBookData ? activeBookData.nameId : 'Shahih Bukhari');
+    const bName = bookName || hadith.kitab || (activeBookData ? activeBookData.nameId : `Shahih ${colName}`);
     const faedah = hadith.faedah ? `\n\nFaedah: ${hadith.faedah}` : '';
+    const fuadBaqi = hadith.arabicNumber ? ` [No. Inti: #${hadith.arabicNumber}]` : '';
+    const sourceHeader = hadith.nomor ? hadith.nomor : `HR. ${colName} ${no}`;
 
-    const text = `${arab}\n\n"${indo}"\n\n— HR. Bukhari No. ${no} ${perawi}\nKitab: ${bName}${faedah}`;
+    const text = `${arab}\n\n"${indo}"\n\n— ${sourceHeader}${fuadBaqi} ${perawi}\nKitab: ${bName}${faedah}`;
     navigator.clipboard.writeText(text);
     setCopiedId(hadith.id || hadith.number || no);
-    showToast(`Hadits No. ${no} berhasil disalin ke clipboard`, 'success');
+    showToast(`Hadits ${hadith.nomor || no} berhasil disalin ke clipboard`, 'success');
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -210,43 +264,49 @@ export default function HadithBrowser({ onExportQuote }) {
   const handleShareQuote = (hadith, bookName = '') => {
     if (!onExportQuote) return;
     const indo = hadith.terjemahan || hadith.id || hadith.text || '';
-    const no = hadith.number || hadith.nomor || '';
+    const colName = hadith.collection 
+      ? (hadith.collection === 'muslim' ? 'Muslim' : 'Bukhari')
+      : (hadith.nomor ? (hadith.nomor.includes('Muslim') ? 'Muslim' : 'Bukhari') : (selectedCollection === 'muslim' ? 'Muslim' : 'Bukhari'));
+    const no = hadith.number ? `No. ${hadith.number}` : (hadith.nomor || '');
     const perawi = hadith.perawi ? `(${hadith.perawi})` : '';
-    const bName = bookName || hadith.kitab || (activeBookData ? activeBookData.nameId : 'Shahih Bukhari');
+    const bName = bookName || hadith.kitab || (activeBookData ? activeBookData.nameId : `Shahih ${colName}`);
+    const sourceHeader = hadith.nomor ? hadith.nomor : `HR. ${colName} ${no}`;
 
     onExportQuote({
       quote: indo,
-      author: `HR. Bukhari No. ${no} ${perawi} • ${bName}`,
+      author: `${sourceHeader} ${perawi} • ${bName}`,
       arabic: hadith.arabic || hadith.arab || ''
     });
   };
 
   // Filter Hadits Tematik
   const filteredThematicHadiths = useMemo(() => {
-    let list = HADITH_BUKHARI;
+    let list = selectedCollection === 'muslim' ? HADITH_MUSLIM : HADITH_BUKHARI;
+    const themes = selectedCollection === 'muslim' ? HADITH_MUSLIM_THEMES : HADITH_THEMES;
+    const getById = selectedCollection === 'muslim' ? getMuslimHadithById : getHadithById;
 
     if (selectedTheme !== 'all') {
-      const ids = HADITH_THEMES[selectedTheme] || [];
-      list = ids.map(id => getHadithById(id)).filter(Boolean);
+      const ids = themes[selectedTheme] || [];
+      list = ids.map(id => getById(id)).filter(Boolean);
     }
 
     const q = thematicQuery.toLowerCase().trim();
     if (q) {
       list = list.filter(h => 
-        h.terjemahan.toLowerCase().includes(q) ||
-        h.nomor.toLowerCase().includes(q) ||
-        h.kitab.toLowerCase().includes(q) ||
+        (h.terjemahan && h.terjemahan.toLowerCase().includes(q)) ||
+        (h.nomor && h.nomor.toLowerCase().includes(q)) ||
+        (h.kitab && h.kitab.toLowerCase().includes(q)) ||
         (h.bab && h.bab.toLowerCase().includes(q)) ||
-        h.perawi.toLowerCase().includes(q) ||
-        h.faedah.toLowerCase().includes(q) ||
+        (h.perawi && h.perawi.toLowerCase().includes(q)) ||
+        (h.faedah && h.faedah.toLowerCase().includes(q)) ||
         (h.tema_tags || []).some(t => t.toLowerCase().includes(q))
       );
     }
 
     return list;
-  }, [selectedTheme, thematicQuery]);
+  }, [selectedCollection, selectedTheme, thematicQuery]);
 
-  // Filter Daftar 97 Kitab
+  // Filter Daftar Kitab
   const filteredBooks = useMemo(() => {
     if (!booksMeta) return [];
     const q = bookFilterQuery.toLowerCase().trim();
@@ -269,6 +329,7 @@ export default function HadithBrowser({ onExportQuote }) {
     return activeBookData.hadiths.filter(h => 
       h.id.toLowerCase().includes(q) ||
       String(h.number).includes(q) ||
+      (h.arabicNumber && String(h.arabicNumber).includes(q)) ||
       (h.arab && h.arab.includes(q))
     );
   }, [activeBookData, inBookSearchQuery]);
@@ -287,7 +348,7 @@ export default function HadithBrowser({ onExportQuote }) {
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 text-foreground space-y-6 animate-fade-up">
       
       {/* ── Header Halaman ────────────────────────────────────────── */}
-      <header className="space-y-3">
+      <header className="space-y-3.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald/15 text-emerald border border-emerald/30 shadow-xs">
@@ -295,14 +356,14 @@ export default function HadithBrowser({ onExportQuote }) {
             </span>
             <div>
               <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl text-foreground flex items-center gap-2">
-                <span>Hadits Riwayat Bukhari</span>
+                <span>Ensiklopedia Hadits Shahih</span>
                 <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 hidden sm:inline-flex items-center gap-1">
                   <ShieldCheck className="h-3 w-3" />
-                  Shahih Muttafaq 'Alaih
+                  Shahihain
                 </span>
               </h2>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                Koleksi Lengkap 97 Kitab Shahih Al-Bukhari (~7.589 Hadits) & Mutiara Tematik Bimbingan Hidup
+                Koleksi Lengkap Shahih Al-Bukhari & Shahih Muslim Lengkap Teks Arab Utsmani & Terjemahan Resmi
               </p>
             </div>
           </div>
@@ -310,54 +371,84 @@ export default function HadithBrowser({ onExportQuote }) {
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-gold/10 text-gold border border-gold/30">
               <Sparkles className="h-3.5 w-3.5" />
-              <span>97 Kitab • 7.589 Hadits</span>
+              <span>15.152+ Hadits Tersedia</span>
             </span>
           </div>
         </div>
 
+        {/* ── Switcher Koleksi Imam: Bukhari vs Muslim ──────────────── */}
+        <div className="flex items-center p-1 rounded-2xl bg-secondary/80 border border-border/80 gap-1.5 shadow-2xs">
+          <button
+            onClick={() => handleSelectCollection('bukhari')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              selectedCollection === 'bukhari'
+                ? 'bg-gold text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+            }`}
+          >
+            <BookOpen className="h-4 w-4" />
+            <span>Shahih Bukhari</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full hidden sm:inline-block ${
+              selectedCollection === 'bukhari' ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
+            }`}>
+              97 Kitab • 7.589 Hadits
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleSelectCollection('muslim')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+              selectedCollection === 'muslim'
+                ? 'bg-emerald text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+            }`}
+          >
+            <Book className="h-4 w-4" />
+            <span>Shahih Muslim</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full hidden sm:inline-block ${
+              selectedCollection === 'muslim' ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
+            }`}>
+              57 Kitab • 7.563 Hadits (~3.033 Inti)
+            </span>
+          </button>
+        </div>
+
         {/* ── Tab Mode Selector ────────────────────────────────────── */}
-        <div className="flex items-center p-1 rounded-2xl bg-secondary/70 border border-border/70 text-xs font-medium gap-1">
+        <div className="flex items-center p-1 rounded-2xl bg-secondary/60 border border-border/70 text-xs font-medium gap-1">
           <button
             onClick={() => { setActiveTab('tematik'); setActiveBookId(null); }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
               activeTab === 'tematik'
-                ? 'bg-gold text-white font-semibold shadow-xs'
+                ? 'bg-foreground text-background font-semibold shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Sparkles className="h-3.5 w-3.5" />
-            <span>Hadits Tematik (30)</span>
+            <span>Hadits Tematik ({currentThematicRaw.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('kitab')}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
               activeTab === 'kitab'
-                ? 'bg-gold text-white font-semibold shadow-xs'
+                ? 'bg-foreground text-background font-semibold shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Library className="h-3.5 w-3.5" />
-            <span>97 Kitab Bukhari</span>
-            {booksMeta.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full hidden sm:inline-block ${
-                activeTab === 'kitab' ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
-              }`}>
-                7.589
-              </span>
-            )}
+            <span>Jelajah {currentCol.totalBooks} Kitab {currentCol.shortName}</span>
           </button>
 
           <button
             onClick={() => { setActiveTab('cari'); setActiveBookId(null); }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
               activeTab === 'cari'
-                ? 'bg-gold text-white font-semibold shadow-xs'
+                ? 'bg-foreground text-background font-semibold shadow-xs'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Search className="h-3.5 w-3.5" />
-            <span>Pencarian Global</span>
+            <span>Pencarian {currentCol.shortName}</span>
           </button>
         </div>
       </header>
@@ -375,8 +466,12 @@ export default function HadithBrowser({ onExportQuote }) {
                 type="text"
                 value={thematicQuery}
                 onChange={(e) => setThematicQuery(e.target.value)}
-                placeholder="Cari hadits tematik (contoh: sabar, rezeki, niat, nomor hadits)..."
-                className="w-full h-11 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
+                placeholder={`Cari hadits tematik ${currentCol.shortName} (contoh: sabar, rezeki, niat, nomor hadits)...`}
+                className={`w-full h-11 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all ${
+                  selectedCollection === 'muslim'
+                    ? 'focus:border-emerald/60 focus:ring-2 focus:ring-emerald/15'
+                    : 'focus:border-gold/60 focus:ring-2 focus:ring-gold/15'
+                }`}
               />
               {thematicQuery && (
                 <button
@@ -390,16 +485,24 @@ export default function HadithBrowser({ onExportQuote }) {
 
             {/* Saran Cepat Lompat Nomor jika user mengetik angka */}
             {detectedNumberInThematic && (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-gold/10 border border-gold/30 text-xs animate-fade-in">
+              <div className={`flex items-center justify-between p-3 rounded-2xl border text-xs animate-fade-in ${
+                selectedCollection === 'muslim'
+                  ? 'bg-emerald/10 border-emerald/30 text-emerald'
+                  : 'bg-gold/10 border-gold/30 text-gold'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-gold flex-shrink-0" />
-                  <span>
-                    Mencari nomor hadits <strong>No. {detectedNumberInThematic}</strong> di seluruh 7.589 hadits Bukhari?
+                  <Zap className="h-4 w-4 flex-shrink-0" />
+                  <span className="text-foreground">
+                    Mencari nomor hadits <strong>No. {detectedNumberInThematic}</strong> di Shahih {currentCol.shortName}?
                   </span>
                 </div>
                 <button
                   onClick={() => handleJumpToHadithNumber(detectedNumberInThematic)}
-                  className="px-3 py-1.5 rounded-xl bg-gold text-white font-semibold hover:bg-gold/90 transition-all flex items-center gap-1 flex-shrink-0"
+                  className={`px-3 py-1.5 rounded-xl text-white font-semibold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
+                    selectedCollection === 'muslim'
+                      ? 'bg-emerald hover:bg-emerald/90'
+                      : 'bg-gold hover:bg-gold/90'
+                  }`}
                 >
                   <span>Buka Hadits No. {detectedNumberInThematic}</span>
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -417,7 +520,7 @@ export default function HadithBrowser({ onExportQuote }) {
                     onClick={() => setSelectedTheme(theme.id)}
                     className={`flex-shrink-0 px-3 py-1.5 rounded-xl font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
                       isActive
-                        ? 'bg-gold text-white font-semibold shadow-xs'
+                        ? (selectedCollection === 'muslim' ? 'bg-emerald text-white font-semibold shadow-xs' : 'bg-gold text-white font-semibold shadow-xs')
                         : 'bg-secondary/60 border border-border/60 text-muted-foreground hover:text-foreground hover:border-gold/30'
                     }`}
                   >
@@ -435,11 +538,11 @@ export default function HadithBrowser({ onExportQuote }) {
 
           {/* Info Counter */}
           <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-2">
-            <span>Menampilkan <strong className="text-foreground">{filteredThematicHadiths.length}</strong> hadits mutiara tematik</span>
+            <span>Menampilkan <strong className="text-foreground">{filteredThematicHadiths.length}</strong> hadits mutiara tematik Shahih {currentCol.shortName}</span>
             {selectedTheme !== 'all' && (
               <button 
                 onClick={() => setSelectedTheme('all')}
-                className="text-gold hover:underline font-medium cursor-pointer"
+                className={`${selectedCollection === 'muslim' ? 'text-emerald' : 'text-gold'} hover:underline font-medium cursor-pointer`}
               >
                 Reset filter tema
               </button>
@@ -452,7 +555,7 @@ export default function HadithBrowser({ onExportQuote }) {
               <BookMarked className="h-10 w-10 text-muted-foreground/40 mx-auto" />
               <h3 className="font-semibold text-base text-foreground">Tidak Ada Hadits Tematik Ditemukan</h3>
               <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                Tidak ditemukan hadits pilihan yang cocok dengan kata kunci "{thematicQuery}". Ingin mencari di seluruh 7.589 hadits Shahih Bukhari?
+                Tidak ditemukan hadits pilihan yang cocok dengan kata kunci "{thematicQuery}". Ingin mencari di seluruh koleksi Shahih {currentCol.shortName}?
               </p>
               <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
                 <button
@@ -461,14 +564,14 @@ export default function HadithBrowser({ onExportQuote }) {
                     setActiveTab('cari');
                     handleExecuteGlobalSearch(thematicQuery);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-gold text-white hover:bg-gold/90 transition-all flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-gold text-white hover:bg-gold/90 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <Search className="h-3.5 w-3.5" />
-                  <span>Cari di Seluruh 7.589 Hadits</span>
+                  <span>Cari di Seluruh {currentCol.totalHadiths.toLocaleString('id-ID')} Hadits {currentCol.shortName}</span>
                 </button>
                 <button
                   onClick={() => { setThematicQuery(''); setSelectedTheme('all'); }}
-                  className="px-4 py-2 rounded-xl text-xs font-medium border border-border/70 text-foreground hover:bg-secondary transition-all"
+                  className="px-4 py-2 rounded-xl text-xs font-medium border border-border/70 text-foreground hover:bg-secondary transition-all cursor-pointer"
                 >
                   Reset Pencarian
                 </button>
@@ -481,10 +584,14 @@ export default function HadithBrowser({ onExportQuote }) {
                 return (
                   <article
                     key={hadith.id}
-                    className="da-card grain relative overflow-hidden rounded-3xl p-5 sm:p-6 border transition-all hover:border-gold/40 shadow-xs space-y-4"
+                    className={`da-card grain relative overflow-hidden rounded-3xl p-5 sm:p-6 border transition-all shadow-xs space-y-4 ${
+                      selectedCollection === 'muslim' ? 'hover:border-emerald/40' : 'hover:border-gold/40'
+                    }`}
                     style={{
-                      background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.5))',
-                      borderColor: 'hsl(var(--gold) / 0.22)'
+                      background: selectedCollection === 'muslim'
+                        ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--emerald) / 0.08))'
+                        : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.5))',
+                      borderColor: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.25)' : 'hsl(var(--gold) / 0.22)'
                     }}
                   >
                     {/* Header Kartu Hadis */}
@@ -493,9 +600,9 @@ export default function HadithBrowser({ onExportQuote }) {
                         <span
                           className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold tracking-wide"
                           style={{
-                            background: 'hsl(var(--gold) / 0.12)',
-                            color: 'hsl(var(--gold))',
-                            border: '1px solid hsl(var(--gold) / 0.3)'
+                            background: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.12)' : 'hsl(var(--gold) / 0.12)',
+                            color: selectedCollection === 'muslim' ? 'hsl(var(--emerald))' : 'hsl(var(--gold))',
+                            border: selectedCollection === 'muslim' ? '1px solid hsl(var(--emerald) / 0.3)' : '1px solid hsl(var(--gold) / 0.3)'
                           }}
                         >
                           <ShieldCheck className="h-3 w-3" />
@@ -547,12 +654,12 @@ export default function HadithBrowser({ onExportQuote }) {
                         className="rounded-2xl p-4 text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-1"
                         style={{
                           background: 'hsl(var(--secondary) / 0.7)',
-                          borderLeft: '4px solid hsl(var(--gold))'
+                          borderLeft: selectedCollection === 'muslim' ? '4px solid hsl(var(--emerald))' : '4px solid hsl(var(--gold))'
                         }}
                       >
                         <span
                           className="text-[11px] font-bold uppercase tracking-wider block"
-                          style={{ color: 'hsl(var(--gold))' }}
+                          style={{ color: selectedCollection === 'muslim' ? 'hsl(var(--emerald))' : 'hsl(var(--gold))' }}
                         >
                           Faedah & Bimbingan Hikmah:
                         </span>
@@ -569,7 +676,11 @@ export default function HadithBrowser({ onExportQuote }) {
                           <span
                             key={tIdx}
                             onClick={() => setThematicQuery(tag)}
-                            className="text-[10px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground hover:text-gold hover:bg-gold/10 transition-colors cursor-pointer"
+                            className={`text-[10px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground transition-colors cursor-pointer ${
+                              selectedCollection === 'muslim'
+                                ? 'hover:text-emerald hover:bg-emerald/10'
+                                : 'hover:text-gold hover:bg-gold/10'
+                            }`}
                           >
                             #{tag}
                           </span>
@@ -613,12 +724,12 @@ export default function HadithBrowser({ onExportQuote }) {
       )}
 
       {/* ═════════════════════════════════════════════════════════════ */}
-      {/* 2. TAB: 97 KITAB BUKHARI (DAFTAR & READER VIEW)               */}
+      {/* 2. TAB: JELAJAH KITAB (DAFTAR & READER VIEW)                 */}
       {/* ═════════════════════════════════════════════════════════════ */}
       {activeTab === 'kitab' && (
         <div className="space-y-5">
           {/* A. TAMPILAN READER JIKA SEBUAH KITAB SEDANG DIBUKA */}
-          {activeBookId ? (
+          {activeBookId !== null && activeBookId !== undefined ? (
             <div className="space-y-4" ref={readerTopRef}>
               {/* Reader Top Navigation Bar */}
               <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/70 border border-border/70">
@@ -627,13 +738,13 @@ export default function HadithBrowser({ onExportQuote }) {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/70 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-gold/40 hover:bg-secondary transition-all cursor-pointer"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Daftar 97 Kitab</span>
+                  <span>Daftar {currentCol.totalBooks} Kitab {currentCol.shortName}</span>
                 </button>
 
                 <div className="flex items-center gap-2">
                   {/* Prev Book Button */}
                   <button
-                    disabled={activeBookId <= 1}
+                    disabled={activeBookId <= (selectedCollection === 'muslim' ? 0 : 1)}
                     onClick={() => handleOpenBook(activeBookId - 1)}
                     className="p-1.5 rounded-xl border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                     title="Kitab Sebelumnya"
@@ -642,12 +753,12 @@ export default function HadithBrowser({ onExportQuote }) {
                   </button>
 
                   <span className="text-xs font-bold text-gold px-2.5 py-1 rounded-lg bg-gold/10 border border-gold/20">
-                    Kitab {activeBookId} / 97
+                    Kitab {activeBookId} / {selectedCollection === 'muslim' ? 56 : 97}
                   </span>
 
                   {/* Next Book Button */}
                   <button
-                    disabled={activeBookId >= 97}
+                    disabled={activeBookId >= (selectedCollection === 'muslim' ? 56 : 97)}
                     onClick={() => handleOpenBook(activeBookId + 1)}
                     className="p-1.5 rounded-xl border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                     title="Kitab Berikutnya"
@@ -662,13 +773,15 @@ export default function HadithBrowser({ onExportQuote }) {
                 <div
                   className="rounded-3xl p-5 sm:p-6 border space-y-2 relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--gold) / 0.08))',
-                    borderColor: 'hsl(var(--gold) / 0.3)'
+                    background: selectedCollection === 'muslim'
+                      ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--emerald) / 0.1))'
+                      : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--gold) / 0.08))',
+                    borderColor: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.3)' : 'hsl(var(--gold) / 0.3)'
                   }}
                 >
-                  <div className="flex items-center gap-2 text-xs font-semibold text-gold uppercase tracking-wider">
+                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold">
                     <ShieldCheck className="h-4 w-4" />
-                    <span>Shahih Bukhari • Kitab {activeBookData.bookNumber}</span>
+                    <span>Shahih {currentCol.shortName} • Kitab {activeBookData.bookNumber}</span>
                   </div>
                   <h3 className="text-xl sm:text-2xl font-bold font-display text-foreground">
                     {activeBookData.nameId}
@@ -678,9 +791,17 @@ export default function HadithBrowser({ onExportQuote }) {
                       {activeBookData.nameEn}
                     </span>
                     <span>•</span>
-                    <span>Rentang: Hadits No. <strong>{activeBookData.firstHadithNumber}</strong> s/d <strong>{activeBookData.lastHadithNumber}</strong></span>
+                    <span>Rentang Sanad: No. <strong>{activeBookData.firstHadithNumber}</strong> s/d <strong>{activeBookData.lastHadithNumber}</strong></span>
+                    {activeBookData.firstArabicNumber && (
+                      <>
+                        <span>•</span>
+                        <span className="text-emerald font-medium">
+                          No. Fuad Baqi: #{activeBookData.firstArabicNumber} – #{activeBookData.lastArabicNumber}
+                        </span>
+                      </>
+                    )}
                     <span>•</span>
-                    <span className="text-emerald font-medium">{activeBookData.totalHadiths} Hadits Tersedia</span>
+                    <span className="text-emerald font-medium">{activeBookData.totalHadiths} Hadits</span>
                   </div>
                 </div>
               )}
@@ -709,7 +830,7 @@ export default function HadithBrowser({ onExportQuote }) {
               {isLoadingBook && (
                 <div className="py-16 text-center space-y-3">
                   <Loader2 className="h-8 w-8 text-gold animate-spin mx-auto" />
-                  <p className="text-xs text-muted-foreground">Memuat hadits Kitab {activeBookId}...</p>
+                  <p className="text-xs text-muted-foreground">Memuat hadits Kitab {activeBookId} ({currentCol.shortName})...</p>
                 </div>
               )}
 
@@ -736,7 +857,7 @@ export default function HadithBrowser({ onExportQuote }) {
                       >
                         {/* Header Hadits */}
                         <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/40">
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span
                               className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold tracking-wide"
                               style={{
@@ -746,8 +867,14 @@ export default function HadithBrowser({ onExportQuote }) {
                               }}
                             >
                               <ShieldCheck className="h-3 w-3" />
-                              <span>HR. Bukhari No. {hadith.number}</span>
+                              <span>HR. {currentCol.shortName} No. {hadith.number}</span>
                             </span>
+
+                            {hadith.arabicNumber && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 font-semibold">
+                                No. Inti Baqi: #{hadith.arabicNumber}
+                              </span>
+                            )}
 
                             {hadith.hadithInBook && (
                               <span className="text-[11px] text-muted-foreground">
@@ -762,15 +889,17 @@ export default function HadithBrowser({ onExportQuote }) {
                         </div>
 
                         {/* Matan Arab */}
-                        <p
-                          className="arabic text-right my-3 text-foreground"
-                          style={{ fontSize: '1.65rem', lineHeight: 2.3 }}
-                          dir="rtl"
-                        >
-                          {hadith.arab}
-                        </p>
+                        {hadith.arab ? (
+                          <p
+                            className="arabic text-right my-3 text-foreground"
+                            style={{ fontSize: '1.65rem', lineHeight: 2.3 }}
+                            dir="rtl"
+                          >
+                            {hadith.arab}
+                          </p>
+                        ) : null}
 
-                        <div className="hairline my-2" />
+                        {hadith.arab && <div className="hairline my-2" />}
 
                         {/* Terjemahan Bahasa Indonesia */}
                         <div>
@@ -834,7 +963,7 @@ export default function HadithBrowser({ onExportQuote }) {
               )}
             </div>
           ) : (
-            /* B. TAMPILAN DAFTAR 97 KITAB (GRID / CARDS) */
+            /* B. TAMPILAN DAFTAR KITAB (GRID / CARDS) */
             <div className="space-y-4">
               {/* Search Bar Kitab */}
               <div className="relative">
@@ -843,7 +972,7 @@ export default function HadithBrowser({ onExportQuote }) {
                   type="text"
                   value={bookFilterQuery}
                   onChange={(e) => setBookFilterQuery(e.target.value)}
-                  placeholder="Cari kitab Shahih Bukhari (misal: shalat, puasa, zakat, nikah, tauhid, no. 1)..."
+                  placeholder={`Cari kitab Shahih ${currentCol.shortName} (misal: shalat, puasa, zakat, nikah, no. 1)...`}
                   className="w-full h-11 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
                 />
                 {bookFilterQuery && (
@@ -860,11 +989,11 @@ export default function HadithBrowser({ onExportQuote }) {
               {isLoadingMeta && booksMeta.length === 0 && (
                 <div className="py-12 text-center space-y-2">
                   <Loader2 className="h-7 w-7 text-gold animate-spin mx-auto" />
-                  <p className="text-xs text-muted-foreground">Memuat indeks 97 Kitab Shahih Bukhari...</p>
+                  <p className="text-xs text-muted-foreground">Memuat indeks Kitab Shahih {currentCol.shortName}...</p>
                 </div>
               )}
 
-              {/* Grid 97 Kitab */}
+              {/* Grid Kitab */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {filteredBooks.map((book) => (
                   <div
@@ -912,7 +1041,7 @@ export default function HadithBrowser({ onExportQuote }) {
       )}
 
       {/* ═════════════════════════════════════════════════════════════ */}
-      {/* 3. TAB: PENCARIAN GLOBAL & LOMPAT NOMOR (7.589 HADITS)         */}
+      {/* 3. TAB: PENCARIAN GLOBAL & LOMPAT NOMOR                      */}
       {/* ═════════════════════════════════════════════════════════════ */}
       {activeTab === 'cari' && (
         <div className="space-y-5">
@@ -921,10 +1050,10 @@ export default function HadithBrowser({ onExportQuote }) {
             <div className="space-y-1">
               <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
                 <Search className="h-4 w-4 text-gold" />
-                <span>Pencarian Lengkap Shahih Bukhari</span>
+                <span>Pencarian Lengkap Shahih {currentCol.shortName}</span>
               </h3>
               <p className="text-xs text-muted-foreground">
-                Cari kata kunci teks hadits atau lompat langsung ke nomor hadits tertentu (1 s/d 7563).
+                Cari kata kunci teks hadits atau ketik nomor hadits (1 s/d {currentCol.totalHadiths.toLocaleString('id-ID')}).
               </p>
             </div>
 
@@ -941,7 +1070,7 @@ export default function HadithBrowser({ onExportQuote }) {
                   type="text"
                   value={globalQuery}
                   onChange={(e) => setGlobalQuery(e.target.value)}
-                  placeholder="Ketik kata kunci (misal: tetangga, sedekah, senyum) atau nomor (misal: 299)..."
+                  placeholder={`Ketik kata kunci atau nomor hadits ${currentCol.shortName}...`}
                   className="w-full h-11 pl-10 pr-24 rounded-2xl bg-secondary/80 border border-border/80 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
                 />
                 <button
@@ -963,7 +1092,7 @@ export default function HadithBrowser({ onExportQuote }) {
               {/* Quick Keyword Chips */}
               <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
                 <span className="text-[11px] text-muted-foreground mr-1">Rekomendasi:</span>
-                {['Niat', 'Sabar', 'Shalat', 'Sedekah', 'Tetangga', 'Senyum', 'Wudhu', 'Kiamat', '299', '1'].map((word) => (
+                {['Niat', 'Sabar', 'Shalat', 'Sedekah', 'Tetangga', 'Senyum', 'Wudhu', 'Kiamat', '1', '93'].map((word) => (
                   <button
                     key={word}
                     type="button"
@@ -987,7 +1116,7 @@ export default function HadithBrowser({ onExportQuote }) {
                 Hasil pencarian untuk "<strong className="text-foreground">{globalQuery}</strong>": Ditemukan <strong className="text-foreground">{globalSearchResults.length}</strong> hadits
               </span>
               {globalSearchResults.length > 0 && (
-                <span className="text-[11px] text-emerald font-medium">Shahih Bukhari</span>
+                <span className="text-[11px] text-emerald font-medium">Shahih {currentCol.shortName}</span>
               )}
             </div>
           )}
@@ -1007,11 +1136,16 @@ export default function HadithBrowser({ onExportQuote }) {
                     }}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-border/40">
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold bg-gold/10 text-gold border border-gold/30">
                           <ShieldCheck className="h-3 w-3" />
-                          <span>HR. Bukhari No. {res.number}</span>
+                          <span>HR. {res.collection === 'muslim' ? 'Muslim' : 'Bukhari'} No. {res.number}</span>
                         </span>
+                        {res.arabicNumber && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 font-semibold">
+                            No. Inti Baqi: #{res.arabicNumber}
+                          </span>
+                        )}
                         <span className="text-xs text-muted-foreground font-medium">
                           {res.bookName}
                         </span>
@@ -1026,7 +1160,7 @@ export default function HadithBrowser({ onExportQuote }) {
                       </button>
                     </div>
 
-                    {/* Jika hasil pencarian memuat Arab (misal pencarian nomor) */}
+                    {/* Jika hasil pencarian memuat Arab */}
                     {res.arab && (
                       <p
                         className="arabic text-right my-2 text-foreground"
@@ -1063,7 +1197,8 @@ export default function HadithBrowser({ onExportQuote }) {
                         onClick={() => handleCopy({
                           id: res.text,
                           number: res.number,
-                          arab: res.arab || ''
+                          arab: res.arab || '',
+                          arabicNumber: res.arabicNumber
                         }, res.bookName)}
                         className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all active:scale-95 cursor-pointer ${
                           isCopied
@@ -1095,10 +1230,10 @@ export default function HadithBrowser({ onExportQuote }) {
       <footer className="noor-card rounded-2xl p-4 border border-border/50 text-xs text-muted-foreground space-y-1">
         <p className="font-semibold text-foreground flex items-center gap-1.5">
           <ShieldCheck className="h-4 w-4 text-emerald" />
-          <span>Tentang Database Shahih Al-Bukhari Al Munawwarah</span>
+          <span>Tentang Database Shahih Al-Bukhari & Shahih Muslim (Ash-Shahihain)</span>
         </p>
         <p className="leading-relaxed text-[11px]">
-          Hadis-hadis dalam database ini mengacu pada kitab <em>Al-Jami' Al-Musnad As-Shahih Al-Mukhtashar</em> karya Imam Al-Bukhari (194–256 H) dengan standar penomoran Fath Al-Bari. Terdiri dari 97 kitab dan 7.589 hadits berderajat Shahih Muttafaq 'Alaih yang menjadi rujukan otoritatif umat Islam sedunia.
+          Hadits-hadits dalam database ini bersumber dari dua kitab hadits paling shahih dan otoritatif dalam Islam: <em>Shahih Al-Bukhari</em> (~7.589 hadits dalam 97 kitab) dan <em>Shahih Muslim</em> (~7.563 hadits jalur sanad / ~3.033 hadits inti tanpa pengulangan dalam 57 kitab menurut penomoran Muhammad Fuad Abdul Baqi). Keduanya disajikan lengkap dengan teks Arab dan terjemahan resmi Bahasa Indonesia.
         </p>
       </footer>
 

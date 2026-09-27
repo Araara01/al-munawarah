@@ -1,6 +1,7 @@
 // Hadith Service — Al Munawwarah
-// Pencarian Hadis Riwayat Bukhari yang relevan berdasarkan query/topik
+// Pencarian Hadis Riwayat Bukhari & Muslim yang relevan berdasarkan query/topik
 import { HADITH_BUKHARI, HADITH_THEMES, getHadithById, getHadithsByTheme } from '../data/hadithData.js';
+import { HADITH_MUSLIM, HADITH_MUSLIM_THEMES, getMuslimHadithById, getMuslimHadithsByTheme } from '../data/hadithMuslimData.js';
 
 /**
  * Cari hadis Bukhari yang paling relevan berdasarkan query pengguna.
@@ -181,54 +182,102 @@ function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// Re-export dari hadithData untuk kemudahan
-export { HADITH_BUKHARI, HADITH_THEMES, getHadithById, getHadithsByTheme };
-
-// ─────────────────────────────────────────────────────────────────
-// Bukhari Complete Database (97 Kitab & 7.589 Hadits)
-// ─────────────────────────────────────────────────────────────────
-
-const bukhariBookCache = new Map();
-let bukhariMetaCache = null;
-let bukhariSearchIndexCache = null;
-let isSearchIndexLoading = false;
+// Re-export dari hadithData & hadithMuslimData untuk kemudahan
+export { 
+  HADITH_BUKHARI, HADITH_THEMES, getHadithById, getHadithsByTheme,
+  HADITH_MUSLIM, HADITH_MUSLIM_THEMES, getMuslimHadithById, getMuslimHadithsByTheme 
+};
 
 /**
- * Mengambil metadata 97 kitab Shahih Bukhari (/data/hadits/bukhari/meta.json)
+ * Mendapatkan koleksi hadis tematik berdasarkan nama perawi ('bukhari' | 'muslim')
  */
-export async function getBukhariMeta() {
-  if (bukhariMetaCache) return bukhariMetaCache;
+export function getThematicHadiths(collection = 'bukhari') {
+  return collection === 'muslim' ? HADITH_MUSLIM : HADITH_BUKHARI;
+}
+
+/**
+ * Mendapatkan indeks tema berdasarkan nama perawi ('bukhari' | 'muslim')
+ */
+export function getThematicThemes(collection = 'bukhari') {
+  return collection === 'muslim' ? HADITH_MUSLIM_THEMES : HADITH_THEMES;
+}
+
+/**
+ * Mendapatkan hadits tematik berdasarkan ID dan perawi
+ */
+export function getThematicHadithById(collection = 'bukhari', id) {
+  return collection === 'muslim' ? getMuslimHadithById(id) : getHadithById(id);
+}
+
+/**
+ * Mendapatkan hadits tematik berdasarkan tema dan perawi
+ */
+export function getThematicHadithsByTheme(collection = 'bukhari', themeKey) {
+  return collection === 'muslim' ? getMuslimHadithsByTheme(themeKey) : getHadithsByTheme(themeKey);
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Hadith Complete Database (Shahih Bukhari & Shahih Muslim)
+// ─────────────────────────────────────────────────────────────────
+
+const bookCache = {
+  bukhari: new Map(),
+  muslim: new Map()
+};
+
+const metaCache = {
+  bukhari: null,
+  muslim: null
+};
+
+const searchIndexCache = {
+  bukhari: null,
+  muslim: null
+};
+
+const searchIndexLoading = {
+  bukhari: false,
+  muslim: false
+};
+
+/**
+ * Mengambil metadata koleksi hadits ('bukhari' | 'muslim')
+ */
+export async function getHadithCollectionMeta(collection = 'bukhari') {
+  const col = collection === 'muslim' ? 'muslim' : 'bukhari';
+  if (metaCache[col]) return metaCache[col];
   try {
-    const res = await fetch('/data/hadits/bukhari/meta.json');
+    const res = await fetch(`/data/hadits/${col}/meta.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    bukhariMetaCache = data;
+    metaCache[col] = data;
     return data;
   } catch (err) {
-    console.error('Gagal memuat meta Shahih Bukhari:', err);
+    console.error(`Gagal memuat meta ${col}:`, err);
     return null;
   }
 }
 
 /**
- * Mengambil isi satu kitab (/data/hadits/bukhari/books/${bookNumber}.json)
+ * Mengambil isi satu kitab hadits ('bukhari' | 'muslim')
  */
-export async function getBukhariBook(bookNumber) {
+export async function getHadithCollectionBook(collection = 'bukhari', bookNumber) {
+  const col = collection === 'muslim' ? 'muslim' : 'bukhari';
   const bNum = parseInt(bookNumber, 10);
-  if (!bNum || bNum < 1 || bNum > 97) return null;
+  if (isNaN(bNum)) return null;
 
-  if (bukhariBookCache.has(bNum)) {
-    return bukhariBookCache.get(bNum);
+  if (bookCache[col].has(bNum)) {
+    return bookCache[col].get(bNum);
   }
 
   try {
-    const res = await fetch(`/data/hadits/bukhari/books/${bNum}.json`);
+    const res = await fetch(`/data/hadits/${col}/books/${bNum}.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    bukhariBookCache.set(bNum, data);
+    bookCache[col].set(bNum, data);
     return data;
   } catch (err) {
-    console.error(`Gagal memuat Kitab ${bNum}:`, err);
+    console.error(`Gagal memuat Kitab ${bNum} (${col}):`, err);
     return null;
   }
 }
@@ -253,16 +302,17 @@ export function findBookForHadithNumber(num, booksMetaList) {
 }
 
 /**
- * Mengambil hadits tunggal berdasarkan nomor hadits global (1 - 7563)
+ * Mengambil hadits tunggal berdasarkan nomor hadits global
  */
-export async function getHadithByGlobalNumber(num) {
-  const meta = await getBukhariMeta();
+export async function getHadithByGlobalNumber(collection = 'bukhari', num) {
+  const col = collection === 'muslim' ? 'muslim' : 'bukhari';
+  const meta = await getHadithCollectionMeta(col);
   if (!meta || !meta.books) return null;
 
   const bookInfo = findBookForHadithNumber(num, meta.books);
   if (!bookInfo) return null;
 
-  const bookData = await getBukhariBook(bookInfo.bookNumber);
+  const bookData = await getHadithCollectionBook(col, bookInfo.bookNumber);
   if (!bookData || !bookData.hadiths) return null;
 
   const target = parseFloat(num);
@@ -271,6 +321,7 @@ export async function getHadithByGlobalNumber(num) {
 
   return {
     ...hadith,
+    collection: col,
     bookInfo: {
       bookNumber: bookData.bookNumber,
       nameId: bookData.nameId,
@@ -283,46 +334,52 @@ export async function getHadithByGlobalNumber(num) {
 /**
  * Memuat indeks pencarian global secara lazy-load
  */
-export async function loadBukhariSearchIndex() {
-  if (bukhariSearchIndexCache) return bukhariSearchIndexCache;
-  if (isSearchIndexLoading) {
-    while (isSearchIndexLoading) {
+export async function loadHadithSearchIndex(collection = 'bukhari') {
+  const col = collection === 'muslim' ? 'muslim' : 'bukhari';
+  if (searchIndexCache[col]) return searchIndexCache[col];
+  if (searchIndexLoading[col]) {
+    while (searchIndexLoading[col]) {
       await new Promise(r => setTimeout(r, 100));
     }
-    return bukhariSearchIndexCache;
+    return searchIndexCache[col];
   }
 
-  isSearchIndexLoading = true;
+  searchIndexLoading[col] = true;
   try {
-    const res = await fetch('/data/hadits/bukhari/search_index.json');
+    const res = await fetch(`/data/hadits/${col}/search_index.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    bukhariSearchIndexCache = data;
+    searchIndexCache[col] = data;
     return data;
   } catch (err) {
-    console.error('Gagal memuat search_index.json:', err);
+    console.error(`Gagal memuat search_index.json (${col}):`, err);
     return null;
   } finally {
-    isSearchIndexLoading = false;
+    searchIndexLoading[col] = false;
   }
 }
 
 /**
- * Pencarian global ke seluruh 7.589 hadits
+ * Pencarian global ke seluruh hadits dalam satu koleksi
  */
-export async function searchBukhariGlobal(query = '', limit = 50) {
+export async function searchHadithCollectionGlobal(collection = 'bukhari', query = '', limit = 50) {
+  const col = collection === 'muslim' ? 'muslim' : 'bukhari';
   const q = (query || '').toLowerCase().trim();
   if (!q) return [];
 
+  const maxHadithNum = col === 'muslim' ? 7563 : 7563;
+
   // Jika query adalah angka, prioritaskan lompat ke nomor hadits
   const asNumber = parseFloat(q);
-  if (!isNaN(asNumber) && asNumber >= 1 && asNumber <= 7563) {
-    const exactHadith = await getHadithByGlobalNumber(asNumber);
+  if (!isNaN(asNumber) && asNumber >= 1 && asNumber <= maxHadithNum) {
+    const exactHadith = await getHadithByGlobalNumber(col, asNumber);
     if (exactHadith) {
       return [{
         number: exactHadith.number,
+        arabicNumber: exactHadith.arabicNumber,
         bookNumber: exactHadith.bookNumber,
         bookName: exactHadith.bookInfo.nameId,
+        collection: col,
         text: exactHadith.id,
         arab: exactHadith.arab,
         isExactNumber: true
@@ -330,10 +387,10 @@ export async function searchBukhariGlobal(query = '', limit = 50) {
     }
   }
 
-  const index = await loadBukhariSearchIndex();
+  const index = await loadHadithSearchIndex(col);
   if (!index) return [];
 
-  const meta = await getBukhariMeta();
+  const meta = await getHadithCollectionMeta(col);
   const booksMap = new Map();
   if (meta && meta.books) {
     meta.books.forEach(b => booksMap.set(b.bookNumber, b.nameId));
@@ -351,8 +408,10 @@ export async function searchBukhariGlobal(query = '', limit = 50) {
     if (isMatch) {
       matched.push({
         number: item.n,
+        arabicNumber: item.an,
         bookNumber: item.b,
         bookName: booksMap.get(item.b) || `Kitab ${item.b}`,
+        collection: col,
         text: item.t
       });
       if (matched.length >= limit) break;
@@ -361,3 +420,13 @@ export async function searchBukhariGlobal(query = '', limit = 50) {
 
   return matched;
 }
+
+// Aliases for Bukhari (Backward compatibility)
+export const getBukhariMeta = () => getHadithCollectionMeta('bukhari');
+export const getBukhariBook = (bookNumber) => getHadithCollectionBook('bukhari', bookNumber);
+export const searchBukhariGlobal = (query, limit) => searchHadithCollectionGlobal('bukhari', query, limit);
+
+// Aliases for Muslim
+export const getMuslimMeta = () => getHadithCollectionMeta('muslim');
+export const getMuslimBook = (bookNumber) => getHadithCollectionBook('muslim', bookNumber);
+export const searchMuslimGlobal = (query, limit) => searchHadithCollectionGlobal('muslim', query, limit);
