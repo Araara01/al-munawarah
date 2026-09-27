@@ -183,3 +183,181 @@ function pickRandom(arr) {
 
 // Re-export dari hadithData untuk kemudahan
 export { HADITH_BUKHARI, HADITH_THEMES, getHadithById, getHadithsByTheme };
+
+// ─────────────────────────────────────────────────────────────────
+// Bukhari Complete Database (97 Kitab & 7.589 Hadits)
+// ─────────────────────────────────────────────────────────────────
+
+const bukhariBookCache = new Map();
+let bukhariMetaCache = null;
+let bukhariSearchIndexCache = null;
+let isSearchIndexLoading = false;
+
+/**
+ * Mengambil metadata 97 kitab Shahih Bukhari (/data/hadits/bukhari/meta.json)
+ */
+export async function getBukhariMeta() {
+  if (bukhariMetaCache) return bukhariMetaCache;
+  try {
+    const res = await fetch('/data/hadits/bukhari/meta.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    bukhariMetaCache = data;
+    return data;
+  } catch (err) {
+    console.error('Gagal memuat meta Shahih Bukhari:', err);
+    return null;
+  }
+}
+
+/**
+ * Mengambil isi satu kitab (/data/hadits/bukhari/books/${bookNumber}.json)
+ */
+export async function getBukhariBook(bookNumber) {
+  const bNum = parseInt(bookNumber, 10);
+  if (!bNum || bNum < 1 || bNum > 97) return null;
+
+  if (bukhariBookCache.has(bNum)) {
+    return bukhariBookCache.get(bNum);
+  }
+
+  try {
+    const res = await fetch(`/data/hadits/bukhari/books/${bNum}.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    bukhariBookCache.set(bNum, data);
+    return data;
+  } catch (err) {
+    console.error(`Gagal memuat Kitab ${bNum}:`, err);
+    return null;
+  }
+}
+
+/**
+ * Menemukan kitab yang memuat hadits nomor tertentu
+ */
+export function findBookForHadithNumber(num, booksMetaList) {
+  const target = parseFloat(num);
+  if (isNaN(target)) return null;
+  if (!booksMetaList || !booksMetaList.length) return null;
+
+  for (let i = 0; i < booksMetaList.length; i++) {
+    const curr = booksMetaList[i];
+    const next = booksMetaList[i + 1];
+    const nextFirst = next ? next.firstHadithNumber : Infinity;
+    if (target >= curr.firstHadithNumber && target < nextFirst) {
+      return curr;
+    }
+  }
+  return null;
+}
+
+/**
+ * Mengambil hadits tunggal berdasarkan nomor hadits global (1 - 7563)
+ */
+export async function getHadithByGlobalNumber(num) {
+  const meta = await getBukhariMeta();
+  if (!meta || !meta.books) return null;
+
+  const bookInfo = findBookForHadithNumber(num, meta.books);
+  if (!bookInfo) return null;
+
+  const bookData = await getBukhariBook(bookInfo.bookNumber);
+  if (!bookData || !bookData.hadiths) return null;
+
+  const target = parseFloat(num);
+  const hadith = bookData.hadiths.find(h => h.number === target);
+  if (!hadith) return null;
+
+  return {
+    ...hadith,
+    bookInfo: {
+      bookNumber: bookData.bookNumber,
+      nameId: bookData.nameId,
+      nameEn: bookData.nameEn,
+      totalHadiths: bookData.totalHadiths
+    }
+  };
+}
+
+/**
+ * Memuat indeks pencarian global secara lazy-load
+ */
+export async function loadBukhariSearchIndex() {
+  if (bukhariSearchIndexCache) return bukhariSearchIndexCache;
+  if (isSearchIndexLoading) {
+    while (isSearchIndexLoading) {
+      await new Promise(r => setTimeout(r, 100));
+    }
+    return bukhariSearchIndexCache;
+  }
+
+  isSearchIndexLoading = true;
+  try {
+    const res = await fetch('/data/hadits/bukhari/search_index.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    bukhariSearchIndexCache = data;
+    return data;
+  } catch (err) {
+    console.error('Gagal memuat search_index.json:', err);
+    return null;
+  } finally {
+    isSearchIndexLoading = false;
+  }
+}
+
+/**
+ * Pencarian global ke seluruh 7.589 hadits
+ */
+export async function searchBukhariGlobal(query = '', limit = 50) {
+  const q = (query || '').toLowerCase().trim();
+  if (!q) return [];
+
+  // Jika query adalah angka, prioritaskan lompat ke nomor hadits
+  const asNumber = parseFloat(q);
+  if (!isNaN(asNumber) && asNumber >= 1 && asNumber <= 7563) {
+    const exactHadith = await getHadithByGlobalNumber(asNumber);
+    if (exactHadith) {
+      return [{
+        number: exactHadith.number,
+        bookNumber: exactHadith.bookNumber,
+        bookName: exactHadith.bookInfo.nameId,
+        text: exactHadith.id,
+        arab: exactHadith.arab,
+        isExactNumber: true
+      }];
+    }
+  }
+
+  const index = await loadBukhariSearchIndex();
+  if (!index) return [];
+
+  const meta = await getBukhariMeta();
+  const booksMap = new Map();
+  if (meta && meta.books) {
+    meta.books.forEach(b => booksMap.set(b.bookNumber, b.nameId));
+  }
+
+  const tokens = q.split(/\s+/).filter(t => t.length > 1);
+
+  const matched = [];
+  for (const item of index) {
+    const textLower = item.t.toLowerCase();
+    const isMatch = tokens.length > 0 
+      ? tokens.every(tok => textLower.includes(tok))
+      : textLower.includes(q);
+
+    if (isMatch) {
+      matched.push({
+        number: item.n,
+        bookNumber: item.b,
+        bookName: booksMap.get(item.b) || `Kitab ${item.b}`,
+        text: item.t
+      });
+      if (matched.length >= limit) break;
+    }
+  }
+
+  return matched;
+}
