@@ -232,15 +232,26 @@ export default function Sidebar({
         {/* ── Bottom User Pill ──────────────────────────────── */}
         <div className="border-t border-border/50 px-4 py-4">
           <div className="flex items-center gap-3">
-            {/* Breathing golden ring avatar */}
+            {/* Breathing golden ring avatar with Crescent & Star */}
             <span className="relative breathing flex h-8 w-8 items-center justify-center flex-shrink-0">
               <svg viewBox="0 0 48 48" className="absolute h-full w-full" aria-hidden="true">
-                <g fill="none" stroke="hsl(var(--gold))" strokeWidth="1.2" strokeLinejoin="round">
-                  <rect x="10" y="10" width="28" height="28" rx="3" transform="rotate(0 24 24)" opacity="0.85" />
-                  <rect x="10" y="10" width="28" height="28" rx="3" transform="rotate(45 24 24)" opacity="0.45" />
+                <circle cx="24" cy="24" r="22" fill="none" stroke="hsl(var(--gold))" strokeWidth="0.8" opacity="0.4" />
+                <circle cx="24" cy="24" r="19.5" fill="none" stroke="hsl(var(--gold))" strokeWidth="0.5" strokeDasharray="1.5 2.5" opacity="0.3" />
+                <g transform="translate(1.2, 2.2) rotate(-18 24 24)">
+                  <path
+                    d="M 33.64 13.77 A 15.5 15.5 0 1 0 33.64 34.23 A 12.2 12.2 0 1 1 33.64 13.77 Z"
+                    fill="hsl(var(--gold))"
+                    stroke="hsl(var(--gold-bright))"
+                    strokeWidth="0.4"
+                  />
+                  <polygon
+                    points="26.80,24.00 30.30,22.77 30.39,19.05 32.65,22.00 36.21,20.94 34.10,24.00 36.71,27.06 32.65,26.00 30.39,28.95 30.30,25.23"
+                    fill="hsl(var(--gold))"
+                    stroke="hsl(var(--gold-bright))"
+                    strokeWidth="0.3"
+                  />
+                  <circle cx="32" cy="24" r="0.85" fill="#ffffff" opacity="0.9" />
                 </g>
-                <circle cx="24" cy="24" r="5" fill="hsl(var(--gold))" opacity="0.9" />
-                <circle cx="24" cy="24" r="9" fill="none" stroke="hsl(var(--gold))" strokeWidth="0.6" opacity="0.4" />
               </svg>
             </span>
             <div className="min-w-0 flex-1">
