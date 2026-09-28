@@ -64,7 +64,7 @@ export default function SettingsModal({
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium text-foreground">Mode Tamu</p>
               <p className="text-xs text-muted-foreground">
-                Riwayat dan ayat tersimpan diamankan di peramban lokal perangkatmu.
+                Riwayat dan dalil tersimpan diamankan di peramban lokal perangkatmu.
               </p>
             </div>
           </div>

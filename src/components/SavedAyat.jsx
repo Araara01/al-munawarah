@@ -130,13 +130,13 @@ export default function SavedAyat({
             <BookmarkCheck className="h-5 w-5" />
           </span>
           <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl text-foreground">
-            Ayat Tersimpan
+            Dalil Tersimpan
           </h2>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           {savedAyahs.length > 0
-            ? `${savedAyahs.length} ayat telah kamu tandai — tersinkronisasi dengan progres Jelajah Al-Qur'an.`
-            : "Simpan ayat-ayat Al-Qur'an yang berkesan agar mudah dibaca kapan saja."}
+            ? `${savedAyahs.length} dalil telah kamu tandai — tersinkronisasi dengan progres Jelajah Al-Qur'an.`
+            : "Simpan dalil-dalil Al-Qur'an yang berkesan agar mudah dibaca kapan saja."}
         </p>
 
         {/* Quick action: Go to QuranBrowser */}
@@ -215,11 +215,11 @@ export default function SavedAyat({
             <Bookmark className="h-7 w-7" />
           </span>
           <h3 className="font-display text-lg font-semibold text-foreground">
-            Belum ada ayat tersimpan
+            Belum ada dalil tersimpan
           </h3>
           <p className="mt-2 max-w-sm text-xs text-muted-foreground leading-relaxed">
             Saat membaca atau menjelajahi Al-Qur'an, tekan tombol{' '}
-            <strong className="text-gold font-semibold">Bookmark</strong> pada kartu ayat
+            <strong className="text-gold font-semibold">Bookmark</strong> pada kartu dalil
             untuk menyimpannya ke daftar ini.
           </p>
           {onGoToQuran && (
@@ -240,7 +240,7 @@ export default function SavedAyat({
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari ayat tersimpan (nama surat, terjemahan, nomor)..."
+                placeholder="Cari dalil tersimpan (nama surat, terjemahan, nomor)..."
                 className="w-full rounded-2xl border border-border/80 bg-secondary/50 py-2.5 pl-4 pr-9 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-gold"
               />
               {searchQuery && (
@@ -256,7 +256,7 @@ export default function SavedAyat({
 
           {filtered.length === 0 && (
             <p className="text-center text-xs text-muted-foreground py-6">
-              Tidak ada ayat yang cocok dengan pencarian "{searchQuery}".
+              Tidak ada dalil yang cocok dengan pencarian "{searchQuery}".
             </p>
           )}
 
@@ -379,7 +379,7 @@ export default function SavedAyat({
                       <button
                         onClick={() => {
                           onRemoveAyah(ayah);
-                          showToast('Ayat dihapus dari tersimpan', 'info');
+                          showToast('Dalil dihapus dari tersimpan', 'info');
                         }}
                         className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition-all"
                         title="Hapus dari Tersimpan"

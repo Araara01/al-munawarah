@@ -88,7 +88,7 @@ export default function QuranBrowser({
   const [copiedTafsirAyah, setCopiedTafsirAyah] = useState(null);
   const [filterSavedOnlyInReader, setFilterSavedOnlyInReader] = useState(false);
 
-  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Ayat Tersimpan)
+  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Dalil Tersimpan)
   const [internalLastRead, setInternalLastRead] = useState(() => getLastRead());
   const lastRead = externalLastRead !== undefined && externalLastRead !== null ? externalLastRead : internalLastRead;
 
@@ -155,7 +155,7 @@ export default function QuranBrowser({
       j.end.surahName.toLowerCase().includes(q);
   });
 
-  // Filter Saved Ayahs (Ayat Tersimpan)
+  // Filter Saved Ayahs (Dalil Tersimpan)
   const filteredSavedAyahs = savedAyahs.filter(ay => {
     const q = searchQuery.toLowerCase().trim();
     if (!q) return true;
@@ -252,7 +252,7 @@ export default function QuranBrowser({
     scrollToAyahWithHighlight(ayahNum);
   };
 
-  // Mark Specific Ayah as Last Read / Reading Checkpoint (Synchronizes with Ayat Tersimpan)
+  // Mark Specific Ayah as Last Read / Reading Checkpoint (Synchronizes with Dalil Tersimpan)
   const handleMarkLastRead = (ayah) => {
     if (!ayah && !surahDetail) return;
     const sNum = parseInt(ayah?.surah_number || ayah?.surahNumber || surahDetail?.number, 10);
@@ -508,7 +508,7 @@ export default function QuranBrowser({
                         ? 'border-gold bg-gold text-white shadow-xs'
                         : 'border-gold/40 bg-gold/10 text-gold hover:bg-gold/20'
                     }`}
-                    title={filterSavedOnlyInReader ? "Tampilkan Semua Ayat" : "Saring Hanya Ayat Tersimpan di Surat Ini"}
+                    title={filterSavedOnlyInReader ? "Tampilkan Semua Ayat" : "Saring Hanya Dalil Tersimpan di Surat Ini"}
                   >
                     <BookmarkCheck className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{savedInThisSurah.length} Tersimpan</span>
@@ -908,7 +908,7 @@ export default function QuranBrowser({
                   <div className="flex items-center gap-2">
                     <BookmarkCheck className="h-4 w-4 shrink-0 text-gold" />
                     <span>
-                      Menampilkan <strong className="font-bold text-foreground">{surahDetail.ayahs.filter(a => isAyahBookmarked(surahDetail.number, a.ayah_number)).length}</strong> ayat tersimpan di Surat {surahDetail.name}
+                      Menampilkan <strong className="font-bold text-foreground">{surahDetail.ayahs.filter(a => isAyahBookmarked(surahDetail.number, a.ayah_number)).length}</strong> dalil tersimpan di Surat {surahDetail.name}
                     </span>
                   </div>
                   <button
@@ -1398,7 +1398,7 @@ export default function QuranBrowser({
                         className="text-[11px] underline underline-offset-2 text-muted-foreground hover:text-gold transition-colors inline-flex items-center gap-1"
                       >
                         <BookmarkCheck className="h-3 w-3 text-gold" />
-                        <span>Ayat Tersimpan ({savedAyahs.length})</span>
+                        <span>Dalil Tersimpan ({savedAyahs.length})</span>
                       </span>
                     )}
                   </div>
@@ -1465,7 +1465,7 @@ export default function QuranBrowser({
                 }`}
               >
                 <BookmarkCheck className="h-3.5 w-3.5" />
-                <span>Ayat Tersimpan</span>
+                <span>Dalil Tersimpan</span>
                 {savedAyahs.length > 0 && (
                   <span className={`rounded-full px-1.5 py-0.2 text-[10px] font-bold ${
                     activeTab === 'bookmark' ? 'bg-gold text-white' : 'bg-gold/25 text-gold'
@@ -1501,7 +1501,7 @@ export default function QuranBrowser({
                     : activeTab === 'juz'
                     ? "Cari nomor juz (1 - 30) atau nama surat awal..."
                     : activeTab === 'bookmark'
-                    ? "Cari ayat tersimpan (nama surat, terjemahan, nomor)..."
+                    ? "Cari dalil tersimpan (nama surat, terjemahan, nomor)..."
                     : "Cari topik / tema penyejuk kalbu..."
                 }
                 className="flex w-full border border-border/80 pl-10 pr-10 py-3 shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gold rounded-2xl bg-secondary/50 text-xs sm:text-sm text-foreground"
@@ -1713,27 +1713,27 @@ export default function QuranBrowser({
             </div>
           )}
 
-          {/* ── TAB 3: BOOKMARK / AYAT TERSIMPAN ── */}
+          {/* ── TAB 3: BOOKMARK / DALIL TERSIMPAN ── */}
           {activeTab === 'bookmark' && (
             <div className="space-y-4">
-              {/* Header inside Ayat Tersimpan tab */}
+              {/* Header inside Dalil Tersimpan tab */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/40">
                 <div className="space-y-0.5">
                   <h3 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
                     <BookmarkCheck className="h-5 w-5 text-gold" />
-                    Ayat Tersimpan ({savedAyahs.length})
+                    Dalil Tersimpan ({savedAyahs.length})
                   </h3>
                   <p className="text-xs text-muted-foreground">
-                    Koleksi ayat yang kamu tandai — tersinkronisasi langsung dengan Jelajah Al-Qur'an.
+                    Koleksi dalil yang kamu tandai — tersinkronisasi langsung dengan Jelajah Al-Qur'an.
                   </p>
                 </div>
                 {onGoToSaved && (
                   <button
                     onClick={onGoToSaved}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-gold/40 bg-gold/10 text-gold text-xs font-semibold hover:bg-gold hover:text-white transition-all shadow-xs"
-                    title="Buka Halaman Khusus Ayat Tersimpan"
+                    title="Buka Halaman Khusus Dalil Tersimpan"
                   >
-                    <span>Buka Halaman Tersimpan</span>
+                    <span>Buka Halaman Dalil Tersimpan</span>
                     <ChevronRight className="h-3.5 w-3.5" />
                   </button>
                 )}
@@ -1745,10 +1745,10 @@ export default function QuranBrowser({
                     <Bookmark className="h-7 w-7" />
                   </span>
                   <h3 className="font-display text-lg font-semibold text-foreground">
-                    Belum ada ayat yang disimpan
+                    Belum ada dalil yang disimpan
                   </h3>
                   <p className="mt-2 max-w-sm text-xs text-muted-foreground leading-relaxed">
-                    Saat menjelajahi atau membaca Al-Qur'an, tekan tombol <strong className="text-gold font-semibold">Bookmark</strong> pada ayat mana pun untuk menyimpannya ke daftar ini.
+                    Saat menjelajahi atau membaca Al-Qur'an, tekan tombol <strong className="text-gold font-semibold">Bookmark</strong> pada dalil mana pun untuk menyimpannya ke daftar ini.
                   </p>
                   <button
                     onClick={() => setActiveTab('surat')}
@@ -1760,7 +1760,7 @@ export default function QuranBrowser({
                 </div>
               ) : filteredSavedAyahs.length === 0 ? (
                 <div className="noor-card rounded-3xl p-12 text-center text-muted-foreground text-xs sm:text-sm space-y-3">
-                  <p>Tidak ditemukan ayat tersimpan dengan kata kunci &ldquo;{searchQuery}&rdquo;.</p>
+                  <p>Tidak ditemukan dalil tersimpan dengan kata kunci &ldquo;{searchQuery}&rdquo;.</p>
                   <button
                     onClick={() => setSearchQuery('')}
                     className="px-4 py-1.5 rounded-xl bg-gold/15 text-gold text-xs font-semibold hover:bg-gold/25 transition-all"
@@ -1892,7 +1892,7 @@ export default function QuranBrowser({
                               <button
                                 onClick={() => onToggleSaveAyah(ay)}
                                 className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-colors"
-                                title="Hapus dari Ayat Tersimpan"
+                                title="Hapus dari Dalil Tersimpan"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>

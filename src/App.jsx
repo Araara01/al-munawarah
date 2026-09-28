@@ -92,7 +92,7 @@ function AppContent() {
     }
   });
 
-  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Ayat Tersimpan)
+  // Last Read State (Synchronized reading position across Jelajah Al-Qur'an & Dalil Tersimpan)
   const [lastRead, setLastRead] = useState(() => getLastRead());
 
   // Chat Conversations
@@ -241,7 +241,7 @@ function AppContent() {
     };
   };
 
-  // Update Last Read / Reading Checkpoint (Synchronizes Jelajah Al-Qur'an & Ayat Tersimpan)
+  // Update Last Read / Reading Checkpoint (Synchronizes Jelajah Al-Qur'an & Dalil Tersimpan)
   const handleUpdateLastRead = (readData, autoSaveToAyahs = false) => {
     if (!readData) return;
     const sNum = parseInt(readData.surahNumber, 10);
@@ -295,7 +295,7 @@ function AppContent() {
         const k = getAyahKeys(a);
         return !(k.surah === target.surah && k.ayah === target.ayah);
       }));
-      showToast("Ayat dihapus dari Ayat Tersimpan", "info");
+      showToast("Dalil dihapus dari Dalil Tersimpan", "info");
     } else {
       const sNum = parseInt(target.surah, 10);
       const aNum = parseInt(target.ayah, 10);
@@ -409,7 +409,7 @@ function AppContent() {
   const TAB_TITLES = {
     chat: "Tanya AI",
     quran: "Jelajahi Al-Qur'an",
-    saved: "Ayat Tersimpan",
+    saved: "Dalil Tersimpan",
     hadith: "Hadits Riwayat Bukhari",
     settings: "Pengaturan",
     about: "Tentang Al Munawwarah",

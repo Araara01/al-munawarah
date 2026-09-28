@@ -735,7 +735,7 @@ export default function MessageItem({
                   },
                   {
                     icon: isSaved ? BookmarkCheck : Bookmark,
-                    label: isSaved ? 'Tersimpan' : 'Simpan Ayat',
+                    label: isSaved ? 'Tersimpan' : 'Simpan Dalil',
                     color: isSaved ? 'text-gold' : '',
                     active: isSaved,
                     onClick: () => onToggleSave?.(primaryAyah)

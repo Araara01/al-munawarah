@@ -321,7 +321,7 @@ export default function LandingPage({
                 className="flex items-center justify-center gap-2 h-[3.25rem] rounded-full border border-gold/35 px-8 text-sm font-medium text-foreground hover:bg-gold/5 transition-transform active:scale-95"
               >
                 <BookmarkCheck className="h-4 w-4 text-gold" />
-                <span>Ayat Tersimpan</span>
+                <span>Dalil Tersimpan</span>
               </button>
               <button
                 onClick={onOpenHadith}

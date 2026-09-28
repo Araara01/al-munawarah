@@ -42,7 +42,7 @@ export default function AdminStats({ conversationsCount = 0, savedCount = 0, las
 
         <div className="noor-card p-5 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-xs font-medium">Ayat Tersimpan</span>
+            <span className="text-xs font-medium">Dalil Tersimpan</span>
             <Bookmark className="h-4 w-4 text-gold" />
           </div>
           <p className="mt-3 font-display text-2xl font-bold text-foreground">

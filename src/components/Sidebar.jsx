@@ -137,7 +137,7 @@ export default function Sidebar({
           />
           <NavItem
             icon={BookmarkCheck}
-            label="Ayat Tersimpan"
+            label="Dalil Tersimpan"
             active={currentTab === 'saved'}
             testId="nav-saved"
             iconColor="text-gold"
