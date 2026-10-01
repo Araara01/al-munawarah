@@ -10,7 +10,6 @@ import {
   X,
   Bookmark,
   Pin,
-  Clock,
   Volume2,
   VolumeX
 } from 'lucide-react';

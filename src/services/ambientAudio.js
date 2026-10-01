@@ -24,7 +24,7 @@ class AmbientSoundManager {
       try {
         if (node.stop) node.stop();
         if (node.disconnect) node.disconnect();
-      } catch (e) {
+      } catch {
         // ignore
       }
     });

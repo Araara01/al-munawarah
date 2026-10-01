@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Sparkles } from 'lucide-react';
-import Logo from './Logo';
 
 export default function QuoteExportModal({ isOpen, onClose, quoteData }) {
   const [copied, setCopied] = useState(false);

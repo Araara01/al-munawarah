@@ -7,8 +7,7 @@ import {
   getAyahAudioUrl, 
   getSurahFullAudioUrl,
   calculateQuranProgress,
-  getSurahStatsMap,
-  getJuzForAyah
+  getSurahStatsMap
 } from '../services/quranService';
 import { 
   Search, 
@@ -30,12 +29,9 @@ import {
   Pause,
   SkipForward,
   SkipBack,
-  Clock,
   Info,
   ArrowUp,
   Share2,
-  TrendingUp,
-  CheckCircle2,
   Trash2
 } from 'lucide-react';
 import { useToast } from './Toast';

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Key, Cpu, ExternalLink, Moon, Sun, Check, Sparkles, Sliders } from 'lucide-react';
+import { X, Key, Cpu, ExternalLink, Moon, Sun, Sparkles } from 'lucide-react';
 import { useToast } from './Toast';
 
 export default function SettingsModal({

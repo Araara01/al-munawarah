@@ -2,21 +2,18 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { 
   HADITH_BUKHARI, 
   HADITH_THEMES, 
-  getHadithById, 
-  getHadithsByTheme 
+  getHadithById
 } from '../data/hadithData';
 import {
   HADITH_MUSLIM,
   HADITH_MUSLIM_THEMES,
-  getMuslimHadithById,
-  getMuslimHadithsByTheme
+  getMuslimHadithById
 } from '../data/hadithMuslimData';
 import {
   getHadithCollectionMeta,
   getHadithCollectionBook,
   searchHadithCollectionGlobal,
-  findBookForHadithNumber,
-  getHadithByGlobalNumber
+  findBookForHadithNumber
 } from '../services/hadithService';
 import { 
   Search, 
@@ -27,19 +24,14 @@ import {
   Share2, 
   ShieldCheck, 
   BookOpen, 
-  SlidersHorizontal,
   ChevronRight,
   ChevronLeft,
-  Filter,
-  CheckCircle2,
   X,
   ArrowLeft,
   Loader2,
   ExternalLink,
   Library,
   Zap,
-  Bookmark,
-  Layers,
   Book
 } from 'lucide-react';
 import { useToast } from './Toast';

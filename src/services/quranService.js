@@ -66,7 +66,7 @@ export async function getTafsirIbnuKatsir(surahNumber) {
       // Invalid/stale cache — remove it
       sessionStorage.removeItem(sessionKey);
     }
-  } catch (e) {}
+  } catch {}
 
   // 3. Load from local static database (Fastest, offline-capable, primary source)
   try {
@@ -78,7 +78,7 @@ export async function getTafsirIbnuKatsir(surahNumber) {
         ibnuKatsirCache.set(sNum, map);
         try {
           sessionStorage.setItem(sessionKey, JSON.stringify(map));
-        } catch (e) {}
+        } catch {}
         console.log(`[Tafsir IK] Surah ${sNum} loaded from local DB (${Object.keys(map).length} ayahs)`);
         return map;
       }
@@ -105,7 +105,7 @@ export async function getTafsirIbnuKatsir(surahNumber) {
         ibnuKatsirCache.set(sNum, map);
         try {
           sessionStorage.setItem(sessionKey, JSON.stringify(map));
-        } catch (e) {}
+        } catch {}
         console.log(`[Tafsir IK] Surah ${sNum} loaded from GitHub CDN fallback`);
         return map;
       }
@@ -145,7 +145,7 @@ export async function getSurahDetail(surahNumber) {
       }
       sessionStorage.removeItem(sessionSurahKey);
     }
-  } catch (e) {
+  } catch {
     // ignore sessionStorage errors
   }
 
@@ -264,7 +264,7 @@ export async function getSurahDetail(surahNumber) {
     surahCache.set(sNum, result);
     try {
       sessionStorage.setItem(sessionSurahKey, JSON.stringify(result));
-    } catch (e) {
+    } catch {
       // ignore quota exceed
     }
 
@@ -320,7 +320,7 @@ export function saveLastRead(surahNumber, surahName, ayahNumber, surahArabic = '
     };
     localStorage.setItem('munawwarah_last_read', JSON.stringify(data));
     return data;
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -333,7 +333,7 @@ export function getLastRead() {
     const saved = localStorage.getItem('munawwarah_last_read');
     if (!saved) return null;
     return JSON.parse(saved);
-  } catch (e) {
+  } catch {
     return null;
   }
 }

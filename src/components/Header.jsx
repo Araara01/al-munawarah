@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Moon, Sun, Settings, Music2, Zap } from 'lucide-react';
+import { Menu, Moon, Sun, Settings, Music2 } from 'lucide-react';
 
 export default function Header({
   onOpenSidebar,

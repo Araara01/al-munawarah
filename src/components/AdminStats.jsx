@@ -5,9 +5,7 @@ import {
   Bookmark, 
   Cpu, 
   Zap, 
-  CheckCircle2,
-  Pin,
-  BookOpen
+  Pin
 } from 'lucide-react';
 import { calculateQuranProgress } from '../services/quranService';
 

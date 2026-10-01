@@ -1,10 +1,8 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { DAILY_WISDOMS } from "../data/wisdomData";
 import { ChevronDown, ChevronUp, RefreshCw, Share2, Sparkles } from "lucide-react";
-import { useToast } from "./Toast";
 
 export default function DailyWisdomBanner({ onExportQuote }) {
-  const { showToast } = useToast();
   const [currentIndex, setCurrentIndex] = useState(() => {
     // Seed from date so wisdom changes daily
     const day = new Date().getDate();
