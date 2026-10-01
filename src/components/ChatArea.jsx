@@ -12,13 +12,19 @@ export default function ChatArea({
   onOpenSurah,
   onExportQuote,
   savedAyahs = [],
-  onToggleSaveAyah
+  onToggleSaveAyah,
+  onFinishTyping
 }) {
   const { showToast } = useToast();
   const [input, setInput] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const scrollContainerRef = useRef(null);
+  const latestMessageRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+  const scrollAnimRef = useRef(null);
+  const isAutoScrollingRef = useRef(false);
+  const prevMessagesLengthRef = useRef(messages.length);
 
   const SUGGESTION_CHIPS = [
     { emoji: '🌙', text: 'Bagaimana cara menghadapi masalah ketika hidup terasa berat?' },
@@ -29,8 +35,162 @@ export default function ChatArea({
     { emoji: '🤲', text: 'Apakah doa saya pasti didengar?' }
   ];
 
+  // Smooth, gradual scroll animation with easing
+  const slowScrollTo = (container, targetY, duration = 800) => {
+    if (!container) return;
+    if (scrollAnimRef.current) {
+      cancelAnimationFrame(scrollAnimRef.current);
+      scrollAnimRef.current = null;
+    }
+
+    const startY = container.scrollTop;
+    const diff = targetY - startY;
+    if (Math.abs(diff) < 2) return;
+
+    const startTime = performance.now();
+    isAutoScrollingRef.current = true;
+
+    function step(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Gentle cubic ease in-out curve
+      const ease = progress < 0.5
+        ? 4 * progress * progress * progress
+        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      container.scrollTop = startY + diff * ease;
+
+      if (progress < 1) {
+        scrollAnimRef.current = requestAnimationFrame(step);
+      } else {
+        scrollAnimRef.current = null;
+        isAutoScrollingRef.current = false;
+      }
+    }
+
+    scrollAnimRef.current = requestAnimationFrame(step);
+  };
+
+  // Position viewport gently so the TOP of the newly arrived answer is in view
+  // (Prevents suddenly jumping to the bottom/end of the answer)
+  const positionNewMessageInView = () => {
+    const container = scrollContainerRef.current;
+    const targetEl = latestMessageRef.current;
+    if (!container || !targetEl) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = targetEl.getBoundingClientRect();
+    const relativeTop = targetRect.top - containerRect.top;
+
+    // If top of AI message is not comfortably positioned near the top of the container:
+    if (relativeTop > 140 || relativeTop < 10) {
+      const desiredScrollTop = container.scrollTop + relativeTop - 50;
+      slowScrollTo(container, Math.max(0, desiredScrollTop), 550);
+    }
+  };
+
+  // Progressive scroll handler triggered as the answer generates and reveals parts
+  const handleProgressScroll = (stageType) => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    if (stageType === 'typing') {
+      const targetEl = latestMessageRef.current;
+      if (!targetEl) return;
+      const containerRect = container.getBoundingClientRect();
+      const targetRect = targetEl.getBoundingClientRect();
+      const bottomDistance = containerRect.bottom - targetRect.bottom;
+
+      // As text types and card expands downwards, gently nudge scroll if close to viewport bottom
+      if (bottomDistance < 50) {
+        const nudge = 50 - bottomDistance;
+        slowScrollTo(container, container.scrollTop + nudge, 280);
+      }
+    } else if (stageType === 'middle-card') {
+      // Middle section appears: smooth gentle scroll
+      setTimeout(() => {
+        const targetEl = latestMessageRef.current;
+        if (!targetEl) return;
+        const containerRect = container.getBoundingClientRect();
+        const targetRect = targetEl.getBoundingClientRect();
+        const bottomDistance = containerRect.bottom - targetRect.bottom;
+        if (bottomDistance < 70) {
+          const distanceToScroll = 70 - bottomDistance;
+          slowScrollTo(container, container.scrollTop + distanceToScroll, 700);
+        }
+      }, 50);
+    } else if (stageType === 'bottom-card') {
+      // Al-Qur'an Yang Cocok & Footer appear: slowly and smoothly scroll to the bottom
+      setTimeout(() => {
+        const maxScroll = container.scrollHeight - container.clientHeight;
+        slowScrollTo(container, maxScroll, 1000);
+      }, 70);
+    } else if (stageType === 'instant-bottom') {
+      const maxScroll = container.scrollHeight - container.clientHeight;
+      slowScrollTo(container, maxScroll, 400);
+    }
+  };
+
+  // If user scrolls manually with mouse wheel or touch, stop programmatic scroll animation
+  const handleUserInteraction = () => {
+    if (scrollAnimRef.current) {
+      cancelAnimationFrame(scrollAnimRef.current);
+      scrollAnimRef.current = null;
+      isAutoScrollingRef.current = false;
+    }
+  };
+
+  // Clean up animation on unmount
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    return () => {
+      if (scrollAnimRef.current) {
+        cancelAnimationFrame(scrollAnimRef.current);
+      }
+    };
+  }, []);
+
+  // Orchestrated scroll effect on message changes & loading states
+  useEffect(() => {
+    const prevLen = prevMessagesLengthRef.current;
+    prevMessagesLengthRef.current = messages.length;
+
+    // When loading starts (user sent question), scroll to show question & loader
+    if (isLoading) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+      return;
+    }
+
+    // When a new message arrives
+    if (messages.length > prevLen) {
+      const lastMsg = messages[messages.length - 1];
+
+      // If it's a NEW AI message: position at TOP of answer (do NOT auto-jump to end!)
+      if (lastMsg?.role === 'assistant' && lastMsg?.isNew) {
+        setTimeout(() => {
+          positionNewMessageInView();
+        }, 60);
+        return;
+      }
+
+      // If user message was added
+      if (lastMsg?.role === 'user') {
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+        return;
+      }
+    }
+
+    // If conversation history was loaded from empty
+    if (prevLen === 0 && messages.length > 0) {
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      }, 50);
+    }
   }, [messages, isLoading]);
 
   const handleInputChange = (e) => {
@@ -92,7 +252,14 @@ export default function ChatArea({
     <div className="flex flex-col bg-background text-foreground transition-colors" style={{ height: 'calc(100vh - 55px - 48px)' }}>
 
       {/* Scrollable Messages Area */}
-      <div className="min-h-0 flex-1 overflow-y-auto" data-testid="chat-scroll-area">
+      <div
+        ref={scrollContainerRef}
+        onWheel={handleUserInteraction}
+        onTouchMove={handleUserInteraction}
+        onPointerDown={handleUserInteraction}
+        className="min-h-0 flex-1 overflow-y-auto"
+        data-testid="chat-scroll-area"
+      >
         <div className="mx-auto w-full px-4 py-8 sm:px-6" style={{ maxWidth: 680 }}>
 
           {messages.length === 0 ? (
@@ -140,16 +307,26 @@ export default function ChatArea({
           ) : (
             /* ── Messages List ── */
             <div className="space-y-8">
-              {messages.map((msg, idx) => (
-                <MessageItem
-                  key={msg.id || idx}
-                  message={msg}
-                  onOpenSurah={onOpenSurah}
-                  onExportQuote={onExportQuote}
-                  isSaved={isAyahSaved(msg.content?.ayahs?.[0])}
-                  onToggleSave={onToggleSaveAyah}
-                />
-              ))}
+              {messages.map((msg, idx) => {
+                const isLast = idx === messages.length - 1;
+                return (
+                  <div
+                    key={msg.id || idx}
+                    ref={isLast ? latestMessageRef : null}
+                  >
+                    <MessageItem
+                      message={msg}
+                      isLatest={isLast}
+                      onOpenSurah={onOpenSurah}
+                      onExportQuote={onExportQuote}
+                      isSaved={isAyahSaved(msg.content?.ayahs?.[0])}
+                      onToggleSave={onToggleSaveAyah}
+                      onProgressScroll={handleProgressScroll}
+                      onFinishTyping={onFinishTyping}
+                    />
+                  </div>
+                );
+              })}
 
               {/* Vitruvian loading indicator */}
               {isLoading && (

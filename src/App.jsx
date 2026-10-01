@@ -99,7 +99,12 @@ function AppContent() {
   const [conversations, setConversations] = useState(() => {
     try {
       const saved = localStorage.getItem('munawwarah_conversations');
-      return saved ? JSON.parse(saved) : [];
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      return (parsed || []).map(c => ({
+        ...c,
+        messages: (c.messages || []).map(m => ({ ...m, isNew: false }))
+      }));
     } catch {
       return [];
     }
@@ -356,7 +361,8 @@ function AppContent() {
         id: `ai-${Date.now()}`,
         role: 'assistant',
         content: responseData,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        isNew: true
       };
 
       const updatedMessages = [...newMessages, aiMsg];
@@ -394,6 +400,20 @@ function AppContent() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleMessageFinished = (msgId) => {
+    setMessages(prev =>
+      prev.map(m => (m.id === msgId ? { ...m, isNew: false } : m))
+    );
+    setConversations(prev =>
+      prev.map(c => ({
+        ...c,
+        messages: (c.messages || []).map(m =>
+          m.id === msgId ? { ...m, isNew: false } : m
+        )
+      }))
+    );
   };
 
   const handleClearHistory = () => {
@@ -503,6 +523,7 @@ function AppContent() {
                 onExportQuote={(q) => setExportQuoteData(q)}
                 savedAyahs={savedAyahs}
                 onToggleSaveAyah={handleToggleSaveAyah}
+                onFinishTyping={handleMessageFinished}
               />
             </>
           )}

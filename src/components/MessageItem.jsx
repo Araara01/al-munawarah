@@ -23,7 +23,10 @@ export default function MessageItem({
   onOpenSurah,
   onExportQuote,
   isSaved = false,
-  onToggleSave
+  onToggleSave,
+  isLatest = false,
+  onProgressScroll,
+  onFinishTyping
 }) {
   const { showToast } = useToast();
   const [isPlaying, setIsPlaying] = useState(false);
@@ -92,6 +95,72 @@ export default function MessageItem({
   } : null);
 
   const isDatabaseConnected = data?.isDatabaseConnected || !!primaryAyah?.fromDatabase;
+
+  // Progressive reveal / typewriter animation state
+  const shouldAnimate = Boolean(message.isNew);
+  const [stage, setStage] = useState(() => (shouldAnimate ? 0 : 2));
+  const [isTyping, setIsTyping] = useState(() => shouldAnimate);
+  const [displayedShortAnswer, setDisplayedShortAnswer] = useState(() =>
+    shouldAnimate ? '' : shortAnswer
+  );
+
+  // Progressive typewriter effect for the short answer
+  useEffect(() => {
+    if (!shouldAnimate || stage !== 0) return;
+
+    if (!shortAnswer) {
+      setStage(2);
+      setIsTyping(false);
+      onFinishTyping?.(message.id);
+      return;
+    }
+
+    const totalChars = shortAnswer.length;
+    // Calculate adaptive typing speed: complete short answer in ~1.2s to 2.4s
+    const targetDuration = Math.min(2400, Math.max(1200, totalChars * 9));
+    const intervalMs = 20;
+    const totalSteps = targetDuration / intervalMs;
+    const chunkSize = Math.max(1, Math.ceil(totalChars / totalSteps));
+
+    let currentIdx = 0;
+    const timer = setInterval(() => {
+      currentIdx += chunkSize;
+      if (currentIdx >= totalChars) {
+        currentIdx = totalChars;
+        setDisplayedShortAnswer(shortAnswer);
+        clearInterval(timer);
+        setIsTyping(false);
+
+        // Stage 0 -> 1: Reveal Jawaban Detail
+        setTimeout(() => {
+          setStage(1);
+          onProgressScroll?.('middle-card');
+
+          // Stage 1 -> 2: Reveal Al-Qur'an Yang Cocok & Footer
+          setTimeout(() => {
+            setStage(2);
+            onProgressScroll?.('bottom-card');
+            onFinishTyping?.(message.id);
+          }, 350);
+        }, 250);
+      } else {
+        setDisplayedShortAnswer(shortAnswer.slice(0, currentIdx));
+        if (currentIdx % (chunkSize * 8) < chunkSize) {
+          onProgressScroll?.('typing');
+        }
+      }
+    }, intervalMs);
+
+    return () => clearInterval(timer);
+  }, [shouldAnimate, shortAnswer]);
+
+  const handleFastForward = () => {
+    setDisplayedShortAnswer(shortAnswer);
+    setIsTyping(false);
+    setStage(2);
+    onProgressScroll?.('instant-bottom');
+    onFinishTyping?.(message.id);
+  };
 
   // Load Tafsir Ibnu Katsir on demand when Tafsir is opened inside Ayah dropdown
   useEffect(() => {
@@ -180,7 +249,7 @@ export default function MessageItem({
       {/* ─────────────────────────────────────────────────────────────
           1. JAWABAN SINGKAT ON POINT (Jawaban Pertama)
           ───────────────────────────────────────────────────────────── */}
-      {shortAnswer && (
+      {(displayedShortAnswer || isTyping) && (
         <div
           className="da-card grain relative overflow-hidden rounded-2xl p-4 sm:p-5 transition-all shadow-xs"
           style={{
@@ -200,21 +269,45 @@ export default function MessageItem({
             >
               <Sparkles className="h-3 w-3" />
               <span>Jawaban Singkat · On Point</span>
+              {isTyping && (
+                <span className="ml-1 text-[10px] text-muted-foreground animate-pulse">
+                  (menjawab...)
+                </span>
+              )}
             </div>
 
-            <button
-              type="button"
-              onClick={handleCopyShortAnswer}
-              title="Salin jawaban singkat"
-              className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md cursor-pointer"
-            >
-              {copiedShort ? <Check className="h-3 w-3 text-emerald" /> : <Copy className="h-3 w-3" />}
-              <span className="hidden sm:inline">{copiedShort ? 'Tersalin' : 'Salin'}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {isTyping && (
+                <button
+                  type="button"
+                  onClick={handleFastForward}
+                  title="Tampilkan seluruh jawaban langsung"
+                  className="inline-flex items-center gap-1 text-[10px] font-medium text-gold hover:text-gold-bright transition-colors px-2 py-0.5 rounded-md border border-gold/30 bg-gold/10 hover:bg-gold/20 cursor-pointer"
+                >
+                  <span>Tampilkan Semua</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleCopyShortAnswer}
+                title="Salin jawaban singkat"
+                className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md cursor-pointer"
+              >
+                {copiedShort ? <Check className="h-3 w-3 text-emerald" /> : <Copy className="h-3 w-3" />}
+                <span className="hidden sm:inline">{copiedShort ? 'Tersalin' : 'Salin'}</span>
+              </button>
+            </div>
           </div>
 
-          <p className="text-sm sm:text-[15px] leading-relaxed text-foreground/95 font-medium">
-            {shortAnswer}
+          <p className="text-sm sm:text-[15px] leading-relaxed text-foreground/95 font-medium whitespace-pre-line">
+            {displayedShortAnswer}
+            {isTyping && (
+              <span
+                className="inline-block w-1.5 h-4 ml-1 rounded-xs align-middle animate-pulse"
+                style={{ background: 'hsl(var(--gold))' }}
+              />
+            )}
           </p>
         </div>
       )}
@@ -222,9 +315,9 @@ export default function MessageItem({
       {/* ─────────────────────────────────────────────────────────────
           2. JAWABAN DETAIL (Opsi di bawah jawaban pertama disertai button dropdown)
           ───────────────────────────────────────────────────────────── */}
-      {(detailedAnswer || hadith || practicalSteps.length > 0) && (
+      {stage >= 1 && (detailedAnswer || hadith || practicalSteps.length > 0) && (
         <div
-          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs"
+          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs animate-fade-up"
           style={{
             background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.45))',
             borderColor: showDetailDropdown ? 'hsl(var(--gold) / 0.45)' : 'hsl(var(--border) / 0.7)'
@@ -444,9 +537,9 @@ export default function MessageItem({
              - Disertai button dropdown untuk melihat ayat tersebut
              - Tersambung dengan database Al-Qur'an
           ───────────────────────────────────────────────────────────── */}
-      {resolvedSurahInfo && (
+      {stage >= 2 && resolvedSurahInfo && (
         <div
-          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs"
+          className="da-card grain relative overflow-hidden rounded-2xl border transition-all shadow-xs animate-fade-up"
           style={{
             background: 'linear-gradient(135deg, hsl(var(--secondary) / 0.7), hsl(var(--card)))',
             borderColor: showAyahDropdown ? 'hsl(var(--gold) / 0.45)' : 'hsl(var(--gold) / 0.22)'
@@ -776,12 +869,14 @@ export default function MessageItem({
       {/* ─────────────────────────────────────────────────────────────
           4. FOOTER DISCLAIMER
           ───────────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground/70 pt-1 border-t border-border/25">
-        <p className="flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3 flex-shrink-0" style={{ color: 'hsl(var(--gold))' }} />
-          <span>Al Munawwarah bukan pengganti ulama resmi, fatwa syariah, atau konsultasi fiqih.</span>
-        </p>
-      </div>
+      {stage >= 2 && (
+        <div className="flex items-center justify-between text-[11px] text-muted-foreground/70 pt-1 border-t border-border/25 animate-fade-up">
+          <p className="flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 flex-shrink-0" style={{ color: 'hsl(var(--gold))' }} />
+            <span>Al Munawwarah bukan pengganti ulama resmi, fatwa syariah, atau konsultasi fiqih.</span>
+          </p>
+        </div>
+      )}
 
     </div>
   );
