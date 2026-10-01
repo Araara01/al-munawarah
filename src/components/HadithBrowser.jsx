@@ -102,18 +102,18 @@ export default function HadithBrowser({ onExportQuote }) {
 
   // Kategori Tema Hadits Pilihan (Responsif Bukhari / Muslim)
   const THEME_OPTIONS = useMemo(() => [
-    { id: 'all', label: 'Semua Mutiara', count: currentThematicRaw.length },
-    { id: 'sabar_ujian', label: 'Sabar & Ujian', count: currentThemesRaw.sabar_ujian?.length || 0 },
-    { id: 'rezeki_tawakal', label: 'Rezeki & Tawakal', count: currentThemesRaw.rezeki_tawakal?.length || 0 },
-    { id: 'ketenangan_dzikir', label: 'Ketenangan & Dzikir', count: currentThemesRaw.ketenangan_dzikir?.length || 0 },
-    { id: 'taubat_ampunan', label: 'Taubat & Ampunan', count: currentThemesRaw.taubat_ampunan?.length || 0 },
-    { id: 'keluarga_sosial', label: 'Keluarga & Sosial', count: currentThemesRaw.keluarga_sosial?.length || 0 },
-    { id: 'akhlak_ilmu', label: 'Akhlak & Ilmu', count: currentThemesRaw.akhlak_ilmu?.length || 0 },
-    { id: 'syukur_nikmat', label: 'Syukur & Qana\'ah', count: currentThemesRaw.syukur_nikmat?.length || 0 },
-    { id: 'sakit_sehat', label: 'Sakit & Obat', count: currentThemesRaw.sakit_sehat?.length || 0 },
-    { id: 'niat_ikhlas', label: 'Niat & Amal', count: currentThemesRaw.niat_ikhlas?.length || 0 },
-    { id: 'ibadah_salat', label: 'Salat & Ibadah', count: currentThemesRaw.ibadah_salat?.length || 0 },
-    { id: 'akhirat_dunia', label: 'Akhirat & Kematian', count: currentThemesRaw.akhirat_dunia?.length || 0 },
+    { id: 'all', label: 'Semua', count: currentThematicRaw.length },
+    { id: 'sabar_ujian', label: 'Sabar', count: currentThemesRaw.sabar_ujian?.length || 0 },
+    { id: 'rezeki_tawakal', label: 'Rezeki', count: currentThemesRaw.rezeki_tawakal?.length || 0 },
+    { id: 'ketenangan_dzikir', label: 'Dzikir', count: currentThemesRaw.ketenangan_dzikir?.length || 0 },
+    { id: 'taubat_ampunan', label: 'Taubat', count: currentThemesRaw.taubat_ampunan?.length || 0 },
+    { id: 'keluarga_sosial', label: 'Keluarga', count: currentThemesRaw.keluarga_sosial?.length || 0 },
+    { id: 'akhlak_ilmu', label: 'Akhlak', count: currentThemesRaw.akhlak_ilmu?.length || 0 },
+    { id: 'syukur_nikmat', label: 'Syukur', count: currentThemesRaw.syukur_nikmat?.length || 0 },
+    { id: 'sakit_sehat', label: 'Kesehatan', count: currentThemesRaw.sakit_sehat?.length || 0 },
+    { id: 'niat_ikhlas', label: 'Niat', count: currentThemesRaw.niat_ikhlas?.length || 0 },
+    { id: 'ibadah_salat', label: 'Salat', count: currentThemesRaw.ibadah_salat?.length || 0 },
+    { id: 'akhirat_dunia', label: 'Akhirat', count: currentThemesRaw.akhirat_dunia?.length || 0 },
   ], [selectedCollection, currentThematicRaw, currentThemesRaw]);
 
   // Muat metadata saat koleksi berubah
@@ -336,377 +336,276 @@ export default function HadithBrowser({ onExportQuote }) {
     return null;
   }, [thematicQuery]);
 
-  return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-8 text-foreground space-y-6 animate-fade-up">
-      
-      {/* ── Header Halaman ────────────────────────────────────────── */}
-      <header className="space-y-3.5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald/15 text-emerald border border-emerald/30 shadow-xs">
-              <BookMarked className="h-6 w-6" />
-            </span>
-            <div>
-              <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl text-foreground flex items-center gap-2">
-                <span>Ensiklopedia Hadits Shahih</span>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 hidden sm:inline-flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" />
-                  Shahihain
-                </span>
-              </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                Koleksi Lengkap Shahih Al-Bukhari & Shahih Muslim Lengkap Teks Arab Utsmani & Terjemahan Resmi
-              </p>
-            </div>
-          </div>
+  // Warna aksen berdasarkan koleksi
+  const accent = selectedCollection === 'muslim' ? 'emerald' : 'gold';
 
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-gold/10 text-gold border border-gold/30">
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>15.152+ Hadits Tersedia</span>
-            </span>
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8 text-foreground space-y-5 animate-fade-up">
+      
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <header className="space-y-4">
+
+        {/* Judul */}
+        <div className="flex items-center gap-3">
+          <span className={`flex h-10 w-10 items-center justify-center rounded-xl bg-${accent}/10 text-${accent}`}>
+            <BookMarked className="h-5 w-5" />
+          </span>
+          <div>
+            <h2 className="font-display text-xl font-bold tracking-tight text-foreground">
+              Ensiklopedia Hadits
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Shahih Al-Bukhari &amp; Shahih Muslim — Teks Arab &amp; Terjemahan
+            </p>
           </div>
         </div>
 
-        {/* ── Switcher Koleksi Imam: Bukhari vs Muslim ──────────────── */}
-        <div className="flex items-center p-1 rounded-2xl bg-secondary/80 border border-border/80 gap-1.5 shadow-2xs">
+        {/* ── Switcher Koleksi ──────────────────────────────────── */}
+        <div className="flex gap-2">
           <button
             onClick={() => handleSelectCollection('bukhari')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
               selectedCollection === 'bukhari'
-                ? 'bg-gold text-white shadow-xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                ? 'bg-gold/10 text-gold border-gold/30'
+                : 'text-muted-foreground border-border/50 hover:border-border hover:text-foreground'
             }`}
           >
-            <BookOpen className="h-4 w-4" />
-            <span>Shahih Bukhari</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full hidden sm:inline-block ${
-              selectedCollection === 'bukhari' ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
-            }`}>
-              97 Kitab • 7.589 Hadits
-            </span>
+            <BookOpen className="h-3.5 w-3.5" />
+            <span>Bukhari</span>
+            <span className="hidden sm:inline text-[10px] opacity-60">97K · 7.589H</span>
           </button>
 
           <button
             onClick={() => handleSelectCollection('muslim')}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
               selectedCollection === 'muslim'
-                ? 'bg-emerald text-white shadow-xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                ? 'bg-emerald/10 text-emerald border-emerald/30'
+                : 'text-muted-foreground border-border/50 hover:border-border hover:text-foreground'
             }`}
           >
-            <Book className="h-4 w-4" />
-            <span>Shahih Muslim</span>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full hidden sm:inline-block ${
-              selectedCollection === 'muslim' ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
-            }`}>
-              57 Kitab • 7.563 Hadits (~3.033 Inti)
-            </span>
+            <Book className="h-3.5 w-3.5" />
+            <span>Muslim</span>
+            <span className="hidden sm:inline text-[10px] opacity-60">57K · 7.563H</span>
           </button>
         </div>
 
-        {/* ── Tab Mode Selector ────────────────────────────────────── */}
-        <div className="flex items-center p-1 rounded-2xl bg-secondary/60 border border-border/70 text-xs font-medium gap-1">
-          <button
-            onClick={() => { setActiveTab('tematik'); setActiveBookId(null); }}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'tematik'
-                ? 'bg-foreground text-background font-semibold shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Hadits Tematik ({currentThematicRaw.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('kitab')}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'kitab'
-                ? 'bg-foreground text-background font-semibold shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Library className="h-3.5 w-3.5" />
-            <span>Jelajah {currentCol.totalBooks} Kitab {currentCol.shortName}</span>
-          </button>
-
-          <button
-            onClick={() => { setActiveTab('cari'); setActiveBookId(null); }}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl transition-all cursor-pointer ${
-              activeTab === 'cari'
-                ? 'bg-foreground text-background font-semibold shadow-xs'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <Search className="h-3.5 w-3.5" />
-            <span>Pencarian {currentCol.shortName}</span>
-          </button>
+        {/* ── Tab Navigasi ──────────────────────────────────────── */}
+        <div className="flex border-b border-border/50">
+          {[
+            { id: 'tematik', icon: Sparkles, label: 'Tematik' },
+            { id: 'kitab',   icon: Library,  label: `${currentCol.totalBooks} Kitab` },
+            { id: 'cari',    icon: Search,   label: 'Cari' },
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => {
+                setActiveTab(id);
+                if (id !== 'kitab') setActiveBookId(null);
+              }}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-all cursor-pointer border-b-2 -mb-px ${
+                activeTab === id
+                  ? `border-${accent} text-${accent}`
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{label}</span>
+            </button>
+          ))}
         </div>
       </header>
 
-      {/* ═════════════════════════════════════════════════════════════ */}
-      {/* 1. TAB: HADITS TEMATIK & MUTIARA HIKMAH                       */}
-      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 1. TAB: HADITS TEMATIK                                     */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {activeTab === 'tematik' && (
-        <div className="space-y-5">
-          {/* Search Bar Tematik */}
-          <div className="space-y-2">
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              <input
-                type="text"
-                value={thematicQuery}
-                onChange={(e) => setThematicQuery(e.target.value)}
-                placeholder={`Cari hadits tematik ${currentCol.shortName} (contoh: sabar, rezeki, niat, nomor hadits)...`}
-                className={`w-full h-11 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none transition-all ${
-                  selectedCollection === 'muslim'
-                    ? 'focus:border-emerald/60 focus:ring-2 focus:ring-emerald/15'
-                    : 'focus:border-gold/60 focus:ring-2 focus:ring-gold/15'
-                }`}
-              />
-              {thematicQuery && (
-                <button
-                  onClick={() => setThematicQuery('')}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Saran Cepat Lompat Nomor jika user mengetik angka */}
-            {detectedNumberInThematic && (
-              <div className={`flex items-center justify-between p-3 rounded-2xl border text-xs animate-fade-in ${
-                selectedCollection === 'muslim'
-                  ? 'bg-emerald/10 border-emerald/30 text-emerald'
-                  : 'bg-gold/10 border-gold/30 text-gold'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <Zap className="h-4 w-4 flex-shrink-0" />
-                  <span className="text-foreground">
-                    Mencari nomor hadits <strong>No. {detectedNumberInThematic}</strong> di Shahih {currentCol.shortName}?
-                  </span>
-                </div>
-                <button
-                  onClick={() => handleJumpToHadithNumber(detectedNumberInThematic)}
-                  className={`px-3 py-1.5 rounded-xl text-white font-semibold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer ${
-                    selectedCollection === 'muslim'
-                      ? 'bg-emerald hover:bg-emerald/90'
-                      : 'bg-gold hover:bg-gold/90'
-                  }`}
-                >
-                  <span>Buka Hadits No. {detectedNumberInThematic}</span>
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
+        <div className="space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <input
+              type="text"
+              value={thematicQuery}
+              onChange={(e) => setThematicQuery(e.target.value)}
+              placeholder="Cari kata kunci atau nomor hadits..."
+              className="w-full h-10 pl-10 pr-10 rounded-xl bg-secondary/50 border border-border/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all"
+            />
+            {thematicQuery && (
+              <button
+                onClick={() => setThematicQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
             )}
-
-            {/* Tema Pills Filter */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1 no-scrollbar text-xs">
-              {THEME_OPTIONS.map((theme) => {
-                const isActive = selectedTheme === theme.id;
-                return (
-                  <button
-                    key={theme.id}
-                    onClick={() => setSelectedTheme(theme.id)}
-                    className={`flex-shrink-0 px-3 py-1.5 rounded-xl font-medium transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 ${
-                      isActive
-                        ? (selectedCollection === 'muslim' ? 'bg-emerald text-white font-semibold shadow-xs' : 'bg-gold text-white font-semibold shadow-xs')
-                        : 'bg-secondary/60 border border-border/60 text-muted-foreground hover:text-foreground hover:border-gold/30'
-                    }`}
-                  >
-                    <span>{theme.label}</span>
-                    <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-background/80 text-muted-foreground'
-                    }`}>
-                      {theme.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
-          {/* Info Counter */}
-          <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-2">
-            <span>Menampilkan <strong className="text-foreground">{filteredThematicHadiths.length}</strong> hadits mutiara tematik Shahih {currentCol.shortName}</span>
-            {selectedTheme !== 'all' && (
-              <button 
-                onClick={() => setSelectedTheme('all')}
-                className={`${selectedCollection === 'muslim' ? 'text-emerald' : 'text-gold'} hover:underline font-medium cursor-pointer`}
+          {/* Saran Cepat Lompat Nomor */}
+          {detectedNumberInThematic && (
+            <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl border border-border/60 bg-secondary/40 text-xs">
+              <span className="text-muted-foreground flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-gold flex-shrink-0" />
+                Langsung ke hadits <strong className="text-foreground">No. {detectedNumberInThematic}</strong>?
+              </span>
+              <button
+                onClick={() => handleJumpToHadithNumber(detectedNumberInThematic)}
+                className={`ml-2 px-3 py-1 rounded-lg text-white text-[11px] font-semibold transition-all flex items-center gap-1 flex-shrink-0 cursor-pointer bg-${accent} hover:opacity-90`}
               >
-                Reset filter tema
+                Buka <ChevronRight className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Filter Tema Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {THEME_OPTIONS.map((theme) => {
+              const isActive = selectedTheme === theme.id;
+              return (
+                <button
+                  key={theme.id}
+                  onClick={() => setSelectedTheme(theme.id)}
+                  className={`flex-shrink-0 px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? `bg-${accent} text-white`
+                      : 'bg-secondary/50 border border-border/50 text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {theme.label}
+                  <span className="ml-1 opacity-60 text-[10px]">{theme.count}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Counter */}
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span><strong className="text-foreground">{filteredThematicHadiths.length}</strong> hadits</span>
+            {selectedTheme !== 'all' && (
+              <button
+                onClick={() => setSelectedTheme('all')}
+                className="text-muted-foreground hover:text-foreground underline underline-offset-2 cursor-pointer"
+              >
+                Reset
               </button>
             )}
           </div>
 
           {/* List Hadits Tematik */}
           {filteredThematicHadiths.length === 0 ? (
-            <div className="noor-card rounded-3xl p-8 text-center space-y-3">
-              <BookMarked className="h-10 w-10 text-muted-foreground/40 mx-auto" />
-              <h3 className="font-semibold text-base text-foreground">Tidak Ada Hadits Tematik Ditemukan</h3>
-              <p className="text-xs text-muted-foreground max-w-md mx-auto">
-                Tidak ditemukan hadits pilihan yang cocok dengan kata kunci "{thematicQuery}". Ingin mencari di seluruh koleksi Shahih {currentCol.shortName}?
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            <div className="py-12 text-center space-y-3">
+              <BookMarked className="h-8 w-8 text-muted-foreground/30 mx-auto" />
+              <p className="text-sm text-muted-foreground">Tidak ada hadits ditemukan</p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 <button
                   onClick={() => {
                     setGlobalQuery(thematicQuery);
                     setActiveTab('cari');
                     handleExecuteGlobalSearch(thematicQuery);
                   }}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-gold text-white hover:bg-gold/90 transition-all flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-medium bg-gold text-white hover:bg-gold/90 transition-all cursor-pointer"
                 >
-                  <Search className="h-3.5 w-3.5" />
-                  <span>Cari di Seluruh {currentCol.totalHadiths.toLocaleString('id-ID')} Hadits {currentCol.shortName}</span>
+                  Cari di Seluruh Koleksi
                 </button>
                 <button
                   onClick={() => { setThematicQuery(''); setSelectedTheme('all'); }}
-                  className="px-4 py-2 rounded-xl text-xs font-medium border border-border/70 text-foreground hover:bg-secondary transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs border border-border/60 text-muted-foreground hover:text-foreground transition-all cursor-pointer"
                 >
-                  Reset Pencarian
+                  Reset
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-4.5">
+            <div className="space-y-3">
               {filteredThematicHadiths.map((hadith) => {
                 const isCopied = copiedId === hadith.id;
                 return (
                   <article
                     key={hadith.id}
-                    className={`da-card grain relative overflow-hidden rounded-3xl p-5 sm:p-6 border transition-all shadow-xs space-y-4 ${
-                      selectedCollection === 'muslim' ? 'hover:border-emerald/40' : 'hover:border-gold/40'
-                    }`}
-                    style={{
-                      background: selectedCollection === 'muslim'
-                        ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--emerald) / 0.08))'
-                        : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.5))',
-                      borderColor: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.25)' : 'hsl(var(--gold) / 0.22)'
-                    }}
+                    className="rounded-2xl border border-border/50 bg-card hover:border-border transition-all overflow-hidden"
                   >
-                    {/* Header Kartu Hadis */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/40">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold tracking-wide"
-                          style={{
-                            background: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.12)' : 'hsl(var(--gold) / 0.12)',
-                            color: selectedCollection === 'muslim' ? 'hsl(var(--emerald))' : 'hsl(var(--gold))',
-                            border: selectedCollection === 'muslim' ? '1px solid hsl(var(--emerald) / 0.3)' : '1px solid hsl(var(--gold) / 0.3)'
-                          }}
-                        >
+                    {/* Stripe aksen atas */}
+                    <div className={`h-0.5 bg-${accent}/40`} />
+
+                    <div className="p-4 sm:p-5 space-y-3.5">
+                      {/* Meta baris atas */}
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold text-${accent}`}>
                           <ShieldCheck className="h-3 w-3" />
-                          <span>{hadith.nomor}</span>
+                          {hadith.nomor}
                         </span>
-
-                        <span className="text-xs text-muted-foreground font-medium">
-                          Dari {hadith.perawi}
-                        </span>
+                        <span className="text-[11px] text-muted-foreground">· {hadith.perawi}</span>
+                        <span className="text-[11px] text-muted-foreground ml-auto">{hadith.kitab}</span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/80">
-                        <span>Kitab: <strong className="text-foreground/90 font-medium">{hadith.kitab}</strong></span>
-                        {hadith.bab && <span>• {hadith.bab}</span>}
-                      </div>
-                    </div>
-
-                    {/* Teks Arab Matan Hadis */}
-                    <p
-                      className="arabic text-right my-3 text-foreground"
-                      style={{ fontSize: '1.65rem', lineHeight: 2.3 }}
-                      dir="rtl"
-                    >
-                      {hadith.arabic}
-                    </p>
-
-                    {/* Transliterasi Latin */}
-                    {hadith.latin && (
-                      <p className="text-xs sm:text-[13px] italic text-muted-foreground/80 text-right leading-relaxed">
-                        {hadith.latin}
+                      {/* Teks Arab */}
+                      <p
+                        className="arabic text-right text-foreground leading-loose"
+                        style={{ fontSize: '1.5rem', lineHeight: 2.2 }}
+                        dir="rtl"
+                      >
+                        {hadith.arabic}
                       </p>
-                    )}
 
-                    <div className="hairline my-2" />
+                      {/* Transliterasi */}
+                      {hadith.latin && (
+                        <p className="text-[12px] italic text-muted-foreground/70 text-right leading-relaxed">
+                          {hadith.latin}
+                        </p>
+                      )}
 
-                    {/* Terjemahan Bahasa Indonesia */}
-                    <div>
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block mb-1">
-                        Terjemahan Matan Hadits
-                      </span>
-                      <p className="text-sm sm:text-[15px] leading-relaxed text-foreground font-normal">
+                      {/* Terjemahan */}
+                      <p className="text-sm leading-relaxed text-foreground/90 border-t border-border/40 pt-3">
                         &ldquo;{hadith.terjemahan}&rdquo;
                       </p>
-                    </div>
 
-                    {/* Kotak Faedah & Hikmah Hadis */}
-                    {hadith.faedah && (
-                      <div
-                        className="rounded-2xl p-4 text-xs sm:text-sm leading-relaxed text-foreground/90 space-y-1"
-                        style={{
-                          background: 'hsl(var(--secondary) / 0.7)',
-                          borderLeft: selectedCollection === 'muslim' ? '4px solid hsl(var(--emerald))' : '4px solid hsl(var(--gold))'
-                        }}
-                      >
-                        <span
-                          className="text-[11px] font-bold uppercase tracking-wider block"
-                          style={{ color: selectedCollection === 'muslim' ? 'hsl(var(--emerald))' : 'hsl(var(--gold))' }}
-                        >
-                          Faedah & Bimbingan Hikmah:
-                        </span>
-                        <p className="text-foreground/85 leading-relaxed">
+                      {/* Faedah */}
+                      {hadith.faedah && (
+                        <div className={`text-xs leading-relaxed text-foreground/80 pl-3 border-l-2 border-${accent}/40`}>
+                          <span className="font-semibold text-muted-foreground block mb-0.5">Faedah:</span>
                           {hadith.faedah}
-                        </p>
-                      </div>
-                    )}
+                        </div>
+                      )}
 
-                    {/* Tema Tags & Actions */}
-                    <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border/40">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        {(hadith.tema_tags || []).slice(0, 4).map((tag, tIdx) => (
-                          <span
-                            key={tIdx}
-                            onClick={() => setThematicQuery(tag)}
-                            className={`text-[10px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground transition-colors cursor-pointer ${
-                              selectedCollection === 'muslim'
-                                ? 'hover:text-emerald hover:bg-emerald/10'
-                                : 'hover:text-gold hover:bg-gold/10'
-                            }`}
-                          >
-                            #{tag}
-                          </span>
-                        ))}
-                      </div>
+                      {/* Footer: tags + aksi */}
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                        <div className="flex flex-wrap items-center gap-1">
+                          {(hadith.tema_tags || []).slice(0, 3).map((tag, tIdx) => (
+                            <span
+                              key={tIdx}
+                              onClick={() => setThematicQuery(tag)}
+                              className="text-[10px] px-2 py-0.5 rounded-md bg-secondary text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
 
-                      <div className="flex items-center gap-2">
-                        {onExportQuote && (
+                        <div className="flex items-center gap-1.5">
+                          {onExportQuote && (
+                            <button
+                              type="button"
+                              onClick={() => handleShareQuote(hadith)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-muted-foreground hover:text-foreground border border-border/50 hover:border-border transition-all cursor-pointer"
+                            >
+                              <Share2 className="h-3 w-3" />
+                              Bagikan
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={() => handleShareQuote(hadith)}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-gold transition-all active:scale-95 cursor-pointer"
-                            title="Bagikan kartu mutiara hadis"
+                            onClick={() => handleCopy(hadith)}
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border transition-all cursor-pointer ${
+                              isCopied
+                                ? 'border-emerald/40 bg-emerald/5 text-emerald'
+                                : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-border'
+                            }`}
                           >
-                            <Share2 className="h-3.5 w-3.5 text-gold" />
-                            <span>Bagikan</span>
+                            {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                            {isCopied ? 'Tersalin' : 'Salin'}
                           </button>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(hadith)}
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all active:scale-95 cursor-pointer ${
-                            isCopied
-                              ? 'border-emerald/50 bg-emerald/10 text-emerald'
-                              : 'border-border/70 text-muted-foreground hover:border-gold/50 hover:text-foreground'
-                          }`}
-                        >
-                          {isCopied ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Copy className="h-3.5 w-3.5" />}
-                          <span>{isCopied ? 'Tersalin' : 'Salin Hadits'}</span>
-                        </button>
+                        </div>
                       </div>
                     </div>
-
                   </article>
                 );
               })}
@@ -715,120 +614,95 @@ export default function HadithBrowser({ onExportQuote }) {
         </div>
       )}
 
-      {/* ═════════════════════════════════════════════════════════════ */}
-      {/* 2. TAB: JELAJAH KITAB (DAFTAR & READER VIEW)                 */}
-      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 2. TAB: JELAJAH KITAB                                      */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {activeTab === 'kitab' && (
-        <div className="space-y-5">
-          {/* A. TAMPILAN READER JIKA SEBUAH KITAB SEDANG DIBUKA */}
+        <div className="space-y-4">
+          {/* A. READER KITAB */}
           {activeBookId !== null && activeBookId !== undefined ? (
             <div className="space-y-4" ref={readerTopRef}>
-              {/* Reader Top Navigation Bar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 p-4 rounded-2xl bg-secondary/70 border border-border/70">
+              {/* Navigasi Reader */}
+              <div className="flex items-center justify-between gap-2">
                 <button
                   onClick={() => { setActiveBookId(null); setTargetHadithNumber(null); }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border/70 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-gold/40 hover:bg-secondary transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  <span>Daftar {currentCol.totalBooks} Kitab {currentCol.shortName}</span>
+                  Daftar Kitab
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {/* Prev Book Button */}
                   <button
                     disabled={activeBookId <= (selectedCollection === 'muslim' ? 0 : 1)}
                     onClick={() => handleOpenBook(activeBookId - 1)}
-                    className="p-1.5 rounded-xl border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                    title="Kitab Sebelumnya"
+                    className="p-1.5 rounded-lg border border-border/60 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
-
-                  <span className="text-xs font-bold text-gold px-2.5 py-1 rounded-lg bg-gold/10 border border-gold/20">
-                    Kitab {activeBookId} / {selectedCollection === 'muslim' ? 56 : 97}
+                  <span className="text-xs font-medium text-muted-foreground px-1">
+                    {activeBookId} / {selectedCollection === 'muslim' ? 56 : 97}
                   </span>
-
-                  {/* Next Book Button */}
                   <button
                     disabled={activeBookId >= (selectedCollection === 'muslim' ? 56 : 97)}
                     onClick={() => handleOpenBook(activeBookId + 1)}
-                    className="p-1.5 rounded-xl border border-border/70 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
-                    title="Kitab Berikutnya"
+                    className="p-1.5 rounded-lg border border-border/60 text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:pointer-events-none transition-colors cursor-pointer"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
                 </div>
               </div>
 
-              {/* Book Header Card */}
+              {/* Header Kitab */}
               {activeBookData && (
-                <div
-                  className="rounded-3xl p-5 sm:p-6 border space-y-2 relative overflow-hidden"
-                  style={{
-                    background: selectedCollection === 'muslim'
-                      ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--emerald) / 0.1))'
-                      : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--gold) / 0.08))',
-                    borderColor: selectedCollection === 'muslim' ? 'hsl(var(--emerald) / 0.3)' : 'hsl(var(--gold) / 0.3)'
-                  }}
-                >
-                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-gold">
-                    <ShieldCheck className="h-4 w-4" />
-                    <span>Shahih {currentCol.shortName} • Kitab {activeBookData.bookNumber}</span>
-                  </div>
-                  <h3 className="text-xl sm:text-2xl font-bold font-display text-foreground">
-                    {activeBookData.nameId}
-                  </h3>
-                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground pt-1">
-                    <span className="px-2.5 py-0.5 rounded-full bg-secondary border border-border/60">
-                      {activeBookData.nameEn}
-                    </span>
-                    <span>•</span>
-                    <span>Rentang Sanad: No. <strong>{activeBookData.firstHadithNumber}</strong> s/d <strong>{activeBookData.lastHadithNumber}</strong></span>
+                <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5 space-y-1.5">
+                  <p className={`text-[11px] font-semibold text-${accent} flex items-center gap-1`}>
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Shahih {currentCol.shortName} · Kitab {activeBookData.bookNumber}
+                  </p>
+                  <h3 className="text-lg font-bold text-foreground">{activeBookData.nameId}</h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {activeBookData.nameEn} &nbsp;·&nbsp;
+                    No. {activeBookData.firstHadithNumber}–{activeBookData.lastHadithNumber} &nbsp;·&nbsp;
+                    <span className="text-foreground font-medium">{activeBookData.totalHadiths} Hadits</span>
                     {activeBookData.firstArabicNumber && (
-                      <>
-                        <span>•</span>
-                        <span className="text-emerald font-medium">
-                          No. Fuad Baqi: #{activeBookData.firstArabicNumber} – #{activeBookData.lastArabicNumber}
-                        </span>
-                      </>
+                      <> &nbsp;·&nbsp; Fuad Baqi #{activeBookData.firstArabicNumber}–#{activeBookData.lastArabicNumber}</>
                     )}
-                    <span>•</span>
-                    <span className="text-emerald font-medium">{activeBookData.totalHadiths} Hadits</span>
-                  </div>
+                  </p>
                 </div>
               )}
 
-              {/* In-Book Search Filter */}
+              {/* Search dalam kitab */}
               <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={inBookSearchQuery}
                   onChange={(e) => setInBookSearchQuery(e.target.value)}
-                  placeholder={`Cari teks atau nomor di dalam Kitab ${activeBookId}...`}
-                  className="w-full h-10 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
+                  placeholder={`Cari di dalam Kitab ${activeBookId}...`}
+                  className="w-full h-9 pl-9 pr-9 rounded-xl bg-secondary/50 border border-border/60 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all"
                 />
                 {inBookSearchQuery && (
                   <button
                     onClick={() => setInBookSearchQuery('')}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Loading State Kitab */}
+              {/* Loading */}
               {isLoadingBook && (
-                <div className="py-16 text-center space-y-3">
-                  <Loader2 className="h-8 w-8 text-gold animate-spin mx-auto" />
-                  <p className="text-xs text-muted-foreground">Memuat hadits Kitab {activeBookId} ({currentCol.shortName})...</p>
+                <div className="py-12 text-center space-y-2">
+                  <Loader2 className="h-6 w-6 text-muted-foreground animate-spin mx-auto" />
+                  <p className="text-xs text-muted-foreground">Memuat hadits...</p>
                 </div>
               )}
 
-              {/* List Hadits di dalam Kitab */}
+              {/* List Hadits dalam Kitab */}
               {!isLoadingBook && activeBookData && (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {filteredInBookHadiths.slice(0, displayCount).map((hadith) => {
                     const isTarget = targetHadithNumber === hadith.number;
                     const isCopied = copiedId === hadith.number;
@@ -837,185 +711,151 @@ export default function HadithBrowser({ onExportQuote }) {
                       <article
                         id={`hadith-num-${hadith.number}`}
                         key={hadith.number}
-                        className={`da-card grain relative overflow-hidden rounded-3xl p-5 sm:p-6 border transition-all shadow-xs space-y-4 ${
-                          isTarget ? 'ring-2 ring-gold border-gold' : 'hover:border-gold/40'
+                        className={`rounded-2xl border bg-card overflow-hidden transition-all ${
+                          isTarget ? 'border-gold/50 ring-1 ring-gold/30' : 'border-border/50 hover:border-border'
                         }`}
-                        style={{
-                          background: isTarget
-                            ? 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--gold) / 0.12))'
-                            : 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.4))',
-                          borderColor: isTarget ? 'hsl(var(--gold))' : 'hsl(var(--gold) / 0.22)'
-                        }}
                       >
-                        {/* Header Hadits */}
-                        <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-border/40">
+                        <div className={`h-0.5 ${isTarget ? 'bg-gold' : `bg-${accent}/30`}`} />
+                        <div className="p-4 sm:p-5 space-y-3.5">
+                          {/* Meta */}
                           <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold tracking-wide"
-                              style={{
-                                background: 'hsl(var(--gold) / 0.12)',
-                                color: 'hsl(var(--gold))',
-                                border: '1px solid hsl(var(--gold) / 0.3)'
-                              }}
-                            >
+                            <span className={`text-[11px] font-semibold text-${accent} flex items-center gap-1`}>
                               <ShieldCheck className="h-3 w-3" />
-                              <span>HR. {currentCol.shortName} No. {hadith.number}</span>
+                              HR. {currentCol.shortName} No. {hadith.number}
                             </span>
-
                             {hadith.arabicNumber && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 font-semibold">
-                                No. Inti Baqi: #{hadith.arabicNumber}
+                              <span className="text-[10px] text-emerald">
+                                Baqi #{hadith.arabicNumber}
                               </span>
                             )}
-
                             {hadith.hadithInBook && (
-                              <span className="text-[11px] text-muted-foreground">
-                                Hadits #{hadith.hadithInBook} di kitab ini
+                              <span className="text-[10px] text-muted-foreground ml-auto">
+                                #{hadith.hadithInBook} di kitab ini
                               </span>
                             )}
                           </div>
 
-                          <div className="text-[11px] text-muted-foreground">
-                            Kitab {activeBookData.bookNumber}: {activeBookData.nameId}
-                          </div>
-                        </div>
-
-                        {/* Matan Arab */}
-                        {hadith.arab ? (
-                          <p
-                            className="arabic text-right my-3 text-foreground"
-                            style={{ fontSize: '1.65rem', lineHeight: 2.3 }}
-                            dir="rtl"
-                          >
-                            {hadith.arab}
-                          </p>
-                        ) : null}
-
-                        {hadith.arab && <div className="hairline my-2" />}
-
-                        {/* Terjemahan Bahasa Indonesia */}
-                        <div>
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground block mb-1">
-                            Terjemahan Bahasa Indonesia
-                          </span>
-                          <p className="text-sm sm:text-[15px] leading-relaxed text-foreground font-normal">
-                            &ldquo;{hadith.id}&rdquo;
-                          </p>
-                        </div>
-
-                        {/* Footer Tombol Aksi */}
-                        <div className="pt-2 flex items-center justify-end gap-2 border-t border-border/40">
-                          {onExportQuote && (
-                            <button
-                              type="button"
-                              onClick={() => handleShareQuote(hadith, activeBookData.nameId)}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-border/70 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-gold transition-all active:scale-95 cursor-pointer"
-                              title="Bagikan kutipan hadits"
+                          {/* Teks Arab */}
+                          {hadith.arab && (
+                            <p
+                              className="arabic text-right text-foreground"
+                              style={{ fontSize: '1.5rem', lineHeight: 2.2 }}
+                              dir="rtl"
                             >
-                              <Share2 className="h-3.5 w-3.5 text-gold" />
-                              <span>Bagikan</span>
-                            </button>
+                              {hadith.arab}
+                            </p>
                           )}
 
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(hadith, activeBookData.nameId)}
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all active:scale-95 cursor-pointer ${
-                              isCopied
-                                ? 'border-emerald/50 bg-emerald/10 text-emerald'
-                                : 'border-border/70 text-muted-foreground hover:border-gold/50 hover:text-foreground'
-                            }`}
-                          >
-                            {isCopied ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Copy className="h-3.5 w-3.5" />}
-                            <span>{isCopied ? 'Tersalin' : 'Salin Hadits'}</span>
-                          </button>
+                          {/* Terjemahan */}
+                          <p className="text-sm leading-relaxed text-foreground/90 border-t border-border/40 pt-3">
+                            &ldquo;{hadith.id}&rdquo;
+                          </p>
+
+                          {/* Aksi */}
+                          <div className="flex items-center justify-end gap-1.5 pt-1">
+                            {onExportQuote && (
+                              <button
+                                type="button"
+                                onClick={() => handleShareQuote(hadith, activeBookData.nameId)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer"
+                              >
+                                <Share2 className="h-3 w-3" />
+                                Bagikan
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(hadith, activeBookData.nameId)}
+                              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border transition-all cursor-pointer ${
+                                isCopied
+                                  ? 'border-emerald/40 bg-emerald/5 text-emerald'
+                                  : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-border'
+                              }`}
+                            >
+                              {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                              {isCopied ? 'Tersalin' : 'Salin'}
+                            </button>
+                          </div>
                         </div>
                       </article>
                     );
                   })}
 
-                  {/* Tombol Muat Lebih Banyak (Chunking Pagination) */}
+                  {/* Muat lebih banyak */}
                   {displayCount < filteredInBookHadiths.length && (
-                    <div className="text-center pt-4 pb-2">
+                    <div className="text-center pt-2">
                       <button
                         onClick={() => setDisplayCount(prev => prev + 25)}
-                        className="px-6 py-2.5 rounded-2xl bg-secondary/80 border border-border/80 text-xs font-semibold text-foreground hover:bg-gold hover:text-white hover:border-gold transition-all shadow-xs cursor-pointer"
+                        className="px-5 py-2 rounded-xl border border-border/60 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer"
                       >
-                        Muat 25 Hadits Berikutnya (Tersisa {filteredInBookHadiths.length - displayCount})
+                        Muat 25 Lagi &nbsp;·&nbsp; Tersisa {filteredInBookHadiths.length - displayCount}
                       </button>
                     </div>
                   )}
 
                   {filteredInBookHadiths.length === 0 && (
-                    <div className="noor-card rounded-2xl p-6 text-center text-xs text-muted-foreground">
-                      Tidak ada hadits di dalam kitab ini yang cocok dengan "{inBookSearchQuery}".
-                    </div>
+                    <p className="py-8 text-center text-xs text-muted-foreground">
+                      Tidak ada hadits yang cocok dengan &ldquo;{inBookSearchQuery}&rdquo;
+                    </p>
                   )}
                 </div>
               )}
             </div>
           ) : (
-            /* B. TAMPILAN DAFTAR KITAB (GRID / CARDS) */
+            /* B. DAFTAR KITAB */
             <div className="space-y-4">
-              {/* Search Bar Kitab */}
+              {/* Search Kitab */}
               <div className="relative">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                 <input
                   type="text"
                   value={bookFilterQuery}
                   onChange={(e) => setBookFilterQuery(e.target.value)}
-                  placeholder={`Cari kitab Shahih ${currentCol.shortName} (misal: shalat, puasa, zakat, nikah, no. 1)...`}
-                  className="w-full h-11 pl-10 pr-10 rounded-2xl bg-secondary/60 border border-border/70 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
+                  placeholder={`Cari nama kitab ${currentCol.shortName}...`}
+                  className="w-full h-10 pl-10 pr-10 rounded-xl bg-secondary/50 border border-border/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all"
                 />
                 {bookFilterQuery && (
                   <button
                     onClick={() => setBookFilterQuery('')}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Status Pemuatan Meta */}
+              {/* Loading meta */}
               {isLoadingMeta && booksMeta.length === 0 && (
-                <div className="py-12 text-center space-y-2">
-                  <Loader2 className="h-7 w-7 text-gold animate-spin mx-auto" />
-                  <p className="text-xs text-muted-foreground">Memuat indeks Kitab Shahih {currentCol.shortName}...</p>
+                <div className="py-10 text-center space-y-2">
+                  <Loader2 className="h-6 w-6 text-muted-foreground animate-spin mx-auto" />
+                  <p className="text-xs text-muted-foreground">Memuat daftar kitab...</p>
                 </div>
               )}
 
               {/* Grid Kitab */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {filteredBooks.map((book) => (
                   <div
                     key={book.bookNumber}
                     onClick={() => handleOpenBook(book.bookNumber)}
-                    className="da-card grain group relative rounded-2xl p-4 border border-border/60 hover:border-gold/50 hover:bg-secondary/40 transition-all cursor-pointer space-y-2.5 shadow-2xs"
+                    className="group rounded-xl border border-border/50 bg-card hover:border-border p-3.5 cursor-pointer transition-all space-y-2"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="flex h-7 px-2.5 items-center justify-center rounded-lg text-xs font-bold bg-gold/10 text-gold border border-gold/25">
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[11px] font-semibold text-${accent}`}>
                         Kitab {book.bookNumber}
                       </span>
-                      <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/20">
-                        {book.totalHadiths} Hadits
-                      </span>
+                      <span className="text-[10px] text-muted-foreground">{book.totalHadiths} hadits</span>
                     </div>
-
                     <div>
-                      <h4 className="font-semibold text-sm sm:text-base text-foreground group-hover:text-gold transition-colors">
+                      <h4 className="text-sm font-medium text-foreground group-hover:text-gold transition-colors line-clamp-1">
                         {book.nameId}
                       </h4>
-                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
-                        {book.nameEn}
-                      </p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{book.nameEn}</p>
                     </div>
-
-                    <div className="flex items-center justify-between pt-2 border-t border-border/40 text-[11px] text-muted-foreground">
-                      <span>No. {book.firstHadithNumber} – {book.lastHadithNumber}</span>
-                      <span className="inline-flex items-center gap-1 text-gold font-medium group-hover:translate-x-0.5 transition-transform">
-                        <span>Buka Kitab</span>
-                        <ChevronRight className="h-3 w-3" />
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/40">
+                      <span>No. {book.firstHadithNumber}–{book.lastHadithNumber}</span>
+                      <span className="flex items-center gap-0.5 text-gold group-hover:translate-x-0.5 transition-transform">
+                        Buka <ChevronRight className="h-3 w-3" />
                       </span>
                     </div>
                   </div>
@@ -1023,209 +863,160 @@ export default function HadithBrowser({ onExportQuote }) {
               </div>
 
               {filteredBooks.length === 0 && !isLoadingMeta && (
-                <div className="noor-card rounded-2xl p-8 text-center text-xs text-muted-foreground">
-                  Tidak ada kitab yang cocok dengan kata kunci "{bookFilterQuery}".
-                </div>
+                <p className="py-8 text-center text-xs text-muted-foreground">
+                  Tidak ada kitab yang cocok dengan &ldquo;{bookFilterQuery}&rdquo;
+                </p>
               )}
             </div>
           )}
         </div>
       )}
 
-      {/* ═════════════════════════════════════════════════════════════ */}
-      {/* 3. TAB: PENCARIAN GLOBAL & LOMPAT NOMOR                      */}
-      {/* ═════════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════════ */}
+      {/* 3. TAB: PENCARIAN GLOBAL                                   */}
+      {/* ═══════════════════════════════════════════════════════════ */}
       {activeTab === 'cari' && (
-        <div className="space-y-5">
-          {/* Box Form Pencarian Global */}
-          <div className="noor-card rounded-3xl p-5 sm:p-6 border border-border/60 space-y-4">
-            <div className="space-y-1">
-              <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
-                <Search className="h-4 w-4 text-gold" />
-                <span>Pencarian Lengkap Shahih {currentCol.shortName}</span>
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Cari kata kunci teks hadits atau ketik nomor hadits (1 s/d {currentCol.totalHadiths.toLocaleString('id-ID')}).
-              </p>
+        <div className="space-y-4">
+          {/* Form Pencarian */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); handleExecuteGlobalSearch(); }}
+            className="space-y-3"
+          >
+            <div className="relative">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                value={globalQuery}
+                onChange={(e) => setGlobalQuery(e.target.value)}
+                placeholder={`Cari kata kunci atau nomor hadits ${currentCol.shortName}...`}
+                className="w-full h-10 pl-10 pr-20 rounded-xl bg-secondary/50 border border-border/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/20 transition-all"
+              />
+              <button
+                type="submit"
+                disabled={isSearchingGlobal || !globalQuery.trim()}
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded-lg bg-gold text-white text-[11px] font-semibold hover:bg-gold/90 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                {isSearchingGlobal ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <span>Cari</span>
+                )}
+              </button>
             </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleExecuteGlobalSearch();
-              }}
-              className="space-y-3"
-            >
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                <input
-                  type="text"
-                  value={globalQuery}
-                  onChange={(e) => setGlobalQuery(e.target.value)}
-                  placeholder={`Ketik kata kunci atau nomor hadits ${currentCol.shortName}...`}
-                  className="w-full h-11 pl-10 pr-24 rounded-2xl bg-secondary/80 border border-border/80 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold/60 focus:ring-2 focus:ring-gold/15 transition-all"
-                />
+            {/* Keyword chips */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
+              <span className="text-[11px] text-muted-foreground">Contoh:</span>
+              {['Niat', 'Sabar', 'Shalat', 'Sedekah', 'Tetangga', 'Senyum', 'Wudhu', '1', '93'].map((word) => (
                 <button
-                  type="submit"
-                  disabled={isSearchingGlobal || !globalQuery.trim()}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl bg-gold text-white text-xs font-semibold hover:bg-gold/90 disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer flex items-center gap-1.5"
+                  key={word}
+                  type="button"
+                  onClick={() => { setGlobalQuery(word); handleExecuteGlobalSearch(word); }}
+                  className="px-2.5 py-1 rounded-lg bg-secondary/60 text-muted-foreground hover:text-foreground border border-border/50 text-[11px] transition-colors cursor-pointer"
                 >
-                  {isSearchingGlobal ? (
-                    <>
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      <span>Mencari...</span>
-                    </>
-                  ) : (
-                    <span>Cari</span>
-                  )}
+                  {word}
                 </button>
-              </div>
-
-              {/* Quick Keyword Chips */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
-                <span className="text-[11px] text-muted-foreground mr-1">Rekomendasi:</span>
-                {['Niat', 'Sabar', 'Shalat', 'Sedekah', 'Tetangga', 'Senyum', 'Wudhu', 'Kiamat', '1', '93'].map((word) => (
-                  <button
-                    key={word}
-                    type="button"
-                    onClick={() => {
-                      setGlobalQuery(word);
-                      handleExecuteGlobalSearch(word);
-                    }}
-                    className="px-2.5 py-1 rounded-lg bg-secondary text-muted-foreground hover:text-gold hover:bg-gold/10 border border-border/50 text-[11px] font-medium transition-colors cursor-pointer"
-                  >
-                    {word}
-                  </button>
-                ))}
-              </div>
-            </form>
-          </div>
-
-          {/* Status Hasil Pencarian */}
-          {hasSearchedGlobal && (
-            <div className="flex items-center justify-between text-xs text-muted-foreground border-b border-border/40 pb-2">
-              <span>
-                Hasil pencarian untuk "<strong className="text-foreground">{globalQuery}</strong>": Ditemukan <strong className="text-foreground">{globalSearchResults.length}</strong> hadits
-              </span>
-              {globalSearchResults.length > 0 && (
-                <span className="text-[11px] text-emerald font-medium">Shahih {currentCol.shortName}</span>
-              )}
+              ))}
             </div>
+          </form>
+
+          {/* Hasil */}
+          {hasSearchedGlobal && (
+            <p className="text-[11px] text-muted-foreground border-b border-border/40 pb-2">
+              &ldquo;<strong className="text-foreground">{globalQuery}</strong>&rdquo; — {globalSearchResults.length} hadits ditemukan
+            </p>
           )}
 
-          {/* List Hasil Pencarian Global */}
           {globalSearchResults.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {globalSearchResults.map((res) => {
                 const isCopied = copiedId === res.number;
-
                 return (
                   <article
                     key={res.number}
-                    className="da-card grain relative overflow-hidden rounded-3xl p-5 border border-border/70 hover:border-gold/50 transition-all space-y-3.5 shadow-xs"
-                    style={{
-                      background: 'linear-gradient(135deg, hsl(var(--card)), hsl(var(--secondary) / 0.4))'
-                    }}
+                    className="rounded-2xl border border-border/50 bg-card hover:border-border overflow-hidden transition-all"
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-border/40">
+                    <div className={`h-0.5 bg-${accent}/30`} />
+                    <div className="p-4 sm:p-5 space-y-3">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-xs font-bold bg-gold/10 text-gold border border-gold/30">
+                        <span className={`text-[11px] font-semibold text-${accent} flex items-center gap-1`}>
                           <ShieldCheck className="h-3 w-3" />
-                          <span>HR. {res.collection === 'muslim' ? 'Muslim' : 'Bukhari'} No. {res.number}</span>
+                          HR. {res.collection === 'muslim' ? 'Muslim' : 'Bukhari'} No. {res.number}
                         </span>
                         {res.arabicNumber && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald/10 text-emerald border border-emerald/25 font-semibold">
-                            No. Inti Baqi: #{res.arabicNumber}
-                          </span>
+                          <span className="text-[10px] text-emerald">Baqi #{res.arabicNumber}</span>
                         )}
-                        <span className="text-xs text-muted-foreground font-medium">
-                          {res.bookName}
-                        </span>
+                        <span className="text-[11px] text-muted-foreground">{res.bookName}</span>
+                        <button
+                          onClick={() => handleOpenBook(res.bookNumber, res.number)}
+                          className="ml-auto inline-flex items-center gap-1 text-[11px] text-gold hover:underline cursor-pointer"
+                        >
+                          Buka di Kitab <ExternalLink className="h-3 w-3" />
+                        </button>
                       </div>
 
-                      <button
-                        onClick={() => handleOpenBook(res.bookNumber, res.number)}
-                        className="inline-flex items-center gap-1 text-xs text-gold hover:underline font-semibold cursor-pointer"
-                      >
-                        <span>Buka di Kitab</span>
-                        <ExternalLink className="h-3 w-3" />
-                      </button>
-                    </div>
-
-                    {/* Jika hasil pencarian memuat Arab */}
-                    {res.arab && (
-                      <p
-                        className="arabic text-right my-2 text-foreground"
-                        style={{ fontSize: '1.5rem', lineHeight: 2.2 }}
-                        dir="rtl"
-                      >
-                        {res.arab}
-                      </p>
-                    )}
-
-                    <p className="text-sm leading-relaxed text-foreground font-normal">
-                      &ldquo;{res.text}&rdquo;
-                    </p>
-
-                    <div className="pt-2 flex items-center justify-end gap-2 border-t border-border/40">
-                      {onExportQuote && (
-                        <button
-                          type="button"
-                          onClick={() => handleShareQuote({
-                            terjemahan: res.text,
-                            number: res.number,
-                            arabic: res.arab || ''
-                          }, res.bookName)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-border/70 px-3 py-1.5 text-xs text-muted-foreground hover:border-gold/50 hover:text-gold transition-all active:scale-95 cursor-pointer"
-                          title="Bagikan kutipan hadits"
+                      {res.arab && (
+                        <p
+                          className="arabic text-right text-foreground"
+                          style={{ fontSize: '1.5rem', lineHeight: 2.2 }}
+                          dir="rtl"
                         >
-                          <Share2 className="h-3.5 w-3.5 text-gold" />
-                          <span>Bagikan</span>
-                        </button>
+                          {res.arab}
+                        </p>
                       )}
 
-                      <button
-                        type="button"
-                        onClick={() => handleCopy({
-                          id: res.text,
-                          number: res.number,
-                          arab: res.arab || '',
-                          arabicNumber: res.arabicNumber
-                        }, res.bookName)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all active:scale-95 cursor-pointer ${
-                          isCopied
-                            ? 'border-emerald/50 bg-emerald/10 text-emerald'
-                            : 'border-border/70 text-muted-foreground hover:border-gold/50 hover:text-foreground'
-                        }`}
-                      >
-                        {isCopied ? <Check className="h-3.5 w-3.5 text-emerald" /> : <Copy className="h-3.5 w-3.5" />}
-                        <span>{isCopied ? 'Tersalin' : 'Salin Hadits'}</span>
-                      </button>
+                      <p className="text-sm leading-relaxed text-foreground/90 border-t border-border/40 pt-3">
+                        &ldquo;{res.text}&rdquo;
+                      </p>
+
+                      <div className="flex items-center justify-end gap-1.5 pt-1">
+                        {onExportQuote && (
+                          <button
+                            type="button"
+                            onClick={() => handleShareQuote({ terjemahan: res.text, number: res.number, arabic: res.arab || '' }, res.bookName)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border border-border/50 text-muted-foreground hover:text-foreground hover:border-border transition-all cursor-pointer"
+                          >
+                            <Share2 className="h-3 w-3" />
+                            Bagikan
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleCopy({ id: res.text, number: res.number, arab: res.arab || '', arabicNumber: res.arabicNumber }, res.bookName)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] border transition-all cursor-pointer ${
+                            isCopied
+                              ? 'border-emerald/40 bg-emerald/5 text-emerald'
+                              : 'border-border/50 text-muted-foreground hover:text-foreground hover:border-border'
+                          }`}
+                        >
+                          {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                          {isCopied ? 'Tersalin' : 'Salin'}
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );
               })}
             </div>
           ) : hasSearchedGlobal && !isSearchingGlobal && (
-            <div className="noor-card rounded-2xl p-8 text-center space-y-2">
-              <BookMarked className="h-9 w-9 text-muted-foreground/40 mx-auto" />
-              <p className="text-sm font-semibold text-foreground">Tidak Ada Hadits yang Cocok</p>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                Coba gunakan kata kunci lain seperti "sabar", "sedekah", "salat", atau masukkan nomor hadits langsung.
-              </p>
+            <div className="py-12 text-center space-y-2">
+              <BookMarked className="h-8 w-8 text-muted-foreground/30 mx-auto" />
+              <p className="text-sm text-muted-foreground">Tidak ada hadits yang cocok</p>
+              <p className="text-xs text-muted-foreground/70">Coba kata kunci lain seperti "sabar", "sedekah", atau nomor hadits</p>
             </div>
           )}
         </div>
       )}
 
-      {/* ── Footer Penjelasan Database ───────────────────────────── */}
-      <footer className="noor-card rounded-2xl p-4 border border-border/50 text-xs text-muted-foreground space-y-1">
-        <p className="font-semibold text-foreground flex items-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-emerald" />
-          <span>Tentang Database Shahih Al-Bukhari & Shahih Muslim (Ash-Shahihain)</span>
+      {/* ── Footer ─────────────────────────────────────────────────── */}
+      <footer className="border-t border-border/40 pt-4 text-[11px] text-muted-foreground space-y-1">
+        <p className="flex items-center gap-1.5 font-medium text-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-emerald" />
+          Tentang Database
         </p>
-        <p className="leading-relaxed text-[11px]">
-          Hadits-hadits dalam database ini bersumber dari dua kitab hadits paling shahih dan otoritatif dalam Islam: <em>Shahih Al-Bukhari</em> (~7.589 hadits dalam 97 kitab) dan <em>Shahih Muslim</em> (~7.563 hadits jalur sanad / ~3.033 hadits inti tanpa pengulangan dalam 57 kitab menurut penomoran Muhammad Fuad Abdul Baqi). Keduanya disajikan lengkap dengan teks Arab dan terjemahan resmi Bahasa Indonesia.
+        <p className="leading-relaxed">
+          Shahih Al-Bukhari (~7.589 hadits, 97 kitab) &amp; Shahih Muslim (~7.563 hadits sanad, 57 kitab).
+          Teks Arab Utsmani &amp; terjemahan Bahasa Indonesia.
         </p>
       </footer>
 
