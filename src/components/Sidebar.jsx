@@ -95,11 +95,24 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Geometric star divider */}
+        {/* Islamic Crescent & Star divider (Bulan Bintang) */}
         <div className="flex items-center gap-2 px-5 mb-4">
           <div className="flex-1 hairline" />
-          <svg viewBox="0 0 16 16" className="h-3 w-3 flex-shrink-0" style={{ color: 'hsl(var(--gold))' }}>
-            <polygon points="8,1 9.5,5.5 14,5.5 10.5,8.5 12,13 8,10 4,13 5.5,8.5 2,5.5 6.5,5.5" fill="currentColor" opacity="0.6" />
+          <svg viewBox="0 0 48 48" className="h-4 w-4 flex-shrink-0" aria-hidden="true">
+            <g transform="translate(1.2, 2.2) rotate(-18 24 24)">
+              {/* Crescent Moon (Hilal) */}
+              <path
+                d="M 33.64 13.77 A 15.5 15.5 0 1 0 33.64 34.23 A 12.2 12.2 0 1 1 33.64 13.77 Z"
+                fill="hsl(var(--gold))"
+                opacity="0.65"
+              />
+              {/* 5-Pointed Star */}
+              <polygon
+                points="26.80,24.00 30.30,22.77 30.39,19.05 32.65,22.00 36.21,20.94 34.10,24.00 36.71,27.06 32.65,26.00 30.39,28.95 30.30,25.23"
+                fill="hsl(var(--gold))"
+                opacity="0.65"
+              />
+            </g>
           </svg>
           <div className="flex-1 hairline" />
         </div>
