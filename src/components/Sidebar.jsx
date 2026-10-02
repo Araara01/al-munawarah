@@ -14,7 +14,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-function NavItem({ icon: Icon, label, active, onClick, testId, iconColor = 'text-muted-foreground' }) {
+function NavItem({ icon: Icon, label, active, onClick, testId, iconColor = 'text-gold' }) {
   return (
     <button
       onClick={onClick}
@@ -26,7 +26,7 @@ function NavItem({ icon: Icon, label, active, onClick, testId, iconColor = 'text
       }`}
     >
       <Icon className={`h-4 w-4 flex-shrink-0 ${
-        active ? 'text-gold' : iconColor !== 'text-muted-foreground' ? iconColor : ''
+        active ? 'text-gold' : iconColor
       }`} />
       <span>{label}</span>
     </button>
@@ -145,7 +145,7 @@ export default function Sidebar({
             label="Jelajahi Al-Qur'an"
             active={currentTab === 'quran'}
             testId="nav-quran"
-            iconColor="text-emerald"
+            iconColor="text-gold"
             onClick={() => { onOpenQuran?.(); onClose?.(); }}
           />
           <NavItem
@@ -161,7 +161,7 @@ export default function Sidebar({
             label="Hadits"
             active={currentTab === 'hadith'}
             testId="nav-hadith"
-            iconColor="text-emerald"
+            iconColor="text-gold"
             onClick={() => { onOpenHadith?.(); onClose?.(); }}
           />
           <NavItem
@@ -169,6 +169,7 @@ export default function Sidebar({
             label="Pengaturan"
             active={currentTab === 'settings'}
             testId="nav-settings"
+            iconColor="text-gold"
             onClick={() => { onOpenSettings?.(); onClose?.(); }}
           />
           <NavItem
@@ -176,7 +177,7 @@ export default function Sidebar({
             label="Admin & Statistik"
             active={currentTab === 'admin'}
             testId="nav-admin"
-            iconColor="text-emerald"
+            iconColor="text-gold"
             onClick={() => { onOpenAdmin?.(); onClose?.(); }}
           />
         </nav>

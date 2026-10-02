@@ -84,7 +84,7 @@ export default function LandingPage({
               {isDark ? (
                 <Sun className="h-5 w-5 text-gold" />
               ) : (
-                <Moon className="h-5 w-5 text-emerald-800" />
+                <Moon className="h-5 w-5 text-gold" />
               )}
             </button>
 
@@ -283,16 +283,13 @@ export default function LandingPage({
             };
             const Icon = iconMap[topic.icon] || Sparkles;
 
-            // Subtle color accent per topic for visual variety
-            const accents = [
-              { ring: 'group-hover:border-gold/60', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(var(--gold)/0.25)]', iconBg: 'bg-gold/10 group-hover:bg-gold/18 border-gold/25 group-hover:border-gold/50', iconColor: 'text-gold' },
-              { ring: 'group-hover:border-emerald/50', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(160_60%_40%/0.2)]', iconBg: 'bg-emerald/10 group-hover:bg-emerald/18 border-emerald/25 group-hover:border-emerald/50', iconColor: 'text-emerald-500' },
-              { ring: 'group-hover:border-rose/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(346_60%_55%/0.2)]', iconBg: 'bg-rose-500/8 group-hover:bg-rose-500/15 border-rose-500/20 group-hover:border-rose-400/40', iconColor: 'text-rose-400' },
-              { ring: 'group-hover:border-sky/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(200_70%_55%/0.2)]', iconBg: 'bg-sky-500/8 group-hover:bg-sky-500/15 border-sky-500/20 group-hover:border-sky-400/40', iconColor: 'text-sky-400' },
-              { ring: 'group-hover:border-violet/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(270_60%_60%/0.2)]', iconBg: 'bg-violet-500/8 group-hover:bg-violet-500/15 border-violet-500/20 group-hover:border-violet-400/40', iconColor: 'text-violet-400' },
-              { ring: 'group-hover:border-amber/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(38_80%_55%/0.2)]', iconBg: 'bg-amber-500/8 group-hover:bg-amber-500/15 border-amber-500/20 group-hover:border-amber-400/40', iconColor: 'text-amber-400' },
-            ];
-            const acc = accents[idx % accents.length];
+            // Elegant gold accent matching brand theme
+            const acc = {
+              ring: 'group-hover:border-gold/60',
+              glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(var(--gold)/0.25)]',
+              iconBg: 'bg-gold/10 group-hover:bg-gold/20 border-gold/25 group-hover:border-gold/50',
+              iconColor: 'text-gold'
+            };
 
             return (
               <button
@@ -364,9 +361,9 @@ export default function LandingPage({
               <button
                 onClick={onOpenHadith}
                 data-testid="footer-cta-hadith"
-                className="flex items-center justify-center gap-2 h-[3.25rem] rounded-full border border-emerald/35 px-8 text-sm font-medium text-foreground hover:bg-emerald/5 transition-transform active:scale-95"
+                className="flex items-center justify-center gap-2 h-[3.25rem] rounded-full border border-gold/35 px-8 text-sm font-medium text-foreground hover:bg-gold/5 transition-transform active:scale-95"
               >
-                <BookMarked className="h-4 w-4 text-emerald" />
+                <BookMarked className="h-4 w-4 text-gold" />
                 <span>Hadits Bukhari</span>
               </button>
             </div>
