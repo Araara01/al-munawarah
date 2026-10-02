@@ -256,40 +256,78 @@ export default function LandingPage({
 
       {/* Crisis Topics – Quick Access Pre-filled Prompts */}
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="mb-6 space-y-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold">
-            Apa yang sedang kamu rasakan?
-          </span>
-          <h2 className="font-display text-xl font-semibold sm:text-2xl text-foreground">
-            Pilih Topik Sesuai Kondisimu
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Klik salah satu untuk langsung memulai percakapan dengan pertanyaan yang sudah disiapkan.
-          </p>
+        
+        {/* Section Header */}
+        <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/5 px-3 py-1 text-[10px] uppercase tracking-[0.22em] text-gold font-semibold">
+              <span className="h-1.5 w-1.5 rounded-full bg-gold animate-pulse" />
+              Mulai dari sini
+            </div>
+            <h2 className="font-display text-2xl font-bold sm:text-3xl text-foreground">
+              Apa yang sedang kamu rasakan?
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+              Pilih topik yang paling dekat dengan kondisimu — percakapan akan langsung dimulai dengan pertanyaan yang tepat.
+            </p>
+          </div>
+          <div className="shrink-0 hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground font-medium px-3 py-1.5 rounded-full bg-secondary/60 border border-border/60">
+            <span className="text-gold font-bold">{CRISIS_TOPICS.length}</span> topik tersedia
+          </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {CRISIS_TOPICS.map((topic) => {
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+          {CRISIS_TOPICS.map((topic, idx) => {
             const iconMap = {
               Brain, TrendingDown, HeartCrack, ShieldAlert, Compass, Sparkles
             };
             const Icon = iconMap[topic.icon] || Sparkles;
+
+            // Subtle color accent per topic for visual variety
+            const accents = [
+              { ring: 'group-hover:border-gold/60', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(var(--gold)/0.25)]', iconBg: 'bg-gold/10 group-hover:bg-gold/18 border-gold/25 group-hover:border-gold/50', iconColor: 'text-gold' },
+              { ring: 'group-hover:border-emerald/50', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(160_60%_40%/0.2)]', iconBg: 'bg-emerald/10 group-hover:bg-emerald/18 border-emerald/25 group-hover:border-emerald/50', iconColor: 'text-emerald-500' },
+              { ring: 'group-hover:border-rose/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(346_60%_55%/0.2)]', iconBg: 'bg-rose-500/8 group-hover:bg-rose-500/15 border-rose-500/20 group-hover:border-rose-400/40', iconColor: 'text-rose-400' },
+              { ring: 'group-hover:border-sky/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(200_70%_55%/0.2)]', iconBg: 'bg-sky-500/8 group-hover:bg-sky-500/15 border-sky-500/20 group-hover:border-sky-400/40', iconColor: 'text-sky-400' },
+              { ring: 'group-hover:border-violet/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(270_60%_60%/0.2)]', iconBg: 'bg-violet-500/8 group-hover:bg-violet-500/15 border-violet-500/20 group-hover:border-violet-400/40', iconColor: 'text-violet-400' },
+              { ring: 'group-hover:border-amber/40', glow: 'group-hover:shadow-[0_8px_30px_-8px_hsl(38_80%_55%/0.2)]', iconBg: 'bg-amber-500/8 group-hover:bg-amber-500/15 border-amber-500/20 group-hover:border-amber-400/40', iconColor: 'text-amber-400' },
+            ];
+            const acc = accents[idx % accents.length];
+
             return (
               <button
                 key={topic.id}
                 onClick={() => onStartChatWithPrompt ? onStartChatWithPrompt(topic.prompt) : onStartChat()}
-                className="noor-card group flex items-start gap-3.5 rounded-3xl p-5 text-left transition-all hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+                className={`noor-card group relative flex flex-col gap-4 rounded-3xl p-5 sm:p-6 text-left transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] cursor-pointer border border-border/60 ${acc.ring} ${acc.glow} overflow-hidden`}
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/5 transition-colors group-hover:border-gold/60 group-hover:bg-gold/10">
-                  <Icon className="h-4 w-4 text-gold" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                {/* Subtle gradient shimmer on hover */}
+                <span className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: 'radial-gradient(ellipse at 20% 20%, hsl(var(--gold)/0.04), transparent 60%)' }} />
+
+                {/* Top row: icon + arrow */}
+                <div className="flex items-start justify-between">
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border transition-all duration-300 ${acc.iconBg}`}>
+                    <Icon className={`h-5 w-5 transition-transform duration-300 group-hover:scale-110 ${acc.iconColor}`} />
+                  </span>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary/60 text-muted-foreground group-hover:bg-gold/10 group-hover:text-gold transition-all duration-300 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0">
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                </div>
+
+                {/* Text content */}
+                <div className="space-y-1.5">
+                  <h3 className="text-sm font-bold text-foreground group-hover:text-gold transition-colors duration-200 leading-snug">
                     {topic.title}
                   </h3>
-                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                     {topic.subtitle}
                   </p>
+                </div>
+
+                {/* Footer hint */}
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/60 group-hover:text-gold/70 transition-colors duration-200">
+                  <span className="h-px flex-1 bg-border/60 group-hover:bg-gold/20 transition-colors duration-200" />
+                  Tanya sekarang
                 </div>
               </button>
             );
