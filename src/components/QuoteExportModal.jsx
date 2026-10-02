@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { X, Copy, Check, Sparkles } from 'lucide-react';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function QuoteExportModal({ isOpen, onClose, quoteData }) {
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !quoteData) return null;
 
-  const handleCopyText = () => {
+  const handleCopyText = async () => {
     const fullText = `${quoteData.arabic ? quoteData.arabic + '\n\n' : ''}"${quoteData.quote}"\n\n— ${quoteData.author || "Al Munawwarah"}\n\n#AlMunawwarah #CahayaAlQuran #Hikmah`;
-    navigator.clipboard.writeText(fullText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const ok = await copyToClipboard(fullText);
+    if (ok) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (

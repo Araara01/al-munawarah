@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Key, Cpu, ExternalLink, Sparkles } from 'lucide-react';
 import { useToast } from './Toast';
 
@@ -14,14 +14,27 @@ export default function SettingsModal({
 }) {
   const { showToast } = useToast();
   const [tempKey, setTempKey] = useState(apiKey || '');
+  const [tempModel, setTempModel] = useState(selectedModel || 'gemini-2.5-pro');
+  const [tempMode, setTempMode] = useState(currentMode || 'muslim');
   const [showKey, setShowKey] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTempKey(apiKey || '');
+      setTempModel(selectedModel || 'gemini-2.5-pro');
+      setTempMode(currentMode || 'muslim');
+    }
+  }, [isOpen, apiKey, selectedModel, currentMode]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
     setApiKey(tempKey);
+    setSelectedModel(tempModel);
+    setCurrentMode(tempMode);
     localStorage.setItem('munawwarah_api_key', tempKey);
-    localStorage.setItem('munawwarah_model', selectedModel);
+    localStorage.setItem('munawwarah_model', tempModel);
+    localStorage.setItem('munawwarah_mode', tempMode);
     showToast("Pengaturan berhasil disimpan", "success");
     onClose();
   };
@@ -74,9 +87,9 @@ export default function SettingsModal({
           </label>
           <div className="grid grid-cols-2 gap-2.5">
             <button
-              onClick={() => setCurrentMode('muslim')}
+              onClick={() => setTempMode('muslim')}
               className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                currentMode === 'muslim'
+                tempMode === 'muslim'
                   ? 'border-gold bg-gold/10 text-gold font-semibold shadow-xs'
                   : 'border-border/80 text-muted-foreground hover:border-gold/30 hover:text-foreground'
               }`}
@@ -89,9 +102,9 @@ export default function SettingsModal({
             </button>
 
             <button
-              onClick={() => setCurrentMode('wawasan')}
+              onClick={() => setTempMode('wawasan')}
               className={`p-3 rounded-2xl border text-left text-xs transition-all ${
-                currentMode === 'wawasan'
+                tempMode === 'wawasan'
                   ? 'border-gold bg-gold/10 text-gold font-semibold shadow-xs'
                   : 'border-border/80 text-muted-foreground hover:border-gold/30 hover:text-foreground'
               }`}
@@ -113,7 +126,7 @@ export default function SettingsModal({
           </label>
 
           {(() => {
-            const model = selectedModel || 'gemini-2.5-pro';
+            const model = tempModel || 'gemini-2.5-pro';
             const isOpenAI = model.startsWith('gpt') || model.startsWith('o1') || model.startsWith('o3') || model.startsWith('o4');
             const isAnthropic = model.startsWith('claude');
             const isQwen = model.startsWith('qwen');
@@ -149,8 +162,8 @@ export default function SettingsModal({
             return (
               <div className="space-y-3">
                 <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
+                  value={tempModel}
+                  onChange={(e) => setTempModel(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl text-xs bg-secondary/50 border border-border/80 focus:outline-none focus:border-gold text-foreground font-medium"
                 >
                   <option value="gemini-2.5-pro">🔵 Google Gemini — Gemini 2.5 Pro (Flagship Tertinggi)</option>

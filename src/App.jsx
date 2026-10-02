@@ -585,10 +585,6 @@ function AppContent() {
                 setSelectedModel={setSelectedModel}
                 currentMode={currentMode}
                 setCurrentMode={setCurrentMode}
-                showLatin={showLatin}
-                setShowLatin={setShowLatin}
-                isDark={isDark}
-                toggleDark={() => setIsDark(!isDark)}
               />
             </div>
           )}
@@ -692,10 +688,6 @@ function AppContent() {
           setSelectedModel={setSelectedModel}
           currentMode={currentMode}
           setCurrentMode={setCurrentMode}
-          showLatin={showLatin}
-          setShowLatin={setShowLatin}
-          isDark={isDark}
-          toggleDark={() => setIsDark(!isDark)}
         />
       )}
 

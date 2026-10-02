@@ -35,6 +35,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useToast } from './Toast';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function QuranBrowser({
   targetSurahNumber = null,
@@ -418,24 +419,32 @@ export default function QuranBrowser({
   };
 
   // Copy Ayah Text
-  const handleCopyAyah = (ayah) => {
+  const handleCopyAyah = async (ayah) => {
     const sName = surahDetail?.name || ayah.surah_name || ayah.surahName || `Surat ${ayah.surah_number || ayah.surahNumber}`;
     const aNum = ayah.ayah_number || ayah.ayahNumber;
     const textToCopy = `${ayah.arabic_text}\n\n${ayah.latin_text ? ayah.latin_text + '\n\n' : ''}"${ayah.translation_id || ''}"\n(QS. ${sName}: ${aNum})`;
-    navigator.clipboard.writeText(textToCopy);
-    setCopiedAyah(aNum);
-    showToast(`Ayat ${aNum} berhasil disalin`, "success");
-    setTimeout(() => setCopiedAyah(null), 2500);
+    const ok = await copyToClipboard(textToCopy);
+    if (ok) {
+      setCopiedAyah(aNum);
+      showToast(`Ayat ${aNum} berhasil disalin`, "success");
+      setTimeout(() => setCopiedAyah(null), 2500);
+    } else {
+      showToast('Gagal menyalin ayat', 'error');
+    }
   };
 
   // Copy Tafsir Text
-  const handleCopyTafsir = (ayah, tafsirSource, tafsirText) => {
+  const handleCopyTafsir = async (ayah, tafsirSource, tafsirText) => {
     if (!tafsirText) return;
     const textToCopy = `[Tafsir ${tafsirSource}]\nSurat ${surahDetail?.name || ayah.surah_name} Ayat ${ayah.ayah_number}\n\n${tafsirText}\n\nSumber: Al Munawwarah`;
-    navigator.clipboard.writeText(textToCopy);
-    setCopiedTafsirAyah(ayah.ayah_number);
-    showToast(`Tafsir ${tafsirSource} Ayat ${ayah.ayah_number} disalin`, "success");
-    setTimeout(() => setCopiedTafsirAyah(null), 2500);
+    const ok = await copyToClipboard(textToCopy);
+    if (ok) {
+      setCopiedTafsirAyah(ayah.ayah_number);
+      showToast(`Tafsir ${tafsirSource} Ayat ${ayah.ayah_number} disalin`, "success");
+      setTimeout(() => setCopiedTafsirAyah(null), 2500);
+    } else {
+      showToast('Gagal menyalin tafsir', 'error');
+    }
   };
 
   // Bookmark check

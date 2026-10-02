@@ -48,7 +48,7 @@ export async function askGuidanceAI({
       const fallback = generateOfflineMunawwarah(userQuery, mode);
       return {
         ...fallback,
-        note: `Dialihkan ke Mesin Kognitif Al Munawwarah internal (${err.message})`
+        note: `Layanan ${providerName} dialihkan ke database internal (${err.message})`
       };
     }
   }
@@ -330,7 +330,8 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01'
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
       model: targetModel,
@@ -349,7 +350,8 @@ async function callClaudeMunawwarah(messages, mode, apiKey, model, temperature) 
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: targetModel,

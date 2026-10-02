@@ -13,10 +13,12 @@ import {
   ChevronDown,
   Database,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  Info
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { getTafsirIbnuKatsir, getSurahMeta } from '../services/quranService.js';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function MessageItem({
   message,
@@ -123,6 +125,9 @@ export default function MessageItem({
     const chunkSize = Math.max(1, Math.ceil(totalChars / totalSteps));
 
     let currentIdx = 0;
+    let timeout1 = null;
+    let timeout2 = null;
+
     const timer = setInterval(() => {
       currentIdx += chunkSize;
       if (currentIdx >= totalChars) {
@@ -132,12 +137,12 @@ export default function MessageItem({
         setIsTyping(false);
 
         // Stage 0 -> 1: Reveal Jawaban Detail
-        setTimeout(() => {
+        timeout1 = setTimeout(() => {
           setStage(1);
           onProgressScroll?.('middle-card');
 
           // Stage 1 -> 2: Reveal Al-Qur'an Yang Cocok & Footer
-          setTimeout(() => {
+          timeout2 = setTimeout(() => {
             setStage(2);
             onProgressScroll?.('bottom-card');
             onFinishTyping?.(message.id);
@@ -151,7 +156,11 @@ export default function MessageItem({
       }
     }, intervalMs);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (timeout1) clearTimeout(timeout1);
+      if (timeout2) clearTimeout(timeout2);
+    };
   }, [shouldAnimate, shortAnswer]);
 
   const handleFastForward = () => {
@@ -217,21 +226,29 @@ export default function MessageItem({
     }
   };
 
-  const handleCopyAyah = (ayah) => {
+  const handleCopyAyah = async (ayah) => {
     if (!ayah) return;
     const text = `${ayah.arabic_text}\n\n"${ayah.translation_id}"\n\n— QS. ${ayah.surah_name}: ${ayah.ayah_number}`;
-    navigator.clipboard.writeText(text);
-    setCopiedAyah(true);
-    showToast('Ayat berhasil disalin ke papan klip', 'success');
-    setTimeout(() => setCopiedAyah(false), 2000);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedAyah(true);
+      showToast('Ayat berhasil disalin ke papan klip', 'success');
+      setTimeout(() => setCopiedAyah(false), 2000);
+    } else {
+      showToast('Gagal menyalin ayat', 'error');
+    }
   };
 
-  const handleCopyShortAnswer = () => {
+  const handleCopyShortAnswer = async () => {
     if (!shortAnswer) return;
-    navigator.clipboard.writeText(shortAnswer);
-    setCopiedShort(true);
-    showToast('Jawaban singkat berhasil disalin', 'success');
-    setTimeout(() => setCopiedShort(false), 2000);
+    const ok = await copyToClipboard(shortAnswer);
+    if (ok) {
+      setCopiedShort(true);
+      showToast('Jawaban singkat berhasil disalin', 'success');
+      setTimeout(() => setCopiedShort(false), 2000);
+    } else {
+      showToast('Gagal menyalin jawaban', 'error');
+    }
   };
 
   const handleShareQuote = (ayah) => {
@@ -245,6 +262,14 @@ export default function MessageItem({
 
   return (
     <div className="space-y-4 animate-fade-up text-foreground">
+
+      {/* Fallback Notice jika API eksternal dialihkan ke mesin kognitif internal */}
+      {data?.note && (
+        <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs bg-gold/10 border border-gold/30 text-gold font-medium animate-fade-in shadow-xs">
+          <Info className="h-4 w-4 shrink-0 text-gold" />
+          <span className="leading-relaxed">{data.note}</span>
+        </div>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────
           1. JAWABAN SINGKAT ON POINT (Jawaban Pertama)
@@ -294,7 +319,7 @@ export default function MessageItem({
                 title="Salin jawaban singkat"
                 className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md cursor-pointer"
               >
-                {copiedShort ? <Check className="h-3 w-3 text-emerald" /> : <Copy className="h-3 w-3" />}
+                {copiedShort ? <Check className="h-3 w-3 text-gold" /> : <Copy className="h-3 w-3" />}
                 <span className="hidden sm:inline">{copiedShort ? 'Tersalin' : 'Salin'}</span>
               </button>
             </div>
@@ -566,9 +591,9 @@ export default function MessageItem({
                   <span
                     className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium"
                     style={{
-                      background: 'hsl(var(--emerald) / 0.1)',
-                      color: 'hsl(var(--emerald))',
-                      border: '1px solid hsl(var(--emerald) / 0.25)'
+                      background: 'hsl(var(--gold) / 0.1)',
+                      color: 'hsl(var(--gold))',
+                      border: '1px solid hsl(var(--gold) / 0.3)'
                     }}
                     title="Terhubung ke Database Al-Qur'an (Tafsir Ibnu Katsir & Kemenag RI)"
                   >
@@ -813,7 +838,7 @@ export default function MessageItem({
                   {
                     icon: BookOpen,
                     label: 'Buka di Al-Qur\'an',
-                    color: 'text-emerald',
+                    color: 'text-gold',
                     onClick: () =>
                       onOpenSurah?.(
                         primaryAyah.surah_number,
@@ -842,7 +867,7 @@ export default function MessageItem({
                   {
                     icon: copiedAyah ? Check : Copy,
                     label: copiedAyah ? 'Tersalin' : 'Salin Ayat',
-                    color: copiedAyah ? 'text-emerald' : '',
+                    color: copiedAyah ? 'text-gold' : '',
                     onClick: () => handleCopyAyah(primaryAyah)
                   }
                 ].map((btn, i) => (

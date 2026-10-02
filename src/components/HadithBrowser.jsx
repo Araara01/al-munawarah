@@ -35,6 +35,7 @@ import {
   Book
 } from 'lucide-react';
 import { useToast } from './Toast';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function HadithBrowser({ onExportQuote }) {
   const { showToast } = useToast();
@@ -232,7 +233,7 @@ export default function HadithBrowser({ onExportQuote }) {
   };
 
   // Handler Salin Teks Hadits
-  const handleCopy = (hadith, bookName = '') => {
+  const handleCopy = async (hadith, bookName = '') => {
     const arab = hadith.arabic || hadith.arab || '';
     const indo = hadith.terjemahan || hadith.id || hadith.text || '';
     const colName = hadith.collection 
@@ -246,10 +247,14 @@ export default function HadithBrowser({ onExportQuote }) {
     const sourceHeader = hadith.nomor ? hadith.nomor : `HR. ${colName} ${no}`;
 
     const text = `${arab}\n\n"${indo}"\n\n— ${sourceHeader}${fuadBaqi} ${perawi}\nKitab: ${bName}${faedah}`;
-    navigator.clipboard.writeText(text);
-    setCopiedId(hadith.id || hadith.number || no);
-    showToast(`Hadits ${hadith.nomor || no} berhasil disalin ke clipboard`, 'success');
-    setTimeout(() => setCopiedId(null), 2000);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedId(hadith.id || hadith.number || no);
+      showToast(`Hadits ${hadith.nomor || no} berhasil disalin ke clipboard`, 'success');
+      setTimeout(() => setCopiedId(null), 2000);
+    } else {
+      showToast('Gagal menyalin hadits ke clipboard', 'error');
+    }
   };
 
   // Handler Bagikan / Export Quote

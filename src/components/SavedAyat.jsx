@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useToast } from './Toast';
 import { calculateQuranProgress, getAyahAudioUrl } from '../services/quranService';
+import { copyToClipboard } from '../utils/clipboard';
 
 export default function SavedAyat({
   savedAyahs = [],
@@ -100,7 +101,7 @@ export default function SavedAyat({
     );
   });
 
-  const handleCopy = (ay, idx) => {
+  const handleCopy = async (ay, idx) => {
     const surahName = ay.surah_name || ay.surahName || '';
     const ayahNum = ay.ayah_number || ay.ayahNumber || '';
     const text = [
@@ -111,10 +112,14 @@ export default function SavedAyat({
     ]
       .filter(Boolean)
       .join('\n');
-    navigator.clipboard.writeText(text);
-    setCopiedIdx(idx);
-    showToast(`Ayat QS. ${surahName}: ${ayahNum} disalin`, 'success');
-    setTimeout(() => setCopiedIdx(null), 2500);
+    const ok = await copyToClipboard(text);
+    if (ok) {
+      setCopiedIdx(idx);
+      showToast(`Ayat QS. ${surahName}: ${ayahNum} disalin`, 'success');
+      setTimeout(() => setCopiedIdx(null), 2500);
+    } else {
+      showToast('Gagal menyalin ayat', 'error');
+    }
   };
 
   const quranProgress = calculateQuranProgress(lastRead, savedAyahs);

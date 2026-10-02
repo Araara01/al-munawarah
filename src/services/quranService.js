@@ -655,7 +655,10 @@ export async function getAyahFromDatabase(surahNumber, ayahNumber) {
  * Match user problem/query to the most appropriate Surah and Ayah in the Quran database.
  */
 export function findQuranReferenceForProblem(query = '') {
-  const q = (query || '').toLowerCase().trim();
+  const queryString = typeof query === 'string'
+    ? query
+    : (query && typeof query.text === 'string' ? query.text : (query ? String(query) : ''));
+  const q = queryString.toLowerCase().trim();
   if (!q) {
     return POPULAR_AYAHS[0]; // QS. Asy-Syarh: 5-6
   }
