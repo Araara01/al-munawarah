@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Key, Cpu, ExternalLink, Moon, Sun, Sparkles } from 'lucide-react';
+import { X, Key, Cpu, ExternalLink, Sparkles } from 'lucide-react';
 import { useToast } from './Toast';
 
 export default function SettingsModal({
@@ -11,10 +11,6 @@ export default function SettingsModal({
   setSelectedModel,
   currentMode,
   setCurrentMode,
-  showLatin = true,
-  setShowLatin,
-  isDark,
-  toggleDark
 }) {
   const { showToast } = useToast();
   const [tempKey, setTempKey] = useState(apiKey || '');
@@ -201,39 +197,6 @@ export default function SettingsModal({
               </div>
             );
           })()}
-        </section>
-
-        {/* Section 4: Tampilan & Teks Latin */}
-        <section className="space-y-3 pt-2 border-t border-border/60">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-foreground font-medium">Tema Tampilan</span>
-            <button
-              onClick={toggleDark}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-border/80 bg-secondary/50 text-xs font-semibold hover:border-gold/50"
-            >
-              {isDark ? <Sun className="h-3.5 w-3.5 text-gold" /> : <Moon className="h-3.5 w-3.5 text-emerald-800" />}
-              <span>{isDark ? "Mode Gelap" : "Mode Terang"}</span>
-            </button>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-foreground font-medium">Tampilkan Transliterasi Latin</p>
-              <p className="text-[11px] text-muted-foreground">Teks bacaan latin di bawah ayat Arab</p>
-            </div>
-            <button
-              onClick={() => setShowLatin && setShowLatin(!showLatin)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                showLatin ? 'bg-primary' : 'bg-secondary'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  showLatin ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
         </section>
 
         {/* Save Footer */}
