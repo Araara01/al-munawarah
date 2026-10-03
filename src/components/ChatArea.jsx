@@ -30,7 +30,7 @@ export default function ChatArea({
     { emoji: '🌙', text: 'Bagaimana cara menghadapi masalah ketika hidup terasa berat?' },
     { emoji: '🕊️', text: 'Apa yang bisa menenangkan hati yang gelisah?' },
     { emoji: '💰', text: 'Apakah rezeki sudah ditentukan atau harus diusahakan?' },
-    { emoji: '👨👩👧', text: 'Bagaimana seharusnya memperlakukan orang tua?' },
+    { emoji: '🧓', text: 'Bagaimana seharusnya memperlakukan orang tua?' },
     { emoji: '🌱', text: 'Saya sedang kehilangan harapan, apa nasihat Al-Qur\'an?' },
     { emoji: '🤲', text: 'Apakah doa saya pasti didengar?' }
   ];
@@ -287,7 +287,7 @@ export default function ChatArea({
                   >
                     {/* Emoji in golden circle */}
                     <span
-                      className="flex-shrink-0 flex items-center justify-center rounded-full text-base"
+                      className="flex-shrink-0 flex items-center justify-center rounded-full text-base overflow-hidden select-none leading-none"
                       style={{
                         width: 34,
                         height: 34,

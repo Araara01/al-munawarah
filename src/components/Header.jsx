@@ -23,7 +23,7 @@ export default function Header({
           data-testid="open-sidebar-btn"
           aria-label="Buka menu"
         >
-          <Menu className="h-4.5 w-4.5" style={{ width: 18, height: 18 }} />
+          <Menu className="h-4.5 w-4.5 text-gold" style={{ width: 18, height: 18 }} />
         </button>
 
         {/* Geometric logo mark */}
@@ -76,7 +76,7 @@ export default function Header({
         >
           {isDark
             ? <Sun className="h-[18px] w-[18px] text-gold" style={{ animation: 'floatUp 0.3s ease' }} />
-            : <Moon className="h-[18px] w-[18px] text-slate-500" />}
+            : <Moon className="h-[18px] w-[18px] text-gold" />}
         </button>
 
         {/* Ambient sound */}
@@ -101,7 +101,7 @@ export default function Header({
           className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/5 dark:hover:bg-white/5 transition-colors active:scale-95"
           title="Pengaturan AI & Model"
         >
-          <Settings className="h-[18px] w-[18px]" />
+          <Settings className="h-[18px] w-[18px] text-gold" />
         </button>
       </div>
 

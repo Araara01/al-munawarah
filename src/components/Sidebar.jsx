@@ -14,20 +14,18 @@ import {
   MessageSquare
 } from 'lucide-react';
 
-function NavItem({ icon: Icon, label, active, onClick, testId, iconColor = 'text-gold' }) {
+function NavItem({ icon: Icon, label, active, onClick, testId }) {
   return (
     <button
       onClick={onClick}
       data-testid={testId}
-      className={`w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all cursor-pointer rounded-r-2xl ${
+      className={`group w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-left transition-all cursor-pointer rounded-r-2xl ${
         active
           ? 'border-l-2 border-gold bg-secondary/80 text-foreground'
           : 'border-l-2 border-transparent text-muted-foreground hover:bg-secondary/50 hover:text-foreground hover:border-gold/30'
       }`}
     >
-      <Icon className={`h-4 w-4 flex-shrink-0 ${
-        active ? 'text-gold' : iconColor
-      }`} />
+      <Icon className="h-4 w-4 flex-shrink-0 text-gold transition-colors group-hover:text-gold-bright" />
       <span>{label}</span>
     </button>
   );
@@ -137,7 +135,6 @@ export default function Sidebar({
             label="Tanya AI"
             active={currentTab === 'chat'}
             testId="nav-chat"
-            iconColor="text-gold"
             onClick={() => { setCurrentTab('chat'); onClose?.(); }}
           />
           <NavItem
@@ -145,7 +142,6 @@ export default function Sidebar({
             label="Jelajahi Al-Qur'an"
             active={currentTab === 'quran'}
             testId="nav-quran"
-            iconColor="text-gold"
             onClick={() => { onOpenQuran?.(); onClose?.(); }}
           />
           <NavItem
@@ -153,7 +149,6 @@ export default function Sidebar({
             label="Dalil Tersimpan"
             active={currentTab === 'saved'}
             testId="nav-saved"
-            iconColor="text-gold"
             onClick={() => { onOpenSaved?.(); onClose?.(); }}
           />
           <NavItem
@@ -161,7 +156,6 @@ export default function Sidebar({
             label="Hadits"
             active={currentTab === 'hadith'}
             testId="nav-hadith"
-            iconColor="text-gold"
             onClick={() => { onOpenHadith?.(); onClose?.(); }}
           />
           <NavItem
@@ -169,7 +163,6 @@ export default function Sidebar({
             label="Pengaturan"
             active={currentTab === 'settings'}
             testId="nav-settings"
-            iconColor="text-gold"
             onClick={() => { onOpenSettings?.(); onClose?.(); }}
           />
           <NavItem
@@ -177,7 +170,6 @@ export default function Sidebar({
             label="Admin & Statistik"
             active={currentTab === 'admin'}
             testId="nav-admin"
-            iconColor="text-gold"
             onClick={() => { onOpenAdmin?.(); onClose?.(); }}
           />
         </nav>
@@ -206,7 +198,7 @@ export default function Sidebar({
           </div>
 
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground/60 pointer-events-none" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-gold/60 pointer-events-none" />
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
